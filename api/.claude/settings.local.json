@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx tsc:*)",
+      "Bash(echo \"exit:$?\")",
+      "Bash(npx jest:*)",
+      "Bash(npm test *)",
+      "Bash(bunx tsc *)",
+      "Bash(bun test *)",
+      "Bash(bun run *)"
+    ]
+  }
+}
