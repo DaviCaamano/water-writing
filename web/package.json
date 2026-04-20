@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "bun run next dev",
     "build": "bun run next build",
+    "analyze": "next experimental-analyze",
     "start": "bun run next start",
     "lint": "bun run eslint",
     "format": "bun run prettier --write \"src/**/*.{ts,tsx,js,jsx,json,css}\""

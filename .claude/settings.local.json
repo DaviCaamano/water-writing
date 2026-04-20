@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node analyze-bundle.mjs)",
+      "Bash(bun run *)"
+    ]
+  }
+}
