@@ -8,10 +8,10 @@
     "api"
   ],
   "scripts": {
-    "dev:web": "bun --filter water-writing dev",
-    "dev:api": "bun --filter water-writing-api dev",
-    "build:web": "bun --filter water-writing build",
-    "build:api": "bun --filter water-writing-api build",
+    "web:dev": "bun --filter water-writing dev",
+    "apidev": "bun --filter water-writing-api dev",
+    "web:build": "bun --filter water-writing build",
+    "api:build": "bun --filter water-writing-api build",
     "lint": "bun --filter '*' lint"
   },
   "devDependencies": {

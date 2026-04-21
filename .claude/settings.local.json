@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(node analyze-bundle.mjs)",
-      "Bash(bun run *)"
+      "Bash(bun run *)",
+      "Bash(bun add *)",
+      "Bash(bun remove *)"
     ]
   }
 }

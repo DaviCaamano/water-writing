@@ -332,10 +332,12 @@ function SubscriptionSection() {
       <div>
         {isSubscribed ? (
           <Tooltip>
-            <TooltipTrigger render={<span className="inline-block w-full" />}>
-              <Button variant="outline" className="w-full bg-muted text-muted-foreground" disabled>
-                Delete Account
-              </Button>
+            <TooltipTrigger asChild>
+              <span className="inline-block w-full">
+                <Button variant="outline" className="w-full bg-muted text-muted-foreground" disabled>
+                  Delete Account
+                </Button>
+              </span>
             </TooltipTrigger>
             <TooltipContent>
               <p>You must cancel your subscription before deleting your account.</p>
