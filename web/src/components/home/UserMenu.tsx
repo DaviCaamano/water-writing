@@ -8,6 +8,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useUserStore } from '@/store/useUserStore';
+import { Plan } from '@/api/types/enum/plan';
 
 interface UserMenuProps {
   onOpenAuth: () => void;
@@ -15,7 +16,7 @@ interface UserMenuProps {
 }
 
 export function UserMenu({ onOpenAuth, onOpenSettings }: UserMenuProps) {
-  const { isLoggedIn, subscription, logout } = useUserStore();
+  const { isLoggedIn, plan, logout } = useUserStore();
 
   const handleLogout = async () => {
     try {
@@ -51,7 +52,7 @@ export function UserMenu({ onOpenAuth, onOpenSettings }: UserMenuProps) {
         <DropdownMenuContent align="end" className="w-48">
           <DropdownMenuItem onClick={() => onOpenSettings('general')}>Settings</DropdownMenuItem>
           <DropdownMenuItem>Gallery</DropdownMenuItem>
-          {subscription !== 'max' && (
+          {plan !== Plan.max && (
             <DropdownMenuItem onClick={() => onOpenSettings('subscription')}>
               Upgrade
             </DropdownMenuItem>

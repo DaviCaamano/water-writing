@@ -47,12 +47,10 @@ export default function Home() {
     setSettingsOpen(true);
   };
 
-  const showBackButton = currentView !== 'legacy';
-
   return (
     <div className="-home- h-screen overflow-hidden bg-slate-950">
       <div className="-home-nav- absolute left-0 right-0 top-0 z-40 flex items-center justify-between px-4 py-3 pointer-events-none">
-        <NavButton navigateUp={navigateUp} showBackButton={showBackButton} />
+        <NavButton navigateUp={navigateUp} showBackButton={currentView !== 'legacy'} />
         <UserMenu onOpenAuth={() => setAuthOpen(true)} onOpenSettings={handleOpenSettings} />
       </div>
       {currentView === 'editor' && <EditorSettings />}

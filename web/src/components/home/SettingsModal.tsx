@@ -7,17 +7,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
-import { Pencil, Check, X, Plus } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Check, Pencil, X } from 'lucide-react';
 import { useUserStore } from '@/store/useUserStore';
 import { api } from '@/lib/api';
-import type { BillingResponse, BillingHistoryEntry, CardInfo } from '@/types';
+import type { BillingHistoryEntry, BillingResponse, CardInfo } from '@/types';
+import { Plan } from '@/api/types/enum/plan';
 
 type SettingsSection = 'general' | 'subscription' | 'billing';
 
@@ -27,7 +23,11 @@ interface SettingsModalProps {
   initialSection?: SettingsSection;
 }
 
-export function SettingsModal({ open, onOpenChange, initialSection = 'general' }: SettingsModalProps) {
+export function SettingsModal({
+  open,
+  onOpenChange,
+  initialSection = 'general',
+}: SettingsModalProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       {open ? <SettingsModalContent key={initialSection} initialSection={initialSection} /> : null}
@@ -53,9 +53,7 @@ function SettingsModalContent({ initialSection }: { initialSection: SettingsSect
             key={s.key}
             onClick={() => setActiveSection(s.key)}
             className={`text-left px-3 py-2 rounded-md text-sm transition-colors ${
-              activeSection === s.key
-                ? 'font-bold bg-accent'
-                : 'hover:bg-accent/50'
+              activeSection === s.key ? 'font-bold bg-accent' : 'hover:bg-accent/50'
             }`}
           >
             {s.label}
@@ -75,11 +73,10 @@ function SettingsModalContent({ initialSection }: { initialSection: SettingsSect
 /* ─────────────────────── General Section ─────────────────────── */
 
 function GeneralSection() {
-  const { firstName, lastName, email, genres, updateName, updateGenres } = useUserStore();
+  const { firstName, lastName, email, updateName } = useUserStore();
   const [editingName, setEditingName] = useState(false);
   const [editFirst, setEditFirst] = useState('');
   const [editLast, setEditLast] = useState('');
-  const [newGenre, setNewGenre] = useState('');
 
   const startNameEdit = () => {
     setEditFirst(firstName);
@@ -100,18 +97,6 @@ function GeneralSection() {
     setEditingName(false);
   };
 
-  const addGenre = async () => {
-    const trimmed = newGenre.trim();
-    if (trimmed && !genres.includes(trimmed)) {
-      await updateGenres([...genres, trimmed]);
-      setNewGenre('');
-    }
-  };
-
-  const removeGenre = async (genre: string) => {
-    await updateGenres(genres.filter((g) => g !== genre));
-  };
-
   return (
     <div className="space-y-6">
       <div>
@@ -124,17 +109,11 @@ function GeneralSection() {
                 <div className="flex gap-2 flex-1">
                   <div className="space-y-1 flex-1">
                     <Label className="text-xs text-muted-foreground">First Name</Label>
-                    <Input
-                      value={editFirst}
-                      onChange={(e) => setEditFirst(e.target.value)}
-                    />
+                    <Input value={editFirst} onChange={(e) => setEditFirst(e.target.value)} />
                   </div>
                   <div className="space-y-1 flex-1">
                     <Label className="text-xs text-muted-foreground">Last Name</Label>
-                    <Input
-                      value={editLast}
-                      onChange={(e) => setEditLast(e.target.value)}
-                    />
+                    <Input value={editLast} onChange={(e) => setEditLast(e.target.value)} />
                   </div>
                 </div>
                 <div className="flex gap-1 mt-5">
@@ -164,40 +143,6 @@ function GeneralSection() {
           </div>
         </div>
       </div>
-
-      <Separator />
-
-      <div>
-        <h3 className="text-lg font-semibold mb-3">Genres</h3>
-        <div className="flex flex-wrap gap-2 mb-3">
-          {genres.map((genre) => (
-            <Badge key={genre} variant="secondary" className="gap-1 pr-1">
-              {genre}
-              <button
-                onClick={() => removeGenre(genre)}
-                className="ml-1 hover:bg-accent rounded-full p-0.5"
-              >
-                <X className="w-3 h-3" />
-              </button>
-            </Badge>
-          ))}
-          {genres.length === 0 && (
-            <p className="text-sm text-muted-foreground">No genres selected</p>
-          )}
-        </div>
-        <div className="flex gap-2">
-          <Input
-            placeholder="Add a genre..."
-            value={newGenre}
-            onChange={(e) => setNewGenre(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && addGenre()}
-            className="max-w-xs"
-          />
-          <Button size="icon" variant="outline" onClick={addGenre}>
-            <Plus className="w-4 h-4" />
-          </Button>
-        </div>
-      </div>
     </div>
   );
 }
@@ -205,11 +150,11 @@ function GeneralSection() {
 /* ─────────────────────── Subscription Section ─────────────────────── */
 
 function SubscriptionSection() {
-  const { subscription, deleteAccount } = useUserStore();
+  const { plan, deleteAccount } = useUserStore();
   const [yearly, setYearly] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  const isSubscribed = subscription !== 'none';
+  const isSubscribed = plan !== null;
 
   const handleCancelSubscription = async () => {
     try {
@@ -256,7 +201,7 @@ function SubscriptionSection() {
       <div className="grid grid-cols-2 gap-4">
         {/* Pro Plan */}
         <div className="relative border rounded-lg p-5 space-y-4">
-          {subscription === 'pro' && (
+          {plan === Plan.pro && (
             <div className="absolute -top-3 left-4 bg-primary text-primary-foreground text-xs font-semibold px-3 py-1 rounded-full">
               Your Current Plan
             </div>
@@ -282,14 +227,12 @@ function SubscriptionSection() {
               </p>
             </div>
           )}
-          {subscription !== 'pro' && (
-            <Button className="w-full">Subscribe to Pro</Button>
-          )}
+          {plan !== Plan.pro && <Button className="w-full">Subscribe to Pro</Button>}
         </div>
 
         {/* Max Plan */}
         <div className="relative border rounded-lg p-5 space-y-4">
-          {subscription === 'max' && (
+          {plan === Plan.max && (
             <div className="absolute -top-3 left-4 bg-primary text-primary-foreground text-xs font-semibold px-3 py-1 rounded-full">
               Your Current Plan
             </div>
@@ -312,20 +255,14 @@ function SubscriptionSection() {
               </div>
             </div>
           )}
-          {subscription !== 'max' && (
-            <Button className="w-full">Subscribe to Max</Button>
-          )}
+          {plan !== Plan.max && <Button className="w-full">Subscribe to Max</Button>}
         </div>
       </div>
 
       <Separator />
 
       {isSubscribed && (
-        <Button
-          variant="destructive"
-          className="w-full"
-          onClick={handleCancelSubscription}
-        >
+        <Button variant="destructive" className="w-full" onClick={handleCancelSubscription}>
           Cancel Subscription
         </Button>
       )}
@@ -335,7 +272,11 @@ function SubscriptionSection() {
           <Tooltip>
             <TooltipTrigger asChild>
               <span className="inline-block w-full">
-                <Button variant="outline" className="w-full bg-muted text-muted-foreground" disabled>
+                <Button
+                  variant="outline"
+                  className="w-full bg-muted text-muted-foreground"
+                  disabled
+                >
                   Delete Account
                 </Button>
               </span>
@@ -357,17 +298,17 @@ function SubscriptionSection() {
 /* ─────────────────────── Billing Section ─────────────────────── */
 
 function BillingSection() {
-  const { accountId } = useUserStore();
-  return <BillingSectionContent key={accountId ?? 'guest'} accountId={accountId} />;
+  const { userId } = useUserStore();
+  return <BillingSectionContent key={userId ?? 'guest'} userId={userId} />;
 }
 
-function BillingSectionContent({ accountId }: { accountId: string | null }) {
-  const [loading, setLoading] = useState(Boolean(accountId));
+function BillingSectionContent({ userId }: { userId: string | null }) {
+  const [loading, setLoading] = useState(Boolean(userId));
   const [card, setCard] = useState<CardInfo | null>(null);
   const [history, setHistory] = useState<BillingHistoryEntry[]>([]);
 
   useEffect(() => {
-    if (!accountId) {
+    if (!userId) {
       return;
     }
 
@@ -375,7 +316,7 @@ function BillingSectionContent({ accountId }: { accountId: string | null }) {
 
     const loadBilling = async () => {
       try {
-        const data = await api<BillingResponse>(`/users/billing/history/${accountId}`);
+        const data = await api<BillingResponse>(`/users/billing/history/${userId}`);
         if (cancelled) return;
 
         setCard(data.card);
@@ -396,7 +337,7 @@ function BillingSectionContent({ accountId }: { accountId: string | null }) {
     return () => {
       cancelled = true;
     };
-  }, [accountId]);
+  }, [userId]);
 
   if (loading) {
     return (

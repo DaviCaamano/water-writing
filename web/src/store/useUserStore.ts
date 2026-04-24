@@ -1,33 +1,10 @@
 import { useMemo } from 'react';
 import { Store, useStore } from '@tanstack/react-store';
 import { api } from '@/lib/api';
+import { LoginResponse } from '@/api/types/response';
+import { UserState } from '@/types/state';
 
-interface LoginResponse {
-  accountId: string;
-  username: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  subscription: 'none' | 'pro' | 'max';
-  documentNames: string[];
-  genres: string[];
-  token: string;
-}
-
-interface UserState {
-  accountId: string | null;
-  username: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  subscription: 'none' | 'pro' | 'max';
-  documentNames: string[];
-  genres: string[];
-  token: string | null;
-  isLoggedIn: boolean;
-}
-
-interface UserActions {
+export interface UserActions {
   login: (email: string, password: string) => Promise<void>;
   signup: (data: {
     email: string;
@@ -46,34 +23,30 @@ interface UserActions {
 
 function createInitialUserState(): UserState {
   return {
-    accountId: null,
-    username: '',
-    firstName: '',
-    lastName: '',
     email: '',
-    subscription: 'none',
-    documentNames: [],
-    genres: [],
-    token: null,
+    firstName: '',
     isLoggedIn: false,
+    lastName: '',
+    legacy: [],
+    plan: null,
+    token: null,
+    userId: null,
   };
 }
 
 function applyLoginResponse(data: LoginResponse) {
   localStorage.setItem('token', data.token);
-  localStorage.setItem('account_id', data.accountId);
+  localStorage.setItem('account_id', data.userId);
 
   return {
-    accountId: data.accountId,
-    username: data.username,
-    firstName: data.firstName,
-    lastName: data.lastName,
     email: data.email,
-    subscription: data.subscription,
-    documentNames: data.documentNames,
-    genres: data.genres || [],
-    token: data.token,
+    firstName: data.firstName,
     isLoggedIn: true,
+    lastName: data.lastName,
+    legacy: data.legacy,
+    plan: data.plan,
+    token: data.token,
+    userId: data.userId,
   };
 }
 
@@ -136,12 +109,12 @@ const userActions: UserActions = {
 
   refreshSession: async () => {
     const token = localStorage.getItem('token');
-    const accountId = localStorage.getItem('account_id');
-    if (!token || !accountId) return;
+    const userId = localStorage.getItem('account_id');
+    if (!token || !userId) return;
 
     try {
       const data = await api<LoginResponse>(
-        `/user?token=${encodeURIComponent(token)}&account_id=${encodeURIComponent(accountId)}`,
+        `/user?token=${encodeURIComponent(token)}&account_id=${encodeURIComponent(userId)}`,
         { method: 'GET' },
         false,
       );

@@ -1,14 +1,3 @@
-export interface User {
-  accountId: string;
-  username: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  subscription: 'none' | 'pro' | 'max';
-  documentNames: string[];
-  genres: string[];
-}
-
 export interface StoryDocument {
   id: string;
   title: string;
