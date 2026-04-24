@@ -1,9 +1,9 @@
 import { motion } from 'framer-motion';
-import type { ViewMode } from '@/types';
-import { Editor } from '@/components/home/Editor';
-import { StoryView } from '@/components/home/StoryView';
-import { WorldView } from '@/components/home/WorldView';
-import { LegacyView } from '@/components/home/LegacyView';
+import type { ViewMode } from '~types';
+import { Editor } from '~components/home/Editor';
+import { StoryView } from '~components/home/StoryView';
+import { WorldView } from '~components/home/WorldView';
+import { LegacyView } from '~components/home/LegacyView';
 import { useEffect, useRef, useState } from 'react';
 
 const VIEW_DEPTH: Record<ViewMode, number> = {

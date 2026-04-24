@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { Store, useStore } from '@tanstack/react-store';
-import { api } from '@/lib/api';
+import { api } from '~lib/api';
 import {
   createMockLegacyWorlds,
   mapLegacyStory,
@@ -8,8 +8,8 @@ import {
   mapLegacyWorlds,
   type LegacyStoryResponse,
   type LegacyWorldResponse,
-} from '@/lib/legacy-data';
-import type { Story, StoryDocument, ViewMode, World } from '@/types';
+} from '~lib/legacy-data';
+import type { Story, StoryDocument, ViewMode, World } from '~types';
 
 const IS_DEVELOPMENT = process.env.NODE_ENV === 'development';
 

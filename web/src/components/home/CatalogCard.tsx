@@ -4,9 +4,9 @@ import Image from 'next/image';
 import type { ChangeEvent, KeyboardEvent, ReactNode } from 'react';
 import { useId } from 'react';
 import type { LucideIcon } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { cn } from '@/lib/utils';
+import { Badge } from '~components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '~components/ui/card';
+import { cn } from '~lib/utils';
 
 interface CatalogCardProps {
   itemLabel: string;

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useCallback } from 'react';
-import { useEditorStore } from '@/store/useEditorStore';
+import { useEditorStore } from '~store/useEditorStore';
 
 export function Editor() {
   const { title, body, fontSize, fontFamily, theme, setTitle, setBody, saveDocument, isDirty } =

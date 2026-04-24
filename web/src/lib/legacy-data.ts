@@ -1,4 +1,4 @@
-import type { Story, StoryDocument, World } from '@/types';
+import type { Story, StoryDocument, World } from '~types';
 
 export interface LegacyDocumentResponse {
   documentId: string;

@@ -6,9 +6,9 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { useUserStore } from '@/store/useUserStore';
-import { Plan } from '@/api/types/enum/plan';
+} from '~components/ui/dropdown-menu';
+import { useUserStore } from '~store/useUserStore';
+import { Plan } from '#types/shared/enum/plan';
 
 interface UserMenuProps {
   onOpenAuth: () => void;

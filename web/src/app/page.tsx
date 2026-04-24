@@ -1,15 +1,15 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useUserStore } from '@/store/useUserStore';
-import { useNavigationStore } from '@/store/useNavigationStore';
-import { useEditorStore } from '@/store/useEditorStore';
-import { UserMenu } from '@/components/home/UserMenu';
-import { AuthDialog } from '@/components/home/AuthDialog';
-import { SettingsModal } from '@/components/home/SettingsModal';
-import { EditorSettings } from '@/components/home/EditorSettings';
-import { NavButton } from '@/components/home/NavButton';
-import { HomeView } from '@/components/home/HomeView';
+import { useUserStore } from '~store/useUserStore';
+import { useNavigationStore } from '~store/useNavigationStore';
+import { useEditorStore } from '~store/useEditorStore';
+import { UserMenu } from '~components/home/UserMenu';
+import { AuthDialog } from '~components/home/AuthDialog';
+import { SettingsModal } from '~components/home/SettingsModal';
+import { EditorSettings } from '~components/home/EditorSettings';
+import { NavButton } from '~components/home/NavButton';
+import { HomeView } from '~components/home/HomeView';
 
 type SettingsSection = 'general' | 'subscription' | 'billing';
 

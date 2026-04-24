@@ -1,4 +1,4 @@
-import { LoginResponse } from '@/api/types/response';
+import { LoginResponse } from '#types/shared/response';
 
 export interface UserState extends Omit<LoginResponse, 'token' | 'userId'> {
   isLoggedIn: boolean;

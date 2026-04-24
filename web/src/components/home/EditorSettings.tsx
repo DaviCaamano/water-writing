@@ -2,18 +2,18 @@
 
 import Image from 'next/image';
 import { useState } from 'react';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
+import { Popover, PopoverContent, PopoverTrigger } from '~components/ui/popover';
+import { Label } from '~components/ui/label';
+import { Button } from '~components/ui/button';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { useEditorStore } from '@/store/useEditorStore';
-import type { EditorTheme } from '@/types';
+} from '~components/ui/select';
+import { useEditorStore } from '~store/useEditorStore';
+import type { EditorTheme } from '~types';
 
 const FONT_OPTIONS = [
   { label: 'Georgia', value: 'Georgia, serif' },

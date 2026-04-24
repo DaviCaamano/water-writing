@@ -12,9 +12,9 @@ import {
   PencilLine,
   Trash2,
 } from 'lucide-react';
-import { CatalogCard } from '@/components/home/CatalogCard';
-import { CatalogShell } from '@/components/home/CatalogShell';
-import { Button } from '@/components/ui/button';
+import { CatalogCard } from '~components/home/CatalogCard';
+import { CatalogShell } from '~components/home/CatalogShell';
+import { Button } from '~components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,9 +25,9 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { useEditorStore } from '@/store/useEditorStore';
-import { useNavigationStore } from '@/store/useNavigationStore';
+} from '~components/ui/dropdown-menu';
+import { useEditorStore } from '~store/useEditorStore';
+import { useNavigationStore } from '~store/useNavigationStore';
 
 function summarizeDocument(body: string): string {
   const trimmed = body.trim();
@@ -141,7 +141,7 @@ export function StoryView() {
                 itemLabel="Document"
                 title={document.title}
                 description={summarizeDocument(document.body)}
-                meta={`#${index + 1} in story · ${document.body.length.toLocaleString()} characters`}
+                meta={`#${index + 1} in story Â· ${document.body.length.toLocaleString()} characters`}
                 badgeText="Document"
                 coverImage={document.coverImage}
                 accentClassName="from-cyan-500 via-sky-500 to-indigo-500"

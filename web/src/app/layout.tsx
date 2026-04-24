@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
-import { TooltipProvider } from '@/components/ui/tooltip';
+import { TooltipProvider } from '~components/ui/tooltip';
 import './globals.css';
 
 const geistSans = Geist({
@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Water Writing—Where Words Begin to Flow',
+  title: 'Water Writing - Where Words Begin to Flow',
   description: 'Create, organize, and enhance your writing with AI assistance.',
 };
 

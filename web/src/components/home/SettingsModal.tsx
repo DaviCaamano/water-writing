@@ -1,19 +1,19 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Separator } from '@/components/ui/separator';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Dialog, DialogContent } from '~components/ui/dialog';
+import { Button } from '~components/ui/button';
+import { Input } from '~components/ui/input';
+import { Label } from '~components/ui/label';
+import { Switch } from '~components/ui/switch';
+import { Skeleton } from '~components/ui/skeleton';
+import { Separator } from '~components/ui/separator';
+import { Tooltip, TooltipContent, TooltipTrigger } from '~components/ui/tooltip';
 import { Check, Pencil, X } from 'lucide-react';
-import { useUserStore } from '@/store/useUserStore';
-import { api } from '@/lib/api';
-import type { BillingHistoryEntry, BillingResponse, CardInfo } from '@/types';
-import { Plan } from '@/api/types/enum/plan';
+import { useUserStore } from '~store/useUserStore';
+import { api } from '~lib/api';
+import type { BillingHistoryEntry, BillingResponse, CardInfo } from '~types';
+import { Plan } from '#types/shared/enum/plan';
 
 type SettingsSection = 'general' | 'subscription' | 'billing';
 
@@ -70,7 +70,7 @@ function SettingsModalContent({ initialSection }: { initialSection: SettingsSect
   );
 }
 
-/* ─────────────────────── General Section ─────────────────────── */
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ General Section â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 function GeneralSection() {
   const { firstName, lastName, email, updateName } = useUserStore();
@@ -147,7 +147,7 @@ function GeneralSection() {
   );
 }
 
-/* ─────────────────────── Subscription Section ─────────────────────── */
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ Subscription Section â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 function SubscriptionSection() {
   const { plan, deleteAccount } = useUserStore();
@@ -295,7 +295,7 @@ function SubscriptionSection() {
   );
 }
 
-/* ─────────────────────── Billing Section ─────────────────────── */
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ Billing Section â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 function BillingSection() {
   const { userId } = useUserStore();

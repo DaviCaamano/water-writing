@@ -1,9 +1,9 @@
 'use client';
 
 import { EllipsisVertical, Globe2, ImagePlus, PencilLine, Trash2 } from 'lucide-react';
-import { CatalogCard } from '@/components/home/CatalogCard';
-import { CatalogShell } from '@/components/home/CatalogShell';
-import { Button } from '@/components/ui/button';
+import { CatalogCard } from '~components/home/CatalogCard';
+import { CatalogShell } from '~components/home/CatalogShell';
+import { Button } from '~components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,8 +11,8 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { useNavigationStore } from '@/store/useNavigationStore';
+} from '~components/ui/dropdown-menu';
+import { useNavigationStore } from '~store/useNavigationStore';
 
 function summarizeWorld(storyCount: number, documentCount: number): string {
   if (storyCount === 0) {

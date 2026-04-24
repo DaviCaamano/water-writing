@@ -1,8 +1,8 @@
 import { useMemo } from 'react';
 import { Store, useStore } from '@tanstack/react-store';
-import { api } from '@/lib/api';
-import { syncDocumentInNavigationStore } from '@/store/useNavigationStore';
-import type { EditorTheme } from '@/types';
+import { api } from '~lib/api';
+import { syncDocumentInNavigationStore } from '~store/useNavigationStore';
+import type { EditorTheme } from '~types';
 
 const IS_DEVELOPMENT = process.env.NODE_ENV === 'development';
 

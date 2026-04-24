@@ -8,9 +8,9 @@ import {
   PencilLine,
   Trash2,
 } from 'lucide-react';
-import { CatalogCard } from '@/components/home/CatalogCard';
-import { CatalogShell } from '@/components/home/CatalogShell';
-import { Button } from '@/components/ui/button';
+import { CatalogCard } from '~components/home/CatalogCard';
+import { CatalogShell } from '~components/home/CatalogShell';
+import { Button } from '~components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,8 +21,8 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { useNavigationStore } from '@/store/useNavigationStore';
+} from '~components/ui/dropdown-menu';
+import { useNavigationStore } from '~store/useNavigationStore';
 
 function summarizeStory(documentCount: number): string {
   if (documentCount === 0) {

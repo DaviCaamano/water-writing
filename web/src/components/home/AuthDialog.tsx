@@ -6,11 +6,11 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { useUserStore } from '@/store/useUserStore';
+} from '~components/ui/dialog';
+import { Button } from '~components/ui/button';
+import { Input } from '~components/ui/input';
+import { Label } from '~components/ui/label';
+import { useUserStore } from '~store/useUserStore';
 
 interface AuthDialogProps {
   open: boolean;

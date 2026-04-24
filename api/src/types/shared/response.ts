@@ -1,6 +1,6 @@
 // API response types
-import { Plan } from '@/types/enum/plan';
 import { Response } from 'express';
+import { Plan } from '#types/shared/enum/plan';
 
 export type RouteResponse<T> = Response<T | { error: string }>;
 
@@ -37,12 +37,12 @@ export interface WorldResponse {
 
 export interface LoginResponse {
   email: string;
-  userId: string;
-  plan: Plan | null;
   firstName: string;
   lastName: string;
   legacy: WorldResponse[];
+  plan: Plan | null;
   token: string;
+  userId: string;
 }
 
 export interface LogoutResponse {
