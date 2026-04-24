@@ -41,7 +41,7 @@ export const login = async (data: LoginBody): Promise<LoginResponse> => {
     );
 
     const planResult = await client.query<PlanRow>(
-      'SELECT plan_type FROM plans WHERE user_id = $1 AND is_active = TRUE LIMIT 1',
+      'SELECT plan_type FROM plans WHERE user_id = $1 AND renew_on IS NOT NULL LIMIT 1',
       [user.user_id],
     );
 

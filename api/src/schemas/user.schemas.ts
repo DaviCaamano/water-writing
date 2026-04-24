@@ -35,12 +35,6 @@ export const UpdateUserSchema = z
     message: 'At least one field must be provided',
   });
 
-export const GenresSchema = z.object({
-  genres: z
-    .array(z.string().min(1, 'Genre cannot be empty').max(100))
-    .min(1, 'At least one genre is required')
-    .max(50, 'Maximum 50 genres allowed'),
-});
 
 export const BillingHistoryParamsSchema = z.object({
   userId: z.uuid('userId must be a valid UUID'),
@@ -56,6 +50,5 @@ export const SubscribeSchema = z.object({
 export type LoginBody = z.infer<typeof LoginSchema>;
 export type CreateUserBody = z.infer<typeof CreateUserSchema>;
 export type UpdateUserBody = z.infer<typeof UpdateUserSchema>;
-export type GenresBody = z.infer<typeof GenresSchema>;
 export type BillingHistoryParams = z.infer<typeof BillingHistoryParamsSchema>;
 export type SubscribeBody = z.infer<typeof SubscribeSchema>;

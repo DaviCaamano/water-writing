@@ -56,11 +56,11 @@ export interface DocumentRow {
 }
 
 export interface PlanRow {
-  plan_id: string;
   user_id: string;
   plan_type: Plan;
   is_year_plan: boolean;
-  is_active: boolean;
+  renew_on: 'monthly' | 'yearly' | null;
+  renew_date: Date;
   stripe_subscription_id: string | null;
   start_date: Date;
   end_date: Date | null;

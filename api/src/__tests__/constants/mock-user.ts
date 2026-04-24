@@ -2,6 +2,8 @@ import { BillingResponse, LoginResponse } from '#types/shared/response';
 import { BillingRow, GenreRow, PlanRow, UserRow } from '#types/database';
 import { Plan } from '#types/shared/enum/plan';
 import { CreateUserBody, SubscribeBody, UpdateUserBody } from '#schemas/user.schemas';
+export { MOCK_USER_ID } from '#__tests__/constants/mock-ids';
+import { MOCK_USER_ID } from '#__tests__/constants/mock-ids';
 import {
   MOCK_STRIPE_INVOICE_ID,
   MOCK_STRIPE_PAYMENT_INTENT_ID,
@@ -13,7 +15,6 @@ import { MOCK_DATE } from '#__tests__/constants/mock-basic';
 import { mockLegacyResponse } from '#__tests__/utils/mock-linked-documents';
 
 export const MOCK_LOGIN_EMAIL = 'jane@example.com';
-export const MOCK_USER_ID = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11';
 export const MOCK_LOGIN_TOKEN = 'mock-jwt-token';
 export const MOCK_LOGIN_FIRST_NAME = 'Jane';
 export const MOCK_LOGIN_LAST_NAME = 'Doe';
@@ -23,7 +24,6 @@ export const MOCK_HASHED_PASSWORD = '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/
 export const MOCK_GENRE_ID = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12';
 export const MOCK_GENRE_FIELD = 'fantasy';
 export const MOCK_GENRES = ['fantasy', 'horror'];
-export const MOCK_PLAN_ID = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a14';
 export const MOCK_BILLING_ID = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bdyy0a15';
 
 export const MOCK_USER: UserRow = {
@@ -68,11 +68,11 @@ export const MOCK_GENRE: GenreRow = {
 };
 
 export const MOCK_PLAN: PlanRow = {
-  plan_id: MOCK_PLAN_ID,
   user_id: MOCK_USER_ID,
   plan_type: Plan.pro,
   is_year_plan: false,
-  is_active: true,
+  renew_on: 'monthly',
+  renew_date: MOCK_DATE,
   stripe_subscription_id: mockStripeSubscriptionId,
   start_date: MOCK_DATE,
   end_date: MOCK_DATE,

@@ -14,15 +14,12 @@ import {
   CreateUserBody,
   UpdateUserSchema,
   UpdateUserBody,
-  GenresSchema,
-  GenresBody,
   SubscribeSchema,
   SubscribeBody,
 } from '#schemas/user.schemas';
 import {
   createUser,
   updateUser,
-  addGenres,
   deleteUser,
   subscribe,
 } from '#services/user/user.service';
@@ -96,18 +93,6 @@ router.post(
   validate(UpdateUserSchema),
   async (req: AuthRequest, res: Response<UserResponse>): Promise<void> => {
     res.json(await updateUser(req.userId!, req.body as UpdateUserBody));
-  },
-);
-
-// Add genres
-router.post(
-  '/genres',
-  authMiddleware,
-  generalLimiter,
-  validate(GenresSchema),
-  async (req: AuthRequest, res: Response<{ genres: string[] }>): Promise<void> => {
-    const { genres } = req.body as GenresBody;
-    res.json({ genres: await addGenres(req.userId!, genres) });
   },
 );
 

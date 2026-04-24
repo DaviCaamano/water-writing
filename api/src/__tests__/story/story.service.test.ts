@@ -1,4 +1,4 @@
-import { MOCK_USER_ID } from '#__tests__/constants/mock-user';
+import { MOCK_GENRE, MOCK_GENRES, MOCK_USER_ID } from '#__tests__/constants/mock-user';
 
 jest.mock('#utils/database/with-transaction');
 jest.mock('#utils/database/with-query');
@@ -18,6 +18,7 @@ import { createMockClient } from '#__tests__/constants/mock-database';
 import { PoolClient } from 'pg';
 import { mockClear } from '#__tests__/utils/test-wrappers';
 import { StoryNotFoundError, WorldNotFoundError } from '#constants/error/custom-errors';
+import { upsertGenre } from '#services/story/story.service';
 
 const mockWithTransaction = withTransaction as jest.MockedFunction<typeof withTransaction>;
 const mockWithQuery = withQuery as jest.MockedFunction<typeof withQuery>;
@@ -139,6 +140,21 @@ describe(
           worldId: MOCK_WORLD_ID,
         }),
       ).rejects.toThrow(WorldNotFoundError);
+    });
+  }),
+);
+
+describe(
+  'user service: addGenres',
+  mockClear(() => {
+    it('should add genres to a user', async () => {
+      const mockClient = createMockClient();
+      mockClient.query
+        .mockResolvedValueOnce(undefined)
+        .mockResolvedValueOnce(undefined)
+        .mockResolvedValueOnce({ rows: [MOCK_GENRE] });
+      mockWithQuery.mockImplementation((callback) => callback(mockClient as PoolClient));
+      await expect(upsertGenre(MOCK_USER_ID, MOCK_GENRES)).resolves.not.toThrow();
     });
   }),
 );

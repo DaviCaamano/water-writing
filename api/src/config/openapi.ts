@@ -6,11 +6,11 @@ import {
   LoginSchema,
   CreateUserSchema,
   UpdateUserSchema,
-  GenresSchema,
   SubscribeSchema,
 } from '#schemas/user.schemas';
 import {
   EditorSchema,
+  GenresSchema,
   UpsertDocumentSchema,
   UpsertStorySchema,
   UpsertWorldSchema,

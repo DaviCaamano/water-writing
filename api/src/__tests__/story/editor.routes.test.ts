@@ -11,7 +11,7 @@ import { testAuth } from '#__tests__/utils/test-wrappers';
 import { MOCK_DOC_ID } from '#__tests__/constants/mock-story';
 import { MOCK_USER_ID } from '#__tests__/constants/mock-user';
 
-const mockEditText = editorService.editText as jest.Mock;
+const mockEditText = editorService.waterWrite as jest.Mock;
 
 const validBody = {
   documentId: MOCK_DOC_ID,

@@ -31,7 +31,7 @@ async function fetchContextDocuments(userId: string, documentId: string): Promis
   return result.rows;
 }
 
-export async function editText(
+export async function waterWrite(
   userId: string,
   documentId: string,
   selection: { start: number; end: number },
@@ -46,8 +46,6 @@ export async function editText(
     throw new InvalidSelectionError();
   }
 
-  const selectionText = body.slice(selection.start, selection.end);
-
   const storyContext = documents
     .map((doc) => `# ${doc.title}\n\n${doc.body ?? ''}`)
     .join('\n\n---\n\n');
@@ -59,11 +57,15 @@ export async function editText(
   const stream = anthropic.messages.stream({
     model: process.env.NODE_ENV === 'development' ? ClaudeModel.Haiku4_5 : ClaudeModel.Opus4_7,
     max_tokens: 1000,
-    system: `You are an expert creative writing assistant. The user will provide you with story context, a selected passage, and instructions for how to rewrite it. Return ONLY the replacement text — no preamble, no explanation, no quotation marks around the output.`,
+    system: `You are an expert creative writing assistant. 
+The user will provide you with story context in a <story> tag, 
+two indexes which represent a substring of the story text inside <startSelectionIndex> and <endSelectionindex> tags, 
+and instructions for how to replace substring inside an <instructions> tag. 
+Return ONLY the replacement text — no preamble, no explanation, no quotation marks around the output.`,
     messages: [
       {
         role: 'user',
-        content: `<story>\n${storyContext}\n</story>\n\n<selection>\n${selectionText}\n</selection>\n\n<instructions>\n${prompt}\n</instructions>`,
+        content: `<story>\n${storyContext}\n</story>\n\n<startSelectionIndex>\n${selection.start}\n</startSelectionIndex>\n\n<endSelectionindex>\n${selection.end}\n</endSelectionindex>\n\n<instructions>\n${prompt}\n</instructions>`,
       },
     ],
   });

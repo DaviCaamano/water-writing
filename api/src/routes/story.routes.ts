@@ -12,7 +12,7 @@ import {
   EditorSchema,
   EditorBody,
 } from '#schemas/story.schemas';
-import { upsertStory } from '#services/story/story.service';
+import { upsertGenre, upsertStory } from '#services/story/story.service';
 import { AuthRequest } from '#types/request';
 import { upsertDocument } from '#services/story/document.service';
 import {
@@ -22,8 +22,10 @@ import {
   WorldNotFoundError,
 } from '#constants/error/custom-errors';
 import { upsertWorld } from '#services/story/world.service';
-import { editText } from '#services/story/editor.service';
+import { waterWrite } from '#services/story/editor.service';
 import { RouteResponse, StoryResponse, WorldResponse } from '#types/shared/response';
+import { GenresBody, GenresSchema } from '#schemas/story.schemas';
+import { Response } from 'express';
 
 const router = Router();
 
@@ -85,14 +87,14 @@ router.post(
 );
 
 router.post(
-  '/editor',
+  '/water-write',
   authMiddleware,
   aiLimiter,
   validate(EditorSchema),
   async (req: AuthRequest, res: RouteResponse<never>): Promise<void> => {
     try {
       const body = req.body as EditorBody;
-      await editText(req.userId!, body.documentId, body.selection, body.prompt, res);
+      await waterWrite(req.userId!, body.documentId, body.selection, body.prompt, res);
     } catch (err) {
       if (err instanceof DocumentNotFoundError) {
         res.status(404).json({ error: 'Document not found' });
@@ -104,6 +106,18 @@ router.post(
       }
       throw err;
     }
+  },
+);
+
+// Add genres
+router.post(
+  '/genre',
+  authMiddleware,
+  generalLimiter,
+  validate(GenresSchema),
+  async (req: AuthRequest, res: Response<{ genres: string[] }>): Promise<void> => {
+    const { genres } = req.body as GenresBody;
+    res.json({ genres: await upsertGenre(req.userId!, genres) });
   },
 );
 

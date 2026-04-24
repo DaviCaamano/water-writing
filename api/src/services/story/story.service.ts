@@ -1,6 +1,6 @@
 import type { UpsertStoryBody } from '#schemas/story.schemas';
 import { withTransaction } from '#utils/database/with-transaction';
-import { StoryRow, StoryRowWithDocuments } from '#types/database';
+import { GenreRow, StoryRow, StoryRowWithDocuments } from '#types/database';
 import { StoryNotFoundError, WorldNotFoundError } from '#constants/error/custom-errors';
 import { withQuery } from '#utils/database/with-query';
 import { StoryResponse } from '#types/shared/response';
@@ -108,5 +108,24 @@ export async function upsertStory(userId: string, data: UpsertStoryBody): Promis
     );
     const newStoryId = newStory.rows[0].story_id;
     return mapStoryResponse(await fetchStory(newStoryId));
+  });
+}
+
+
+// Genres
+export async function upsertGenre(storyId: string, genres: string[]) {
+  return withQuery(async (client) => {
+    for (const genre of genres) {
+      await client.query(
+        'INSERT INTO genres (story_id, genre) VALUES ($1, $2) ON CONFLICT (story_id, genre) DO NOTHING',
+        [storyId, genre],
+      );
+    }
+
+    const result = await client.query<GenreRow>(
+      'SELECT genre FROM genres WHERE user_id = $1 ORDER BY genre',
+      [storyId],
+    );
+    return result.rows.map((r) => r.genre as string);
   });
 }

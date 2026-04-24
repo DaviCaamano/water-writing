@@ -4,7 +4,7 @@ jest.mock('#config/anthropic', () => ({
 }));
 
 import anthropic from '#config/anthropic';
-import { editText } from '#services/story/editor.service';
+import { waterWrite } from '#services/story/editor.service';
 import { DocumentNotFoundError, InvalidSelectionError } from '#constants/error/custom-errors';
 import { MOCK_USER_ID } from '#__tests__/constants/mock-user';
 import { MOCK_DOC, MOCK_DOC_ID, mockPool } from '#__tests__/constants/mock-story';
@@ -33,7 +33,7 @@ describe(
       mockPool.query.mockResolvedValueOnce({ rows: [] });
 
       await expect(
-        editText(MOCK_USER_ID, MOCK_DOC_ID, { start: 0, end: 5 }, 'rewrite', createMockRes()),
+        waterWrite(MOCK_USER_ID, MOCK_DOC_ID, { start: 0, end: 5 }, 'rewrite', createMockRes()),
       ).rejects.toThrow(DocumentNotFoundError);
     });
 
@@ -44,7 +44,7 @@ describe(
       });
 
       await expect(
-        editText(
+        waterWrite(
           MOCK_USER_ID,
           MOCK_DOC_ID,
           { start: 0, end: body.length + 1 },
@@ -67,7 +67,7 @@ describe(
       );
 
       const res = createMockRes();
-      await editText(MOCK_USER_ID, MOCK_DOC_ID, { start: 0, end: 5 }, 'rewrite', res);
+      await waterWrite(MOCK_USER_ID, MOCK_DOC_ID, { start: 0, end: 5 }, 'rewrite', res);
 
       expect(res.write).toHaveBeenCalledWith(`data: ${JSON.stringify({ text: 'Hi ' })}\n\n`);
       expect(res.write).toHaveBeenCalledWith(`data: ${JSON.stringify({ text: 'there' })}\n\n`);
@@ -81,7 +81,7 @@ describe(
       });
       mockStream.mockReturnValueOnce(asyncIter([]));
 
-      await editText(
+      await waterWrite(
         MOCK_USER_ID,
         MOCK_DOC_ID,
         { start: 6, end: 11 },

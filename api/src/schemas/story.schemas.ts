@@ -32,7 +32,16 @@ export const EditorSchema = z
     path: ['selection'],
   });
 
+export const GenresSchema = z.object({
+  story_id: z.uuid('story_id must be a valid UUID'),
+  genres: z
+    .array(z.string().min(1, 'Genre cannot be empty').max(100))
+    .min(1, 'At least one genre is required')
+    .max(50, 'Maximum 50 genres allowed'),
+});
+
 export type UpsertDocumentBody = z.infer<typeof UpsertDocumentSchema>;
 export type UpsertStoryBody = z.infer<typeof UpsertStorySchema>;
 export type UpsertWorldBody = z.infer<typeof UpsertWorldSchema>;
 export type EditorBody = z.infer<typeof EditorSchema>;
+export type GenresBody = z.infer<typeof GenresSchema>;

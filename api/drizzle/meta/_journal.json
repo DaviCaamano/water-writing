@@ -15,6 +15,34 @@
       "when": 1776236226771,
       "tag": "0001_damp_sentry",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1777038495511,
+      "tag": "0002_chilly_marten_broadcloak",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1777041623796,
+      "tag": "0003_fine_omega_sentinel",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1777042600000,
+      "tag": "0004_sturdy_sunfire",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1777047247847,
+      "tag": "0005_messy_nova",
+      "breakpoints": true
     }
   ]
 }

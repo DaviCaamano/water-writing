@@ -4,6 +4,7 @@
 // OR IMPORTS SHOULD BE FROM LIBRARIES SHARED BY BOTH PROJECTS
 
 export enum Plan {
+  none = 'none',
   pro = 'pro-plan',
   max = 'max-plan',
 }

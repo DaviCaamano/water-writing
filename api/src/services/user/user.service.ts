@@ -3,13 +3,12 @@ import pool from '#config/database';
 import stripe from '#config/stripe';
 import logger from '#config/logger';
 import type { CreateUserBody, UpdateUserBody, SubscribeBody } from '#schemas/user.schemas';
-import { GenreRow, PlanRow, UserRow } from '#types/database';
+import { PlanRow, UserRow } from '#types/database';
 import { EmailTakenError, StripePaymentFailed } from '#constants/error/custom-errors';
 import { UserResponse } from '#types/shared/response';
 import { Plan } from '#types/shared/enum/plan';
 import { withTransaction } from '#utils/database/with-transaction';
 import { PoolClient } from 'pg';
-import { withQuery } from '#utils/database/with-query';
 
 const SALT_ROUNDS = 12;
 
@@ -62,7 +61,7 @@ export const updateUser = async (userId: string, data: UpdateUserBody): Promise<
 
     const userQuery = client.query<UserRow>('SELECT * FROM users WHERE user_id = $1', [userId]);
     const planQuery = client.query<PlanRow>(
-      'SELECT plan_type FROM plans WHERE user_id = $1 AND is_active = TRUE LIMIT 1',
+      'SELECT plan_type FROM plans WHERE user_id = $1 AND renew_on IS NOT NULL LIMIT 1',
       [userId],
     );
 
@@ -79,25 +78,6 @@ export const updateUser = async (userId: string, data: UpdateUserBody): Promise<
     };
   });
 };
-
-// Genres
-export async function addGenres(userId: string, genres: string[]) {
-  return withQuery(async (client) => {
-    for (const genre of genres) {
-      await client.query(
-        'INSERT INTO genres (user_id, genre) VALUES ($1, $2) ON CONFLICT (user_id, genre) DO NOTHING',
-        [userId, genre],
-      );
-    }
-
-    const result = await client.query<GenreRow>(
-      'SELECT genre FROM genres WHERE user_id = $1 ORDER BY genre',
-      [userId],
-    );
-    return result.rows.map((r) => r.genre as string);
-  });
-}
-
 // Delete user (GDPR / account deletion)
 export async function deleteUser(userId: string) {
   // All related tables cascade-delete from users.user_id
@@ -111,6 +91,7 @@ export async function deleteUser(userId: string) {
 export async function subscribe(userId: string, data: SubscribeBody) {
   return withTransaction(async (client: PoolClient) => {
     const { planType, yearPlan, paymentMethodId } = data;
+    const renewOn = planType === Plan.none ? null : yearPlan ? 'yearly' : 'monthly';
     const amountCents = await calculatePrice(userId, planType, yearPlan, client);
 
     const userResult = await client.query<UserRow>('SELECT * FROM users WHERE user_id = $1', [
@@ -150,14 +131,28 @@ export async function subscribe(userId: string, data: SubscribeBody) {
       throw new StripePaymentFailed();
     }
 
-    const updatePlanQuery = client.query(
-      'UPDATE plans SET is_active = FALSE, updated_at = NOW() WHERE user_id = $1 AND is_active = TRUE',
-      [userId],
-    );
-    const insertPlanQuery = client.query(
-      `INSERT INTO plans (user_id, plan_type, is_year_plan, is_active, stripe_subscription_id, start_date)
-       VALUES ($1, $2, $3, TRUE, $4, NOW())`,
-      [userId, planType, yearPlan, paymentIntent.id],
+    const upsertPlanQuery = client.query(
+      `INSERT INTO plans (
+         user_id,
+         plan_type,
+         is_year_plan,
+         renew_on,
+         stripe_subscription_id,
+         start_date,
+         end_date,
+         updated_at
+       )
+       VALUES ($1, $2, $3, $4, $5, NOW(), NULL, NOW())
+       ON CONFLICT (user_id)
+       DO UPDATE SET
+         plan_type = EXCLUDED.plan_type,
+         is_year_plan = EXCLUDED.is_year_plan,
+         renew_on = EXCLUDED.renew_on,
+         stripe_subscription_id = EXCLUDED.stripe_subscription_id,
+         start_date = EXCLUDED.start_date,
+         end_date = EXCLUDED.end_date,
+         updated_at = NOW()`,
+      [userId, planType, yearPlan, renewOn, paymentIntent.id],
     );
     const insertBillingQuery = client.query(
       `INSERT INTO billing (user_id, plan_type, is_year_plan, amount_cents, stripe_payment_intent_id)
@@ -165,7 +160,7 @@ export async function subscribe(userId: string, data: SubscribeBody) {
       [userId, planType, yearPlan, amountCents, paymentIntent.id],
     );
 
-    await Promise.all([updatePlanQuery, insertPlanQuery, insertBillingQuery]);
+    await Promise.all([upsertPlanQuery, insertBillingQuery]);
 
     logger.info({ userId, planType, yearPlan, amountCents }, 'Subscription created');
 

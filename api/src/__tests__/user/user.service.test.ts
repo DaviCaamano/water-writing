@@ -9,10 +9,8 @@ jest.mock('#config/stripe', () => ({
   },
 }));
 
-import { addGenres, createUser, subscribe, updateUser } from '#services/user/user.service';
+import { createUser, subscribe, updateUser } from '#services/user/user.service';
 import {
-  MOCK_GENRE,
-  MOCK_GENRES,
   MOCK_NEW_USER,
   MOCK_PLAN,
   MOCK_SUBSCRIPTION_REQUEST,
@@ -23,12 +21,11 @@ import {
 import { createMockClient, mockPool } from '#__tests__/constants/mock-database';
 import { EmailTakenError, StripePaymentFailed } from '#constants/error/custom-errors';
 import { PoolClient } from 'pg';
-import { withQuery } from '#utils/database/with-query';
 import { withTransaction } from '#utils/database/with-transaction';
 import stripe from '#config/stripe';
 import { mockStripCustomer, mockStripePaymentIntent } from '#__tests__/constants/mock-stripe';
 import { mockClear } from '#__tests__/utils/test-wrappers';
-const mockWithQuery = withQuery as jest.MockedFunction<typeof withQuery>;
+
 const mockWithTransaction = withTransaction as jest.MockedFunction<typeof withTransaction>;
 
 describe(
@@ -59,21 +56,6 @@ describe(
       mockWithTransaction.mockImplementation((callback) => callback(mockClient as PoolClient));
 
       await expect(updateUser(MOCK_USER_ID, MOCK_UPDATING_USER)).resolves.not.toThrow();
-    });
-  }),
-);
-
-describe(
-  'user service: addGenres',
-  mockClear(() => {
-    it('should add genres to a user', async () => {
-      const mockClient = createMockClient();
-      mockClient.query
-        .mockResolvedValueOnce(undefined)
-        .mockResolvedValueOnce(undefined)
-        .mockResolvedValueOnce({ rows: [MOCK_GENRE] });
-      mockWithQuery.mockImplementation((callback) => callback(mockClient as PoolClient));
-      await expect(addGenres(MOCK_USER_ID, MOCK_GENRES)).resolves.not.toThrow();
     });
   }),
 );

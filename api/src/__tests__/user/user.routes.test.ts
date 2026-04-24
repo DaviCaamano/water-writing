@@ -11,7 +11,6 @@ import { MOCK_STRONG_PASSWORD, MOCK_SUBSCRIPTION_REQUEST } from '#__tests__/cons
 import { mockClear, testAuth } from '#__tests__/utils/test-wrappers';
 
 const mockCreateUser = userService.createUser as jest.MockedFunction<typeof userService.createUser>;
-const mockAddGenres = userService.addGenres as jest.MockedFunction<typeof userService.addGenres>;
 const mockDeleteUser = userService.deleteUser as jest.MockedFunction<typeof userService.deleteUser>;
 const mockSubscribe = userService.subscribe as jest.MockedFunction<typeof userService.subscribe>;
 
@@ -81,34 +80,6 @@ describe(
       });
       expect(res.status).toBe(200);
       expect(res.body.status).toBe('ok');
-    });
-  }),
-);
-
-// POST /user/genres
-describe(
-  'POST /user/genres',
-  testAuth('/user/genres', 'post', { genres: 'Fantasy' }, () => {
-    it('returns 400 when genres is not an array', async () => {
-      const res = await request(app)
-        .post('/user/genres')
-        .set(mockAuthHeaders())
-        .send({ genres: 'Fantasy' });
-      expect(res.status).toBe(400);
-      expect(res.body.details.properties).toHaveProperty('genres');
-    });
-
-    it('returns 200 with updated genre list', async () => {
-      const headers = mockAuthHeaders();
-      mockAddGenres.mockResolvedValueOnce(['Fantasy', 'Sci-Fi']);
-
-      const res = await request(app)
-        .post('/user/genres')
-        .set(headers)
-        .send({ genres: ['Fantasy', 'Sci-Fi'] });
-
-      expect(res.status).toBe(200);
-      expect(res.body.genres).toEqual(['Fantasy', 'Sci-Fi']);
     });
   }),
 );

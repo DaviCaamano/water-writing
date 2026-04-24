@@ -16,6 +16,7 @@ import { MOCK_WORLD_RESPONSE } from '#__tests__/constants/mock-story';
 
 const mockUpsertDocument = documentService.upsertDocument as jest.Mock;
 const mockUpsertStory = storyService.upsertStory as jest.Mock;
+const mockAddGenres = storyService.upsertGenre as jest.MockedFunction<typeof storyService.upsertGenre>;
 const mockUpsertWorld = worldService.upsertWorld as jest.Mock;
 
 const MOCK_USER_ID = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11'; // must match MOCK_LOGIN_RESPONSE.userId
@@ -131,6 +132,34 @@ describe(
 
       expect(res.status).toBe(404);
       expect(res.body.error).toBe('Story not found');
+    });
+  }),
+);
+
+// POST /user/genres
+describe(
+  'POST /story/genres',
+  testAuth('/user/genres', 'post', { genres: 'Fantasy' }, () => {
+    it('returns 400 when genres is not an array', async () => {
+      const res = await request(app)
+        .post('/user/genres')
+        .set(mockAuthHeaders())
+        .send({ genres: 'Fantasy' });
+      expect(res.status).toBe(400);
+      expect(res.body.details.properties).toHaveProperty('genres');
+    });
+
+    it('returns 200 with updated genre list', async () => {
+      const headers = mockAuthHeaders();
+      mockAddGenres.mockResolvedValueOnce(['Fantasy', 'Sci-Fi']);
+
+      const res = await request(app)
+        .post('/user/genres')
+        .set(headers)
+        .send({ genres: ['Fantasy', 'Sci-Fi'] });
+
+      expect(res.status).toBe(200);
+      expect(res.body.genres).toEqual(['Fantasy', 'Sci-Fi']);
     });
   }),
 );

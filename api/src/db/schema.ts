@@ -17,6 +17,7 @@ import { Plan } from '#types/shared/enum/plan';
 
 // Enums
 export const planTypeEnum = pgEnum('plan_type', Plan);
+export const renewOnEnum = pgEnum('renew_on', ['monthly', 'yearly']);
 
 // Users
 export const users = pgTable('users', {
@@ -45,23 +46,6 @@ export const authentication = pgTable(
   (t) => [
     index('idx_authentication_user_id').on(t.userId),
     index('idx_authentication_token').on(t.token),
-  ],
-);
-
-// Genres
-export const genres = pgTable(
-  'genres',
-  {
-    genreId: uuid('genre_id').primaryKey().defaultRandom(),
-    userId: uuid('user_id')
-      .notNull()
-      .references(() => users.userId, { onDelete: 'cascade' }),
-    genre: varchar('genre', { length: 100 }).notNull(),
-    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-  },
-  (t) => [
-    uniqueIndex('genres_user_id_genre_unique').on(t.userId, t.genre),
-    index('idx_genres_user_id').on(t.userId),
   ],
 );
 
@@ -107,6 +91,23 @@ export const stories = pgTable(
   ],
 );
 
+// Genres
+export const genres = pgTable(
+  'genres',
+  {
+    genreId: uuid('genre_id').primaryKey().defaultRandom(),
+    storyId: uuid('story_id')
+      .notNull()
+      .references(() => stories.storyId, { onDelete: 'cascade' }),
+    genre: varchar('genre', { length: 100 }).notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    uniqueIndex('genres_story_id_genre_unique').on(t.storyId, t.genre),
+    index('idx_genres_story_id').on(t.storyId),
+  ],
+);
+
 // Documents
 export const documents = pgTable(
   'documents',
@@ -136,30 +137,20 @@ export const documents = pgTable(
 );
 
 // Plans
-export const plans = pgTable(
-  'plans',
-  {
-    planId: uuid('plan_id').primaryKey().defaultRandom(),
-    userId: uuid('user_id')
-      .notNull()
-      .references(() => users.userId, { onDelete: 'cascade' }),
-    planType: planTypeEnum('plan_type').notNull(),
-    isYearPlan: boolean('is_year_plan').notNull().default(false),
-    isActive: boolean('is_active').notNull().default(true),
-    stripeSubscriptionId: varchar('stripe_subscription_id', { length: 255 }),
-    startDate: timestamp('start_date', { withTimezone: true }).notNull().defaultNow(),
-    endDate: timestamp('end_date', { withTimezone: true }),
-    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
-  },
-  (t) => [
-    // Only one active plan per user at a time
-    uniqueIndex('idx_plans_one_active_per_user')
-      .on(t.userId)
-      .where(sql`${t.isActive} = TRUE`),
-    index('idx_plans_user_id').on(t.userId),
-  ],
-);
+export const plans = pgTable('plans', {
+  userId: uuid('user_id')
+    .primaryKey()
+    .references(() => users.userId, { onDelete: 'cascade' }),
+  planType: planTypeEnum('plan_type').notNull(),
+  isYearPlan: boolean('is_year_plan').notNull().default(false),
+  renewOn: renewOnEnum('renew_on'),
+  renewDate: timestamp('renew_date', { withTimezone: true }).notNull().defaultNow(),
+  stripeSubscriptionId: varchar('stripe_subscription_id', { length: 255 }),
+  startDate: timestamp('start_date', { withTimezone: true }).notNull().defaultNow(),
+  endDate: timestamp('end_date', { withTimezone: true }),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+});
 
 // Billing
 export const billing = pgTable(

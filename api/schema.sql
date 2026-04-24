@@ -11,6 +11,7 @@ CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 -- =============================================================
 
 CREATE TYPE plan_type AS ENUM ('pro-plan', 'max-plan');
+CREATE TYPE renew_on AS ENUM ('monthly', 'yearly');
 
 
 -- =============================================================
@@ -132,28 +133,21 @@ CREATE INDEX idx_documents_successor_id   ON documents(successor_id);
 -- =============================================================
 -- PLANS
 -- Active subscription per user.
--- Only one active plan per user at a time (enforced by partial index).
+-- Each user has exactly one current plan row.
 -- =============================================================
 
 CREATE TABLE plans (
-    plan_id             UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id             UUID        NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    user_id             UUID        PRIMARY KEY REFERENCES users(user_id) ON DELETE CASCADE,
     plan_type           plan_type   NOT NULL,
     is_year_plan        BOOLEAN     NOT NULL DEFAULT FALSE,
-    is_active           BOOLEAN     NOT NULL DEFAULT TRUE,
+    renew_on            renew_on,
+    renew_date          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     stripe_subscription_id VARCHAR(255),
     start_date          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     end_date            TIMESTAMPTZ,
     created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
-
--- Only one active plan per user at a time
-CREATE UNIQUE INDEX idx_plans_one_active_per_user
-    ON plans(user_id)
-    WHERE is_active = TRUE;
-
-CREATE INDEX idx_plans_user_id ON plans(user_id);
 
 
 -- =============================================================

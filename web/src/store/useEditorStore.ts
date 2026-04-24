@@ -1,10 +1,9 @@
 import { useMemo } from 'react';
 import { Store, useStore } from '@tanstack/react-store';
-import { api } from '~lib/api';
+import { queryApi } from '~lib/api';
 import { syncDocumentInNavigationStore } from '~store/useNavigationStore';
 import { EditorActions, EditorState, EditorStore } from '~types/state';
-
-const IS_DEVELOPMENT = process.env.NODE_ENV === 'development';
+import { apiRoutes } from '#types/shared/api-route';
 
 function createInitialEditorState(): EditorState {
   return {
@@ -38,12 +37,7 @@ const editorActions: EditorActions = {
       syncDocumentInNavigationStore(documentId, { title, body });
     }
 
-    if (!IS_DEVELOPMENT) {
-      await api('/story', {
-        method: 'POST',
-        body: JSON.stringify({ documentId, storyId, title, body }),
-      });
-    }
+    await queryApi(apiRoutes.story.updateDocument, { body: { documentId, storyId, title, body } });
 
     editorStore.setState((state) => ({ ...state, isDirty: false, lastSaved: new Date() }));
   },
@@ -83,7 +77,6 @@ const editorActions: EditorActions = {
     }));
   },
 };
-
 
 export function useEditorStore(): EditorStore {
   const state = useStore(editorStore, (currentState) => currentState);
