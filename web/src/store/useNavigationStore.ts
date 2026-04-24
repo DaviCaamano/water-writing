@@ -193,10 +193,7 @@ function deriveNavigationState(state: NavigationState): NavigationState {
   const explicitDocument = findDocument(worlds, state.currentDocumentId);
 
   const currentWorld =
-    explicitWorld ??
-    explicitStory?.world ??
-    explicitDocument?.world ??
-    getFirstWorld(worlds);
+    explicitWorld ?? explicitStory?.world ?? explicitDocument?.world ?? getFirstWorld(worlds);
   const explicitStoryInCurrentWorld =
     explicitStory && explicitStory.world.id === currentWorld?.id ? explicitStory.story : null;
   const explicitDocumentStoryInCurrentWorld =
@@ -317,7 +314,11 @@ const navigationActions: NavigationActions = {
   },
 
   navigateToLegacy: () => {
-    updateNavigationState((state) => ({ ...state, currentView: 'legacy', selectedDocumentId: null }));
+    updateNavigationState((state) => ({
+      ...state,
+      currentView: 'legacy',
+      selectedDocumentId: null,
+    }));
 
     if (!IS_DEVELOPMENT && navigationStore.state.worlds.length === 0) {
       void navigationActions.loadLegacy();
@@ -352,10 +353,7 @@ const navigationActions: NavigationActions = {
           world.id === story.worldId
             ? {
                 ...world,
-                stories: [
-                  story,
-                  ...world.stories.filter((entry) => entry.id !== story.id),
-                ],
+                stories: [story, ...world.stories.filter((entry) => entry.id !== story.id)],
               }
             : world,
         ),
@@ -480,7 +478,10 @@ const navigationActions: NavigationActions = {
     const world = findWorld(navigationStore.state.worlds, worldId);
     if (!world) return null;
 
-    const name = createUntitledName(world.stories.map((story) => story.name), 'Untitled Story');
+    const name = createUntitledName(
+      world.stories.map((story) => story.name),
+      'Untitled Story',
+    );
     const createdStory: Story = {
       id: createId('story'),
       name,
@@ -534,7 +535,10 @@ const navigationActions: NavigationActions = {
           ...world,
           stories: world.stories.filter((story) => story.id !== storyId),
         })),
-        currentView: deletingCurrentStory && state.currentView === 'story-view' ? 'world-view' : state.currentView,
+        currentView:
+          deletingCurrentStory && state.currentView === 'story-view'
+            ? 'world-view'
+            : state.currentView,
         currentStoryId: deletingCurrentStory ? null : state.currentStoryId,
         currentDocumentId: deletingCurrentStory ? null : state.currentDocumentId,
         selectedDocumentId: deletingCurrentStory ? null : state.selectedDocumentId,
@@ -671,7 +675,9 @@ const navigationActions: NavigationActions = {
           })),
         })),
         currentView:
-          deletingCurrentDocument && state.currentView === 'editor' ? 'story-view' : state.currentView,
+          deletingCurrentDocument && state.currentView === 'editor'
+            ? 'story-view'
+            : state.currentView,
         currentDocumentId: deletingCurrentDocument ? null : state.currentDocumentId,
         selectedDocumentId:
           state.selectedDocumentId === documentId ? null : state.selectedDocumentId,
@@ -683,7 +689,11 @@ const navigationActions: NavigationActions = {
     updateNavigationState((state) => {
       const documentLocation = findDocument(state.worlds, documentId);
       const targetStoryLocation = findStory(state.worlds, targetStoryId);
-      if (!documentLocation || !targetStoryLocation || documentLocation.story.id === targetStoryId) {
+      if (
+        !documentLocation ||
+        !targetStoryLocation ||
+        documentLocation.story.id === targetStoryId
+      ) {
         return state;
       }
 

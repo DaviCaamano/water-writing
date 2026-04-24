@@ -1,27 +1,27 @@
-import { Plan } from '@/types/enum/plan';
+import { Plan } from '#types/shared/enum/plan';
 
-jest.mock('@/utils/database/with-query');
-jest.mock('@/services/story/world.service');
+jest.mock('#utils/database/with-query');
+jest.mock('#services/story/world.service');
 jest.mock('bcrypt');
 jest.mock('jsonwebtoken');
 
-import { withQuery } from '@/utils/database/with-query';
-import { fetchLegacy } from '@/services/story/world.service';
-import { login } from '@/services/user/login.service';
+import { withQuery } from '#utils/database/with-query';
+import { fetchLegacy } from '#services/story/world.service';
+import { login } from '#services/user/login.service';
 import {
   MOCK_LOGIN_EMAIL,
   MOCK_LOGIN_RESPONSE,
   MOCK_LOGIN_TOKEN,
   MOCK_STRONG_PASSWORD,
   MOCK_USER,
-} from '@/__tests__/constants/mock-user';
+} from '#__tests__/constants/mock-user';
 import { PoolClient } from 'pg';
-import { createMockClient } from '@/__tests__/constants/mock-database';
+import { createMockClient } from '#__tests__/constants/mock-database';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { InvalidCredentialsError } from '@/constants/error/custom-errors';
-import { mockClear } from '@/__tests__/utils/test-wrappers';
-import { mockLegacyResponse } from '@/__tests__/utils/mock-linked-documents';
+import { InvalidCredentialsError } from '#constants/error/custom-errors';
+import { mockClear } from '#__tests__/utils/test-wrappers';
+import { mockLegacyResponse } from '#__tests__/utils/mock-linked-documents';
 
 const mockWithQuery = withQuery as jest.MockedFunction<typeof withQuery>;
 const mockFetchLegacy = fetchLegacy as jest.MockedFunction<typeof fetchLegacy>;

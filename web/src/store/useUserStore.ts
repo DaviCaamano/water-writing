@@ -15,7 +15,6 @@ export interface UserActions {
   }) => Promise<void>;
   logout: () => Promise<void>;
   updateName: (firstName: string, lastName: string) => Promise<void>;
-  updateGenres: (genres: string[]) => Promise<void>;
   deleteAccount: () => Promise<void>;
   refreshSession: () => Promise<void>;
   reset: () => void;
@@ -93,14 +92,6 @@ const userActions: UserActions = {
       body: JSON.stringify({ firstName, lastName }),
     });
     userStore.setState((state) => ({ ...state, firstName, lastName }));
-  },
-
-  updateGenres: async (genres) => {
-    await api('/user/genres', {
-      method: 'POST',
-      body: JSON.stringify({ genres }),
-    });
-    userStore.setState((state) => ({ ...state, genres }));
   },
 
   deleteAccount: async () => {

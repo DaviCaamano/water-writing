@@ -1,5 +1,5 @@
-import { z } from '@/config/zod-extended';
-import { Plan } from '@/types/enum/plan';
+import { z } from '#config/zod-extended';
+import { Plan } from '#types/shared/enum/plan';
 
 // Password strength schema (reused for creation & update)
 const strongPassword = z

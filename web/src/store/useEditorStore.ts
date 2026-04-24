@@ -22,12 +22,7 @@ interface EditorActions {
   setTitle: (title: string) => void;
   setBody: (body: string) => void;
   saveDocument: () => Promise<void>;
-  loadDocument: (doc: {
-    id: string;
-    title: string;
-    body: string;
-    storyId: string;
-  }) => void;
+  loadDocument: (doc: { id: string; title: string; body: string; storyId: string }) => void;
   setFontSize: (size: number) => void;
   setFontFamily: (font: string) => void;
   setTheme: (theme: EditorTheme) => void;

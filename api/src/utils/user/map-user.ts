@@ -1,7 +1,7 @@
-import { BillingRow, UserRow } from '@/types/database';
-import { BillingResponse, UserResponse } from '@/types/response';
-import { Plan } from '@/types/enum/plan';
-import { CreateUserBody } from '@/schemas/user.schemas';
+import { BillingRow, UserRow } from '#types/database';
+import { BillingResponse, UserResponse } from '#types/shared/response';
+import { Plan } from '#types/shared/enum/plan';
+import { CreateUserBody } from '#schemas/user.schemas';
 
 export const mapUser = (user: UserRow, plan?: { plan_type: Plan }): UserResponse => ({
   userId: user.user_id,

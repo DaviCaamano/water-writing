@@ -1,5 +1,5 @@
 import Stripe from 'stripe';
-import { MOCK_DATE } from '@/__tests__/constants/mock-basic';
+import { MOCK_DATE } from '#__tests__/constants/mock-basic';
 
 export const mockStripeClientSecret = 'pi_1234567890';
 export const mockStripeName = 'jane doe';
@@ -31,7 +31,7 @@ export const mockAutomaticPayments: Stripe.PaymentIntent.AutomaticPaymentMethods
   enabled: false,
 };
 export const mockStripeInvoiceId = 'in_1234567890';
-export const mockStripeAccountId = 'acct_1234567890';
+export const mockStripeuserId = 'acct_1234567890';
 
 export const mockStripeProcessingCard: Stripe.PaymentIntent.Processing.Card = {
   customer_notification: {
@@ -46,7 +46,7 @@ export const mockStripePaymentProcessing: Stripe.PaymentIntent.Processing = {
 };
 
 export const mockStripeAccount: Stripe.Account = {
-  id: mockStripeAccountId,
+  id: mockStripeuserId,
   object: 'account',
   business_profile: {
     annual_revenue: null,

@@ -1,6 +1,5 @@
-import { clsx, type ClassValue } from "clsx"
-import { twMerge } from "tailwind-merge"
-
+import { clsx, type ClassValue } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 
 /**
  * Merges multiple CSS class names into a single string with Tailwind CSS conflict resolution.
@@ -18,5 +17,5 @@ import { twMerge } from "tailwind-merge"
  * cn('text-red-500', condition && 'font-bold') // Conditionally adds classes
  */
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+  return twMerge(clsx(inputs));
 }

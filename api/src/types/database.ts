@@ -1,5 +1,5 @@
 // Database row types
-import { Plan } from '@/types/enum/plan';
+import { Plan } from '#types/shared/enum/plan';
 
 export interface UserRow {
   user_id: string;

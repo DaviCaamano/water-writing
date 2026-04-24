@@ -2,11 +2,11 @@ import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import pinoHttp from 'pino-http';
-import logger from '@/config/logger';
-import userRoutes from '@/routes/user.routes';
-import storyRoutes from '@/routes/story.routes';
-import docsRoutes from '@/routes/docs.routes';
-import billingRoutes from '@/routes/billing.routes';
+import logger from '#config/logger';
+import userRoutes from '#routes/user.routes';
+import storyRoutes from '#routes/story.routes';
+import docsRoutes from '#routes/docs.routes';
+import billingRoutes from '#routes/billing.routes';
 
 const app = express();
 
@@ -43,7 +43,14 @@ app.use(express.json({ limit: '1mb' }));
 
 // HTTP request logging (skip in tests to keep output clean)
 if (process.env.NODE_ENV !== 'test') {
-  app.use(pinoHttp({ logger, ignore: (req) => req.url.startsWith('/docs') }));
+  app.use(
+    pinoHttp({
+      logger,
+      autoLogging: {
+        ignore: (req) => req.url.startsWith('/docs'),
+      },
+    }),
+  );
 }
 
 // Routes

@@ -1,15 +1,15 @@
-import { DocumentNotFoundError, InvalidSelectionError } from '@/constants/error/custom-errors';
+import { DocumentNotFoundError, InvalidSelectionError } from '#constants/error/custom-errors';
 
-jest.mock('@/services/story/editor.service');
-jest.mock('@/config/stripe', () => ({ __esModule: true, default: {} }));
+jest.mock('#services/story/editor.service');
+jest.mock('#config/stripe', () => ({ __esModule: true, default: {} }));
 
 import request from 'supertest';
-import app from '@/app';
-import * as editorService from '@/services/story/editor.service';
-import { mockAuthHeaders } from '@/__tests__/constants/mock-auth-headers';
-import { testAuth } from '@/__tests__/utils/test-wrappers';
-import { MOCK_DOC_ID } from '@/__tests__/constants/mock-story';
-import { MOCK_USER_ID } from '@/__tests__/constants/mock-user';
+import app from '#app';
+import * as editorService from '#services/story/editor.service';
+import { mockAuthHeaders } from '#__tests__/constants/mock-auth-headers';
+import { testAuth } from '#__tests__/utils/test-wrappers';
+import { MOCK_DOC_ID } from '#__tests__/constants/mock-story';
+import { MOCK_USER_ID } from '#__tests__/constants/mock-user';
 
 const mockEditText = editorService.editText as jest.Mock;
 

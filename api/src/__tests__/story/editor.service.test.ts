@@ -1,14 +1,14 @@
-jest.mock('@/config/anthropic', () => ({
+jest.mock('#config/anthropic', () => ({
   __esModule: true,
   default: { messages: { stream: jest.fn() } },
 }));
 
-import anthropic from '@/config/anthropic';
-import { editText } from '@/services/story/editor.service';
-import { DocumentNotFoundError, InvalidSelectionError } from '@/constants/error/custom-errors';
-import { MOCK_USER_ID } from '@/__tests__/constants/mock-user';
-import { MOCK_DOC, MOCK_DOC_ID, mockPool } from '@/__tests__/constants/mock-story';
-import { mockClear } from '@/__tests__/utils/test-wrappers';
+import anthropic from '#config/anthropic';
+import { editText } from '#services/story/editor.service';
+import { DocumentNotFoundError, InvalidSelectionError } from '#constants/error/custom-errors';
+import { MOCK_USER_ID } from '#__tests__/constants/mock-user';
+import { MOCK_DOC, MOCK_DOC_ID, mockPool } from '#__tests__/constants/mock-story';
+import { mockClear } from '#__tests__/utils/test-wrappers';
 import type { Response } from 'express';
 
 const mockStream = anthropic.messages.stream as jest.Mock;

@@ -1,16 +1,16 @@
-import { BillingResponse, LoginResponse } from '@/types/response';
-import { BillingRow, GenreRow, PlanRow, UserRow } from '@/types/database';
-import { Plan } from '@/types/enum/plan';
-import { CreateUserBody, SubscribeBody, UpdateUserBody } from '@/schemas/user.schemas';
+import { BillingResponse, LoginResponse } from '#types/shared/response';
+import { BillingRow, GenreRow, PlanRow, UserRow } from '#types/database';
+import { Plan } from '#types/shared/enum/plan';
+import { CreateUserBody, SubscribeBody, UpdateUserBody } from '#schemas/user.schemas';
 import {
   MOCK_STRIPE_INVOICE_ID,
   MOCK_STRIPE_PAYMENT_INTENT_ID,
   mockStipePaymentMethodId,
   mockStripeCustomerId,
   mockStripeSubscriptionId,
-} from '@/__tests__/constants/mock-stripe';
-import { MOCK_DATE } from '@/__tests__/constants/mock-basic';
-import { mockLegacyResponse } from '@/__tests__/utils/mock-linked-documents';
+} from '#__tests__/constants/mock-stripe';
+import { MOCK_DATE } from '#__tests__/constants/mock-basic';
+import { mockLegacyResponse } from '#__tests__/utils/mock-linked-documents';
 
 export const MOCK_LOGIN_EMAIL = 'jane@example.com';
 export const MOCK_USER_ID = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11';

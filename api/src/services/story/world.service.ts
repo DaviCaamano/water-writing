@@ -1,9 +1,9 @@
-import { WorldNotFoundError } from '@/constants/error/custom-errors';
-import { UpsertWorldBody } from '@/schemas/story.schemas';
-import { WorldResponse } from '@/types/response';
-import pool from '@/config/database';
-import { DocumentRow, StoryRow, StoryRowWithDocuments, WorldRow } from '@/types/database';
-import { mapWorldResponse } from '@/utils/story/map-story';
+import { WorldNotFoundError } from '#constants/error/custom-errors';
+import { UpsertWorldBody } from '#schemas/story.schemas';
+import { WorldResponse } from '#types/shared/response';
+import pool from '#config/database';
+import { DocumentRow, StoryRow, StoryRowWithDocuments, WorldRow } from '#types/database';
+import { mapWorldResponse } from '#utils/story/map-story';
 
 export const upsertWorld = async (
   userId: string,

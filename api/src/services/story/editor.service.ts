@@ -1,8 +1,8 @@
-import pool from '@/config/database';
-import anthropic from '@/config/anthropic';
-import { ClaudeModel } from '@/constants/anthropic-models';
-import { DocumentRow } from '@/types/database';
-import { DocumentNotFoundError, InvalidSelectionError } from '@/constants/error/custom-errors';
+import pool from '#config/database';
+import anthropic from '#config/anthropic';
+import { ClaudeModel } from '#constants/anthropic-models';
+import { DocumentRow } from '#types/database';
+import { DocumentNotFoundError, InvalidSelectionError } from '#constants/error/custom-errors';
 import { Response } from 'express';
 
 async function fetchContextDocuments(userId: string, documentId: string): Promise<DocumentRow[]> {

@@ -1,14 +1,14 @@
-import { EmailTakenError, StripePaymentFailed } from '@/constants/error/custom-errors';
+import { EmailTakenError, StripePaymentFailed } from '#constants/error/custom-errors';
 
-jest.mock('@/services/user/user.service');
-jest.mock('@/config/stripe', () => ({ __esModule: true, default: {} }));
+jest.mock('#services/user/user.service');
+jest.mock('#config/stripe', () => ({ __esModule: true, default: {} }));
 
 import request from 'supertest';
-import app from '@/app';
-import * as userService from '@/services/user/user.service';
-import { mockAuthHeaders } from '@/__tests__/constants/mock-auth-headers';
-import { MOCK_STRONG_PASSWORD, MOCK_SUBSCRIPTION_REQUEST } from '@/__tests__/constants/mock-user';
-import { mockClear, testAuth } from '@/__tests__/utils/test-wrappers';
+import app from '#app';
+import * as userService from '#services/user/user.service';
+import { mockAuthHeaders } from '#__tests__/constants/mock-auth-headers';
+import { MOCK_STRONG_PASSWORD, MOCK_SUBSCRIPTION_REQUEST } from '#__tests__/constants/mock-user';
+import { mockClear, testAuth } from '#__tests__/utils/test-wrappers';
 
 const mockCreateUser = userService.createUser as jest.MockedFunction<typeof userService.createUser>;
 const mockAddGenres = userService.addGenres as jest.MockedFunction<typeof userService.addGenres>;

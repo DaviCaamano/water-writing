@@ -1,14 +1,14 @@
-import { MOCK_USER_ID } from '@/__tests__/constants/mock-user';
+import { MOCK_USER_ID } from '#__tests__/constants/mock-user';
 
-jest.mock('@/services/story/world.service');
-jest.mock('@/utils/database/with-transaction');
-jest.mock('@/utils/database/with-query');
+jest.mock('#services/story/world.service');
+jest.mock('#utils/database/with-transaction');
+jest.mock('#utils/database/with-query');
 
-import { withTransaction } from '@/utils/database/with-transaction';
-import { withQuery } from '@/utils/database/with-query';
-import { fetchDocument, upsertDocument } from '@/services/story/document.service';
-import { DocumentNotFoundError, StoryNotFoundError } from '@/constants/error/custom-errors';
-import { fetchWorld } from '@/services/story/world.service';
+import { withTransaction } from '#utils/database/with-transaction';
+import { withQuery } from '#utils/database/with-query';
+import { fetchDocument, upsertDocument } from '#services/story/document.service';
+import { DocumentNotFoundError, StoryNotFoundError } from '#constants/error/custom-errors';
+import { fetchWorld } from '#services/story/world.service';
 import {
   MOCK_DOC_ID,
   MOCK_STORY_ID,
@@ -17,9 +17,9 @@ import {
   MOCK_DOCK_RESPONSE,
   MOCK_WORLD_RESPONSE,
   mockPool,
-} from '@/__tests__/constants/mock-story';
-import { createMockClient } from '@/__tests__/constants/mock-database';
-import { mockClear } from '@/__tests__/utils/test-wrappers';
+} from '#__tests__/constants/mock-story';
+import { createMockClient } from '#__tests__/constants/mock-database';
+import { mockClear } from '#__tests__/utils/test-wrappers';
 
 const mockFetchWorld = fetchWorld as jest.MockedFunction<typeof fetchWorld>;
 const mockWithTransaction = withTransaction as jest.MockedFunction<typeof withTransaction>;

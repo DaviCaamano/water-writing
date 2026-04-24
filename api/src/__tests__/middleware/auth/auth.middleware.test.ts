@@ -1,10 +1,10 @@
-jest.mock('@/config/stripe', () => ({ __esModule: true, default: {} }));
-import { mockPool } from '@/__tests__/constants/mock-story';
+jest.mock('#config/stripe', () => ({ __esModule: true, default: {} }));
+import { mockPool } from '#__tests__/constants/mock-story';
 
 import request from 'supertest';
 import jwt from 'jsonwebtoken';
-import app from '@/app';
-import { mockClear } from '@/__tests__/utils/test-wrappers';
+import app from '#app';
+import { mockClear } from '#__tests__/utils/test-wrappers';
 
 describe(
   'Auth Middleware',

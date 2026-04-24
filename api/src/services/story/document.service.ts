@@ -1,10 +1,10 @@
-import { DocumentRow, StoryRow } from '@/types/database';
-import { UpsertDocumentBody } from '@/schemas/story.schemas';
-import { withTransaction } from '@/utils/database/with-transaction';
-import { DocumentNotFoundError, StoryNotFoundError } from '@/constants/error/custom-errors';
-import { DocumentResponse } from '@/types/response';
-import { fetchWorld } from '@/services/story/world.service';
-import pool from '@/config/database';
+import { DocumentRow, StoryRow } from '#types/database';
+import { UpsertDocumentBody } from '#schemas/story.schemas';
+import { withTransaction } from '#utils/database/with-transaction';
+import { DocumentNotFoundError, StoryNotFoundError } from '#constants/error/custom-errors';
+import { DocumentResponse } from '#types/shared/response';
+import { fetchWorld } from '#services/story/world.service';
+import pool from '#config/database';
 
 export async function fetchDocument(documentId: string): Promise<DocumentResponse> {
   const result = await pool.query<DocumentRow>(

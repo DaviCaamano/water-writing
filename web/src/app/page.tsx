@@ -10,13 +10,12 @@ import { SettingsModal } from '~components/home/SettingsModal';
 import { EditorSettings } from '~components/home/EditorSettings';
 import { NavButton } from '~components/home/NavButton';
 import { HomeView } from '~components/home/HomeView';
-
-type SettingsSection = 'general' | 'subscription' | 'billing';
+import { SettingsSection } from '~types/components/settings-modal';
 
 export default function Home() {
   const [authOpen, setAuthOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [settingsSection, setSettingsSection] = useState<SettingsSection>('general');
+  const [settingsSection, setSettingsSection] = useState<SettingsSection>(SettingsSection.general);
 
   const { refreshSession } = useUserStore();
   const { documentId: editorDocumentId, loadDocument } = useEditorStore();
@@ -42,7 +41,7 @@ export default function Home() {
     });
   }, [currentDocumentId, currentStory, currentView, editorDocumentId, loadDocument]);
 
-  const handleOpenSettings = (section: SettingsSection = 'general') => {
+  const handleOpenSettings = (section: SettingsSection = SettingsSection.general) => {
     setSettingsSection(section);
     setSettingsOpen(true);
   };

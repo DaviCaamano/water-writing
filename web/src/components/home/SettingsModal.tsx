@@ -14,8 +14,7 @@ import { useUserStore } from '~store/useUserStore';
 import { api } from '~lib/api';
 import type { BillingHistoryEntry, BillingResponse, CardInfo } from '~types';
 import { Plan } from '#types/shared/enum/plan';
-
-type SettingsSection = 'general' | 'subscription' | 'billing';
+import { SettingsSection } from '~types/components/settings-modal';
 
 interface SettingsModalProps {
   open: boolean;
@@ -26,7 +25,7 @@ interface SettingsModalProps {
 export function SettingsModal({
   open,
   onOpenChange,
-  initialSection = 'general',
+  initialSection = SettingsSection.general,
 }: SettingsModalProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -39,9 +38,9 @@ function SettingsModalContent({ initialSection }: { initialSection: SettingsSect
   const [activeSection, setActiveSection] = useState<SettingsSection>(initialSection);
 
   const sections: { key: SettingsSection; label: string }[] = [
-    { key: 'general', label: 'General' },
-    { key: 'subscription', label: 'Subscription' },
-    { key: 'billing', label: 'Billing' },
+    { key: SettingsSection.general, label: 'General' },
+    { key: SettingsSection.plan, label: 'Plan' },
+    { key: SettingsSection.billing, label: 'Billing' },
   ];
 
   return (
@@ -62,15 +61,15 @@ function SettingsModalContent({ initialSection }: { initialSection: SettingsSect
       </nav>
 
       <div className="flex-1 overflow-y-auto p-6">
-        {activeSection === 'general' && <GeneralSection />}
-        {activeSection === 'subscription' && <SubscriptionSection />}
-        {activeSection === 'billing' && <BillingSection />}
+        {activeSection === SettingsSection.general && <GeneralSection />}
+        {activeSection === SettingsSection.plan && <SubscriptionSection />}
+        {activeSection === SettingsSection.billing && <BillingSection />}
       </div>
     </DialogContent>
   );
 }
 
-/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ General Section â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* General Section */
 
 function GeneralSection() {
   const { firstName, lastName, email, updateName } = useUserStore();
@@ -147,7 +146,7 @@ function GeneralSection() {
   );
 }
 
-/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ Subscription Section â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* Subscription Section */
 
 function SubscriptionSection() {
   const { plan, deleteAccount } = useUserStore();
@@ -295,7 +294,7 @@ function SubscriptionSection() {
   );
 }
 
-/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ Billing Section â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* Billing Section */
 
 function BillingSection() {
   const { userId } = useUserStore();

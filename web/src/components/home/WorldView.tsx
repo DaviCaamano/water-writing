@@ -176,7 +176,9 @@ export function WorldView() {
       ) : (
         <section className="rounded-[28px] border border-dashed border-slate-300 bg-white/70 px-6 py-12 text-center shadow-[0_15px_45px_-35px_rgba(15,23,42,0.45)]">
           <div className="mx-auto max-w-2xl space-y-3">
-            <h2 className="text-2xl font-semibold text-slate-900">This world needs its first story</h2>
+            <h2 className="text-2xl font-semibold text-slate-900">
+              This world needs its first story
+            </h2>
             <p className="text-sm leading-6 text-slate-600 sm:text-base">
               Story cards live here as a full-screen catalog. Add one and it will be ready to open
               into the story view.

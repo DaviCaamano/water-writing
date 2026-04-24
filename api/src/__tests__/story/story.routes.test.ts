@@ -1,18 +1,18 @@
-import { StoryNotFoundError, WorldNotFoundError } from '@/constants/error/custom-errors';
+import { StoryNotFoundError, WorldNotFoundError } from '#constants/error/custom-errors';
 
-jest.mock('@/services/story/story.service');
-jest.mock('@/services/story/document.service');
-jest.mock('@/services/story/world.service');
-jest.mock('@/config/stripe', () => ({ __esModule: true, default: {} }));
+jest.mock('#services/story/story.service');
+jest.mock('#services/story/document.service');
+jest.mock('#services/story/world.service');
+jest.mock('#config/stripe', () => ({ __esModule: true, default: {} }));
 
 import request from 'supertest';
-import app from '@/app';
-import * as documentService from '@/services/story/document.service';
-import * as storyService from '@/services/story/story.service';
-import * as worldService from '@/services/story/world.service';
-import { mockAuthHeaders } from '@/__tests__/constants/mock-auth-headers';
-import { testAuth } from '@/__tests__/utils/test-wrappers';
-import { MOCK_WORLD_RESPONSE } from '@/__tests__/constants/mock-story';
+import app from '#app';
+import * as documentService from '#services/story/document.service';
+import * as storyService from '#services/story/story.service';
+import * as worldService from '#services/story/world.service';
+import { mockAuthHeaders } from '#__tests__/constants/mock-auth-headers';
+import { testAuth } from '#__tests__/utils/test-wrappers';
+import { MOCK_WORLD_RESPONSE } from '#__tests__/constants/mock-story';
 
 const mockUpsertDocument = documentService.upsertDocument as jest.Mock;
 const mockUpsertStory = storyService.upsertStory as jest.Mock;

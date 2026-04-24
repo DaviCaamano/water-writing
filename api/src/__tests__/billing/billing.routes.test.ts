@@ -1,13 +1,13 @@
-jest.mock('@/services/user/user.service');
-jest.mock('@/services/billing/billing.service');
-jest.mock('@/config/stripe', () => ({ __esModule: true, default: {} }));
+jest.mock('#services/user/user.service');
+jest.mock('#services/billing/billing.service');
+jest.mock('#config/stripe', () => ({ __esModule: true, default: {} }));
 
-import * as billingService from '@/services/billing/billing.service';
-import { MOCK_BILLING_RESPONSE, MOCK_USER_ID } from '@/__tests__/constants/mock-user';
+import * as billingService from '#services/billing/billing.service';
+import { MOCK_BILLING_RESPONSE, MOCK_USER_ID } from '#__tests__/constants/mock-user';
 import request from 'supertest';
-import app from '@/app';
-import { mockClear } from '@/__tests__/utils/test-wrappers';
-import { mockAuthHeaders } from '@/__tests__/constants/mock-auth-headers';
+import app from '#app';
+import { mockClear } from '#__tests__/utils/test-wrappers';
+import { mockAuthHeaders } from '#__tests__/constants/mock-auth-headers';
 
 const mockGetBillingHistory = billingService.getBillingHistory as jest.Mock;
 

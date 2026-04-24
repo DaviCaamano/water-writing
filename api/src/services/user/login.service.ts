@@ -1,13 +1,13 @@
-import logger from '@/config/logger';
-import type { LoginBody } from '@/schemas/user.schemas';
+import logger from '#config/logger';
+import type { LoginBody } from '#schemas/user.schemas';
 import bcrypt from 'bcrypt';
-import { PlanRow, UserRow } from '@/types/database';
+import { PlanRow, UserRow } from '#types/database';
 import jwt from 'jsonwebtoken';
-import { InvalidCredentialsError } from '@/constants/error/custom-errors';
-import { withQuery } from '@/utils/database/with-query';
-import { LoginResponse } from '@/types/response';
-import { parseExpiration } from '@/utils/database/parse-expiration';
-import { fetchLegacy } from '@/services/story/world.service';
+import { InvalidCredentialsError } from '#constants/error/custom-errors';
+import { withQuery } from '#utils/database/with-query';
+import { LoginResponse } from '#types/shared/response';
+import { parseExpiration } from '#utils/database/parse-expiration';
+import { fetchLegacy } from '#services/story/world.service';
 
 export const login = async (data: LoginBody): Promise<LoginResponse> => {
   return withQuery(async (client) => {

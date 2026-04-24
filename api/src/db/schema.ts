@@ -13,7 +13,7 @@ import {
   PgColumn,
 } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
-import { Plan } from '@/types/enum/plan';
+import { Plan } from '#types/shared/enum/plan';
 
 // Enums
 export const planTypeEnum = pgEnum('plan_type', Plan);

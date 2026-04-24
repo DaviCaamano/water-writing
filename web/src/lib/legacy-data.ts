@@ -48,9 +48,7 @@ function createDocumentResponses(
       `This is a development-mode draft for Story ${worldIndex + 1}.${storyIndex + 1}. ` +
       `Use it to test renaming, cover uploads, and navigation into the editor.`,
     predecessorId:
-      documentIndex > 0
-        ? `document-${worldIndex + 1}-${storyIndex + 1}-${documentIndex}`
-        : null,
+      documentIndex > 0 ? `document-${worldIndex + 1}-${storyIndex + 1}-${documentIndex}` : null,
     successorId:
       documentIndex < documentCount - 1
         ? `document-${worldIndex + 1}-${storyIndex + 1}-${documentIndex + 2}`

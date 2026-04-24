@@ -1,12 +1,12 @@
-import { DocumentResponse, StoryResponse, WorldResponse } from '@/types/response';
+import { DocumentResponse, StoryResponse, WorldResponse } from '#types/shared/response';
 import {
   DocumentRow,
   StoryRow,
   StoryRowWithDocuments,
   WorldRow,
   WorldRowWithStories,
-} from '@/types/database';
-import { orderLinkedDocs } from '@/utils/order-linked-docs';
+} from '#types/database';
+import { orderLinkedDocs } from '#utils/order-linked-docs';
 
 export const mapDocumentResponse = (row: DocumentRow): DocumentResponse => {
   return {

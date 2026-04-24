@@ -1,15 +1,15 @@
 import bcrypt from 'bcrypt';
-import pool from '@/config/database';
-import stripe from '@/config/stripe';
-import logger from '@/config/logger';
-import type { CreateUserBody, UpdateUserBody, SubscribeBody } from '@/schemas/user.schemas';
-import { GenreRow, PlanRow, UserRow } from '@/types/database';
-import { EmailTakenError, StripePaymentFailed } from '@/constants/error/custom-errors';
-import { UserResponse } from '@/types/response';
-import { Plan } from '@/types/enum/plan';
-import { withTransaction } from '@/utils/database/with-transaction';
+import pool from '#config/database';
+import stripe from '#config/stripe';
+import logger from '#config/logger';
+import type { CreateUserBody, UpdateUserBody, SubscribeBody } from '#schemas/user.schemas';
+import { GenreRow, PlanRow, UserRow } from '#types/database';
+import { EmailTakenError, StripePaymentFailed } from '#constants/error/custom-errors';
+import { UserResponse } from '#types/shared/response';
+import { Plan } from '#types/shared/enum/plan';
+import { withTransaction } from '#utils/database/with-transaction';
 import { PoolClient } from 'pg';
-import { withQuery } from '@/utils/database/with-query';
+import { withQuery } from '#utils/database/with-query';
 
 const SALT_ROUNDS = 12;
 

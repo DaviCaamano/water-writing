@@ -1,5 +1,5 @@
 import { PoolClient } from 'pg';
-import pool from '@/config/database';
+import pool from '#config/database';
 
 // Initializes a client for the database connection
 // Perform the operations of the callback

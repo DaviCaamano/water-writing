@@ -1,7 +1,7 @@
-import { orderLinkedDocs } from '@/utils/order-linked-docs';
-import { DocumentResponse } from '@/types/response';
-import { MOCK_DATE } from '@/__tests__/constants/mock-basic';
-import { MOCK_DOC_ID, MOCK_STORY_ID } from '@/__tests__/constants/mock-story';
+import { orderLinkedDocs } from '#utils/order-linked-docs';
+import { DocumentResponse } from '#types/shared/response';
+import { MOCK_DATE } from '#__tests__/constants/mock-basic';
+import { MOCK_DOC_ID, MOCK_STORY_ID } from '#__tests__/constants/mock-story';
 
 const mockDoc: DocumentResponse = {
   documentId: MOCK_DOC_ID,

@@ -1,6 +1,6 @@
-jest.mock('@/utils/database/with-transaction');
-jest.mock('@/utils/database/with-query');
-jest.mock('@/config/stripe', () => ({
+jest.mock('#utils/database/with-transaction');
+jest.mock('#utils/database/with-query');
+jest.mock('#config/stripe', () => ({
   __esModule: true,
   default: {
     customers: { create: jest.fn() },
@@ -9,7 +9,7 @@ jest.mock('@/config/stripe', () => ({
   },
 }));
 
-import { addGenres, createUser, subscribe, updateUser } from '@/services/user/user.service';
+import { addGenres, createUser, subscribe, updateUser } from '#services/user/user.service';
 import {
   MOCK_GENRE,
   MOCK_GENRES,
@@ -19,15 +19,15 @@ import {
   MOCK_UPDATING_USER,
   MOCK_USER,
   MOCK_USER_ID,
-} from '@/__tests__/constants/mock-user';
-import { createMockClient, mockPool } from '@/__tests__/constants/mock-database';
-import { EmailTakenError, StripePaymentFailed } from '@/constants/error/custom-errors';
+} from '#__tests__/constants/mock-user';
+import { createMockClient, mockPool } from '#__tests__/constants/mock-database';
+import { EmailTakenError, StripePaymentFailed } from '#constants/error/custom-errors';
 import { PoolClient } from 'pg';
-import { withQuery } from '@/utils/database/with-query';
-import { withTransaction } from '@/utils/database/with-transaction';
-import stripe from '@/config/stripe';
-import { mockStripCustomer, mockStripePaymentIntent } from '@/__tests__/constants/mock-stripe';
-import { mockClear } from '@/__tests__/utils/test-wrappers';
+import { withQuery } from '#utils/database/with-query';
+import { withTransaction } from '#utils/database/with-transaction';
+import stripe from '#config/stripe';
+import { mockStripCustomer, mockStripePaymentIntent } from '#__tests__/constants/mock-stripe';
+import { mockClear } from '#__tests__/utils/test-wrappers';
 const mockWithQuery = withQuery as jest.MockedFunction<typeof withQuery>;
 const mockWithTransaction = withTransaction as jest.MockedFunction<typeof withTransaction>;
 

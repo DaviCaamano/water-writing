@@ -9,10 +9,11 @@ import {
 } from '~components/ui/dropdown-menu';
 import { useUserStore } from '~store/useUserStore';
 import { Plan } from '#types/shared/enum/plan';
+import { SettingsSection } from '~types/components/settings-modal';
 
 interface UserMenuProps {
   onOpenAuth: () => void;
-  onOpenSettings: (section?: 'general' | 'subscription' | 'billing') => void;
+  onOpenSettings: (section?: SettingsSection) => void;
 }
 
 export function UserMenu({ onOpenAuth, onOpenSettings }: UserMenuProps) {
@@ -50,10 +51,12 @@ export function UserMenu({ onOpenAuth, onOpenSettings }: UserMenuProps) {
           <Image src="/profile.svg" alt="" width={24} height={24} className="w-6 h-6" />
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-48">
-          <DropdownMenuItem onClick={() => onOpenSettings('general')}>Settings</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => onOpenSettings(SettingsSection.general)}>
+            Settings
+          </DropdownMenuItem>
           <DropdownMenuItem>Gallery</DropdownMenuItem>
           {plan !== Plan.max && (
-            <DropdownMenuItem onClick={() => onOpenSettings('subscription')}>
+            <DropdownMenuItem onClick={() => onOpenSettings(SettingsSection.plan)}>
               Upgrade
             </DropdownMenuItem>
           )}

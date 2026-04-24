@@ -6,23 +6,18 @@ import {
   MOCK_STORY,
   MOCK_WORLD,
   MOCK_WORLD_RESPONSE,
-} from '@/__tests__/constants/mock-story';
+} from '#__tests__/constants/mock-story';
 
-import { WorldNotFoundError } from '@/constants/error/custom-errors';
-import {
-  DocumentRow,
-  StoryRow,
-  StoryRowWithDocuments,
-  WorldRowWithStories,
-} from '@/types/database';
-import { mockPool } from '@/__tests__/constants/mock-database';
-import { MOCK_DATE } from '@/__tests__/constants/mock-basic';
-import { mockClear } from '@/__tests__/utils/test-wrappers';
+import { WorldNotFoundError } from '#constants/error/custom-errors';
+import { DocumentRow, StoryRow, StoryRowWithDocuments, WorldRowWithStories } from '#types/database';
+import { mockPool } from '#__tests__/constants/mock-database';
+import { MOCK_DATE } from '#__tests__/constants/mock-basic';
+import { mockClear } from '#__tests__/utils/test-wrappers';
 
-import * as worldService from '@/services/story/world.service';
-import { DocType, checkLegacyStructure, mockLegacy } from '@/__tests__/utils/mock-linked-documents';
-import { fetchLegacy } from '@/services/story/world.service';
-import { MOCK_USER_ID } from '@/__tests__/constants/mock-user';
+import * as worldService from '#services/story/world.service';
+import { DocType, checkLegacyStructure, mockLegacy } from '#__tests__/utils/mock-linked-documents';
+import { fetchLegacy } from '#services/story/world.service';
+import { MOCK_USER_ID } from '#__tests__/constants/mock-user';
 
 describe(
   'upsertWorld',

@@ -1,12 +1,12 @@
 import { Router, Request, Response } from 'express';
-import { authMiddleware } from '@/middleware/auth';
-import { validate } from '@/middleware/validate';
+import { authMiddleware } from '#middleware/auth';
+import { validate } from '#middleware/validate';
 import {
   loginLimiter,
   createAccountLimiter,
   subscribeLimiter,
   generalLimiter,
-} from '@/config/rate-limiters';
+} from '#config/rate-limiters';
 import {
   LoginSchema,
   LoginBody,
@@ -18,22 +18,22 @@ import {
   GenresBody,
   SubscribeSchema,
   SubscribeBody,
-} from '@/schemas/user.schemas';
+} from '#schemas/user.schemas';
 import {
   createUser,
   updateUser,
   addGenres,
   deleteUser,
   subscribe,
-} from '@/services/user/user.service';
-import { AuthRequest } from '@/types/request';
-import { login, logout } from '@/services/user/login.service';
+} from '#services/user/user.service';
+import { AuthRequest } from '#types/request';
+import { login, logout } from '#services/user/login.service';
 import {
   EmailTakenError,
   InvalidCredentialsError,
   StripePaymentFailed,
-} from '@/constants/error/custom-errors';
-import { LoginResponse, LogoutResponse, RouteResponse, UserResponse } from '@/types/response';
+} from '#constants/error/custom-errors';
+import { LoginResponse, LogoutResponse, RouteResponse, UserResponse } from '#types/shared/response';
 
 const router = Router();
 

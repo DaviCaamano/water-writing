@@ -5,14 +5,9 @@ import {
   MOCK_STORY_RESPONSE,
   MOCK_WORLD,
   MOCK_WORLD_RESPONSE,
-} from '@/__tests__/constants/mock-story';
-import {
-  DocumentRow,
-  StoryRow,
-  StoryRowWithDocuments,
-  WorldRowWithStories,
-} from '@/types/database';
-import { DocumentResponse, StoryResponse, WorldResponse } from '@/types/response';
+} from '#__tests__/constants/mock-story';
+import { DocumentRow, StoryRow, StoryRowWithDocuments, WorldRowWithStories } from '#types/database';
+import { DocumentResponse, StoryResponse, WorldResponse } from '#types/shared/response';
 
 export enum DocType {
   worldRow = 'world-row',

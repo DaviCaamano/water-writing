@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import { authMiddleware } from '@/middleware/auth';
-import { validate } from '@/middleware/validate';
-import { aiLimiter, generalLimiter } from '@/config/rate-limiters';
+import { authMiddleware } from '#middleware/auth';
+import { validate } from '#middleware/validate';
+import { aiLimiter, generalLimiter } from '#config/rate-limiters';
 import {
   UpsertDocumentSchema,
   UpsertDocumentBody,
@@ -11,19 +11,19 @@ import {
   UpsertWorldBody,
   EditorSchema,
   EditorBody,
-} from '@/schemas/story.schemas';
-import { upsertStory } from '@/services/story/story.service';
-import { AuthRequest } from '@/types/request';
-import { upsertDocument } from '@/services/story/document.service';
+} from '#schemas/story.schemas';
+import { upsertStory } from '#services/story/story.service';
+import { AuthRequest } from '#types/request';
+import { upsertDocument } from '#services/story/document.service';
 import {
   DocumentNotFoundError,
   InvalidSelectionError,
   StoryNotFoundError,
   WorldNotFoundError,
-} from '@/constants/error/custom-errors';
-import { upsertWorld } from '@/services/story/world.service';
-import { editText } from '@/services/story/editor.service';
-import { RouteResponse, StoryResponse, WorldResponse } from '@/types/response';
+} from '#constants/error/custom-errors';
+import { upsertWorld } from '#services/story/world.service';
+import { editText } from '#services/story/editor.service';
+import { RouteResponse, StoryResponse, WorldResponse } from '#types/shared/response';
 
 const router = Router();
 

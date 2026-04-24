@@ -1,11 +1,11 @@
-import { MOCK_USER_ID } from '@/__tests__/constants/mock-user';
+import { MOCK_USER_ID } from '#__tests__/constants/mock-user';
 
-jest.mock('@/utils/database/with-transaction');
-jest.mock('@/utils/database/with-query');
+jest.mock('#utils/database/with-transaction');
+jest.mock('#utils/database/with-query');
 
-import * as storyService from '@/services/story/story.service';
-import { withTransaction } from '@/utils/database/with-transaction';
-import { withQuery } from '@/utils/database/with-query';
+import * as storyService from '#services/story/story.service';
+import { withTransaction } from '#utils/database/with-transaction';
+import { withQuery } from '#utils/database/with-query';
 import {
   MOCK_STORY_ID,
   MOCK_WORLD_ID,
@@ -13,11 +13,11 @@ import {
   mockPool,
   MOCK_STORY,
   MOCK_STORY_RESPONSE,
-} from '@/__tests__/constants/mock-story';
-import { createMockClient } from '@/__tests__/constants/mock-database';
+} from '#__tests__/constants/mock-story';
+import { createMockClient } from '#__tests__/constants/mock-database';
 import { PoolClient } from 'pg';
-import { mockClear } from '@/__tests__/utils/test-wrappers';
-import { StoryNotFoundError, WorldNotFoundError } from '@/constants/error/custom-errors';
+import { mockClear } from '#__tests__/utils/test-wrappers';
+import { StoryNotFoundError, WorldNotFoundError } from '#constants/error/custom-errors';
 
 const mockWithTransaction = withTransaction as jest.MockedFunction<typeof withTransaction>;
 const mockWithQuery = withQuery as jest.MockedFunction<typeof withQuery>;

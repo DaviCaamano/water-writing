@@ -1,7 +1,7 @@
-import pool from '@/config/database';
-import { BillingRow } from '@/types/database';
-import { BillingResponse } from '@/types/response';
-import { mapBilling } from '@/utils/user/map-user';
+import pool from '#config/database';
+import { BillingRow } from '#types/database';
+import { BillingResponse } from '#types/shared/response';
+import { mapBilling } from '#utils/user/map-user';
 
 export async function getBillingHistory(userId: string): Promise<BillingResponse[]> {
   const result = await pool.query<BillingRow>(

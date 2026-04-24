@@ -1,17 +1,17 @@
-import { InvalidCredentialsError } from '@/constants/error/custom-errors';
+import { InvalidCredentialsError } from '#constants/error/custom-errors';
 
-jest.mock('@/services/user/login.service');
+jest.mock('#services/user/login.service');
 
 import request from 'supertest';
-import app from '@/app';
-import * as loginService from '@/services/user/login.service';
+import app from '#app';
+import * as loginService from '#services/user/login.service';
 import {
   MOCK_LOGIN_EMAIL,
   MOCK_LOGIN_RESPONSE,
   MOCK_STRONG_PASSWORD,
-} from '@/__tests__/constants/mock-user';
-import { mockAuthHeaders } from '@/__tests__/constants/mock-auth-headers';
-import { mockClear } from '@/__tests__/utils/test-wrappers';
+} from '#__tests__/constants/mock-user';
+import { mockAuthHeaders } from '#__tests__/constants/mock-auth-headers';
+import { mockClear } from '#__tests__/utils/test-wrappers';
 
 const mockLogin = loginService.login as jest.Mock;
 const mockLogout = loginService.logout as jest.Mock;

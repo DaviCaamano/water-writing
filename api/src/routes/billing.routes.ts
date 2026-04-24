@@ -1,11 +1,11 @@
-import { getBillingHistory } from '@/services/billing/billing.service';
-import { authMiddleware } from '@/middleware/auth';
+import { getBillingHistory } from '#services/billing/billing.service';
+import { authMiddleware } from '#middleware/auth';
 import { Router } from 'express';
-import { generalLimiter } from '@/config/rate-limiters';
-import { validateParams } from '@/middleware/validate';
-import { BillingHistoryParams, BillingHistoryParamsSchema } from '@/schemas/user.schemas';
-import { AuthRequest } from '@/types/request';
-import { BillingResponse, RouteResponse } from '@/types/response';
+import { generalLimiter } from '#config/rate-limiters';
+import { validateParams } from '#middleware/validate';
+import { BillingHistoryParams, BillingHistoryParamsSchema } from '#schemas/user.schemas';
+import { AuthRequest } from '#types/request';
+import { BillingResponse, RouteResponse } from '#types/shared/response';
 
 const router = Router();
 

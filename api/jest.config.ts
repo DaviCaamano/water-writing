@@ -7,7 +7,7 @@ const config: Config = {
   setupFiles: ['./src/config/jest-setup.ts'],
   setupFilesAfterEnv: ['./src/config/jest-mocks.ts'],
   moduleNameMapper: {
-    '^@/(.*)$': '<rootDir>/src/$1',
+    '^#(.*)$': '<rootDir>/src/$1',
   },
   resetMocks: true,
   silent: false,

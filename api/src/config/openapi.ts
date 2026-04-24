@@ -1,21 +1,21 @@
 import { OpenAPIRegistry, OpenApiGeneratorV31 } from '@asteasolutions/zod-to-openapi';
 // Import from zod-extended so the Zod factory methods are already wrapped by
 // extendZodWithOpenApi before any schema passed to registry.register() is created.
-import { z } from '@/config/zod-extended';
+import { z } from '#config/zod-extended';
 import {
   LoginSchema,
   CreateUserSchema,
   UpdateUserSchema,
   GenresSchema,
   SubscribeSchema,
-} from '@/schemas/user.schemas';
+} from '#schemas/user.schemas';
 import {
   EditorSchema,
   UpsertDocumentSchema,
   UpsertStorySchema,
   UpsertWorldSchema,
-} from '@/schemas/story.schemas';
-import { Plan } from '@/types/enum/plan';
+} from '#schemas/story.schemas';
+import { Plan } from '#types/shared/enum/plan';
 
 export const registry = new OpenAPIRegistry();
 
@@ -281,15 +281,17 @@ registry.registerPath({
 });
 
 // Document generator
-export function generateOpenApiDocument() {
+export function generateOpenApiDocument(): ReturnType<OpenApiGeneratorV31['generateDocument']> {
   const generator = new OpenApiGeneratorV31(registry.definitions);
-  return generator.generateDocument({
+  const config = {
     openapi: '3.1.0',
     info: {
       title: 'Writers Bot API',
       version: '1.0.0',
-      description: 'Writing management platform — documents, stories, and worlds.',
+      description: 'Writing management platform Ã¢â‚¬â€ documents, stories, and worlds.',
     },
     servers: [{ url: process.env.API_URL ?? 'http://localhost:3001' }],
-  });
+  };
+
+  return generator.generateDocument(config);
 }
