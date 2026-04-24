@@ -18,6 +18,7 @@ export interface StoryDocument {
   successorId: string | null;
   characters: DocumentCharacter[];
   places: DocumentPlace[];
+  coverImage: string | null;
 }
 
 export interface DocumentCharacter {
@@ -36,12 +37,14 @@ export interface Story {
   worldId: string;
   documentCount: number;
   documents: StoryDocument[];
+  coverImage: string | null;
 }
 
 export interface World {
   id: string;
   name: string;
   stories: Story[];
+  coverImage: string | null;
 }
 
 export interface BillingHistoryEntry {
@@ -60,6 +63,6 @@ export interface BillingResponse {
   card: CardInfo;
 }
 
-export type ViewMode = 'editor' | 'story-canvas' | 'world-canvas' | 'legacy';
+export type ViewMode = 'editor' | 'story-view' | 'world-view' | 'legacy';
 
 export type EditorTheme = 'light' | 'dark' | 'sepia';

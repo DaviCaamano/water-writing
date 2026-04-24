@@ -7,7 +7,7 @@
     "build": "bun run next build",
     "analyze": "next experimental-analyze",
     "start": "bun run next start",
-    "lint": "bun run eslint",
+    "lint": "eslint .",
     "format": "bun run prettier --write \"src/**/*.{ts,tsx,js,jsx,json,css}\""
   },
   "dependencies": {

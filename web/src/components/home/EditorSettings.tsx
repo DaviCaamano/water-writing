@@ -1,7 +1,7 @@
 'use client';
 
+import Image from 'next/image';
 import { useState } from 'react';
-import { ScrollText } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -42,7 +42,7 @@ export function EditorSettings() {
           className="p-2 rounded-full hover:bg-accent/80 transition-colors"
           aria-label="Text settings"
         >
-          <img src="/theme.svg" className="w-6 h-6" />
+          <Image src="/theme.svg" alt="" width={24} height={24} className="w-6 h-6" />
         </PopoverTrigger>
         <PopoverContent side="top" align="start" className="w-64 space-y-4">
           <div className="space-y-2">

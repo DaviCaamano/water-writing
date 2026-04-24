@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -28,13 +28,15 @@ interface SettingsModalProps {
 }
 
 export function SettingsModal({ open, onOpenChange, initialSection = 'general' }: SettingsModalProps) {
-  const [activeSection, setActiveSection] = useState<SettingsSection>(initialSection);
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      {open ? <SettingsModalContent key={initialSection} initialSection={initialSection} /> : null}
+    </Dialog>
+  );
+}
 
-  useEffect(() => {
-    if (open) {
-      setActiveSection(initialSection);
-    }
-  }, [open, initialSection]);
+function SettingsModalContent({ initialSection }: { initialSection: SettingsSection }) {
+  const [activeSection, setActiveSection] = useState<SettingsSection>(initialSection);
 
   const sections: { key: SettingsSection; label: string }[] = [
     { key: 'general', label: 'General' },
@@ -43,32 +45,30 @@ export function SettingsModal({ open, onOpenChange, initialSection = 'general' }
   ];
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl h-[80vh] p-0 gap-0 flex">
-        <nav className="w-52 border-r p-6 flex flex-col gap-1 shrink-0">
-          <h2 className="text-lg font-semibold mb-4">Settings</h2>
-          {sections.map((s) => (
-            <button
-              key={s.key}
-              onClick={() => setActiveSection(s.key)}
-              className={`text-left px-3 py-2 rounded-md text-sm transition-colors ${
-                activeSection === s.key
-                  ? 'font-bold bg-accent'
-                  : 'hover:bg-accent/50'
-              }`}
-            >
-              {s.label}
-            </button>
-          ))}
-        </nav>
+    <DialogContent className="max-w-4xl h-[80vh] p-0 gap-0 flex">
+      <nav className="w-52 border-r p-6 flex flex-col gap-1 shrink-0">
+        <h2 className="text-lg font-semibold mb-4">Settings</h2>
+        {sections.map((s) => (
+          <button
+            key={s.key}
+            onClick={() => setActiveSection(s.key)}
+            className={`text-left px-3 py-2 rounded-md text-sm transition-colors ${
+              activeSection === s.key
+                ? 'font-bold bg-accent'
+                : 'hover:bg-accent/50'
+            }`}
+          >
+            {s.label}
+          </button>
+        ))}
+      </nav>
 
-        <div className="flex-1 overflow-y-auto p-6">
-          {activeSection === 'general' && <GeneralSection />}
-          {activeSection === 'subscription' && <SubscriptionSection />}
-          {activeSection === 'billing' && <BillingSection />}
-        </div>
-      </DialogContent>
-    </Dialog>
+      <div className="flex-1 overflow-y-auto p-6">
+        {activeSection === 'general' && <GeneralSection />}
+        {activeSection === 'subscription' && <SubscriptionSection />}
+        {activeSection === 'billing' && <BillingSection />}
+      </div>
+    </DialogContent>
   );
 }
 
@@ -77,14 +77,15 @@ export function SettingsModal({ open, onOpenChange, initialSection = 'general' }
 function GeneralSection() {
   const { firstName, lastName, email, genres, updateName, updateGenres } = useUserStore();
   const [editingName, setEditingName] = useState(false);
-  const [editFirst, setEditFirst] = useState(firstName);
-  const [editLast, setEditLast] = useState(lastName);
+  const [editFirst, setEditFirst] = useState('');
+  const [editLast, setEditLast] = useState('');
   const [newGenre, setNewGenre] = useState('');
 
-  useEffect(() => {
+  const startNameEdit = () => {
     setEditFirst(firstName);
     setEditLast(lastName);
-  }, [firstName, lastName]);
+    setEditingName(true);
+  };
 
   const saveName = async () => {
     if (editFirst !== firstName || editLast !== lastName) {
@@ -150,7 +151,7 @@ function GeneralSection() {
                 <p className="text-base">
                   {firstName} {lastName}
                 </p>
-                <Button size="icon" variant="ghost" onClick={() => setEditingName(true)}>
+                <Button size="icon" variant="ghost" onClick={startNameEdit}>
                   <Pencil className="w-4 h-4" />
                 </Button>
               </>
@@ -357,27 +358,45 @@ function SubscriptionSection() {
 
 function BillingSection() {
   const { accountId } = useUserStore();
-  const [loading, setLoading] = useState(true);
+  return <BillingSectionContent key={accountId ?? 'guest'} accountId={accountId} />;
+}
+
+function BillingSectionContent({ accountId }: { accountId: string | null }) {
+  const [loading, setLoading] = useState(Boolean(accountId));
   const [card, setCard] = useState<CardInfo | null>(null);
   const [history, setHistory] = useState<BillingHistoryEntry[]>([]);
 
-  const fetchBilling = useCallback(async () => {
-    if (!accountId) return;
-    setLoading(true);
-    try {
-      const data = await api<BillingResponse>(`/users/billing/history/${accountId}`);
-      setCard(data.card);
-      setHistory(data.history);
-    } catch (e) {
-      console.error('Failed to load billing:', e);
-    } finally {
-      setLoading(false);
-    }
-  }, [accountId]);
-
   useEffect(() => {
-    fetchBilling();
-  }, [fetchBilling]);
+    if (!accountId) {
+      return;
+    }
+
+    let cancelled = false;
+
+    const loadBilling = async () => {
+      try {
+        const data = await api<BillingResponse>(`/users/billing/history/${accountId}`);
+        if (cancelled) return;
+
+        setCard(data.card);
+        setHistory(data.history);
+      } catch (e) {
+        if (!cancelled) {
+          console.error('Failed to load billing:', e);
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    };
+
+    void loadBilling();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [accountId]);
 
   if (loading) {
     return (

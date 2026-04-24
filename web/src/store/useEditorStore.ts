@@ -1,7 +1,10 @@
 import { useMemo } from 'react';
 import { Store, useStore } from '@tanstack/react-store';
 import { api } from '@/lib/api';
+import { syncDocumentInNavigationStore } from '@/store/useNavigationStore';
 import type { EditorTheme } from '@/types';
+
+const IS_DEVELOPMENT = process.env.NODE_ENV === 'development';
 
 interface EditorState {
   documentId: string | null;
@@ -58,10 +61,18 @@ const editorActions: EditorActions = {
 
   saveDocument: async () => {
     const { title, body, documentId, storyId } = editorStore.state;
-    await api('/story', {
-      method: 'POST',
-      body: JSON.stringify({ documentId, storyId, title, body }),
-    });
+
+    if (documentId) {
+      syncDocumentInNavigationStore(documentId, { title, body });
+    }
+
+    if (!IS_DEVELOPMENT) {
+      await api('/story', {
+        method: 'POST',
+        body: JSON.stringify({ documentId, storyId, title, body }),
+      });
+    }
+
     editorStore.setState((state) => ({ ...state, isDirty: false, lastSaved: new Date() }));
   },
 
