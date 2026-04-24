@@ -12,7 +12,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '~components/ui/tooltip'
 import { Check, Pencil, X } from 'lucide-react';
 import { useUserStore } from '~store/useUserStore';
 import { api } from '~lib/api';
-import type { BillingHistoryEntry, BillingResponse, CardInfo } from '~types';
+import type { BillingHistoryEntry, BillingResponse, CardInfo } from '~types/story';
 import { Plan } from '#types/shared/enum/plan';
 import { SettingsSection } from '~types/components/settings-modal';
 

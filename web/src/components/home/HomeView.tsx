@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import type { ViewMode } from '~types';
+import type { ViewMode } from '~types/story';
 import { Editor } from '~components/home/Editor';
 import { StoryView } from '~components/home/StoryView';
 import { WorldView } from '~components/home/WorldView';

@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from '~components/ui/select';
 import { useEditorStore } from '~store/useEditorStore';
-import type { EditorTheme } from '~types';
+import type { EditorTheme } from '~types/story';
 
 const FONT_OPTIONS = [
   { label: 'Georgia', value: 'Georgia, serif' },

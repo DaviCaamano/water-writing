@@ -9,7 +9,7 @@ import {
   type LegacyStoryResponse,
   type LegacyWorldResponse,
 } from '~lib/legacy-data';
-import type { Story, StoryDocument, ViewMode, World } from '~types';
+import type { Story, StoryDocument, ViewMode, World } from '~types/story';
 
 const IS_DEVELOPMENT = process.env.NODE_ENV === 'development';
 
