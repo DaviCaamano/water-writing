@@ -30,7 +30,13 @@ import {
   InvalidCredentialsError,
   StripePaymentFailed,
 } from '#constants/error/custom-errors';
-import { LoginResponse, LogoutResponse, RouteResponse, UserResponse } from '#types/shared/response';
+import {
+  LoginResponse,
+  LogoutResponse,
+  RouteResponse,
+  SubscriptionResponse,
+  UserResponse,
+} from '#types/shared/response';
 
 const router = Router();
 
@@ -108,7 +114,10 @@ router.post(
   authMiddleware,
   subscribeLimiter,
   validate(SubscribeSchema),
-  async (req: AuthRequest, res: Response): Promise<void> => {
+  async (
+    req: AuthRequest,
+    res: RouteResponse<{ status: string } & SubscriptionResponse>,
+  ): Promise<void> => {
     try {
       res.json({ status: 'ok', ...(await subscribe(req.userId!, req.body as SubscribeBody)) });
     } catch (err) {

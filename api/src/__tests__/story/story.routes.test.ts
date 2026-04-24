@@ -136,13 +136,13 @@ describe(
   }),
 );
 
-// POST /user/genres
+// POST /story/genre
 describe(
   'POST /story/genres',
-  testAuth('/user/genres', 'post', { genres: 'Fantasy' }, () => {
+  testAuth('/story/genre', 'post', { genres: 'Fantasy' }, () => {
     it('returns 400 when genres is not an array', async () => {
       const res = await request(app)
-        .post('/user/genres')
+        .post('/story/genre')
         .set(mockAuthHeaders())
         .send({ genres: 'Fantasy' });
       expect(res.status).toBe(400);
@@ -154,9 +154,9 @@ describe(
       mockAddGenres.mockResolvedValueOnce(['Fantasy', 'Sci-Fi']);
 
       const res = await request(app)
-        .post('/user/genres')
+        .post('/story/genre')
         .set(headers)
-        .send({ genres: ['Fantasy', 'Sci-Fi'] });
+        .send({ story_id: MOCK_STORY_ID, genres: ['Fantasy', 'Sci-Fi'] });
 
       expect(res.status).toBe(200);
       expect(res.body.genres).toEqual(['Fantasy', 'Sci-Fi']);

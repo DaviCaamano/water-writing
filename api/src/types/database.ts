@@ -1,5 +1,7 @@
 // Database row types
 import { Plan } from '#types/shared/enum/plan';
+import { RenewOn } from '#types/shared/enum/renew-on';
+import { StripeSubscriptionStatus } from '#types/enum/stripe';
 
 export interface UserRow {
   user_id: string;
@@ -59,9 +61,12 @@ export interface PlanRow {
   user_id: string;
   plan_type: Plan;
   is_year_plan: boolean;
-  renew_on: 'monthly' | 'yearly' | null;
+  renew_on: RenewOn | null;
   renew_date: Date;
+  stripe_price_id: string | null;
   stripe_subscription_id: string | null;
+  subscription_status: StripeSubscriptionStatus | null;
+  cancel_at_period_end: boolean;
   start_date: Date;
   end_date: Date | null;
   created_at: Date;

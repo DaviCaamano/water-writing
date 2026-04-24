@@ -20,11 +20,11 @@ const validBody = {
 };
 
 describe(
-  'POST /story/editor',
-  testAuth('/story/editor', 'post', validBody, () => {
+  'POST /story/water-write',
+  testAuth('/story/water-write', 'post', validBody, () => {
     it('returns 400 when selection.end <= selection.start', async () => {
       const res = await request(app)
-        .post('/story/editor')
+        .post('/story/water-write')
         .set(mockAuthHeaders())
         .send({ ...validBody, selection: { start: 5, end: 5 } });
       expect(res.status).toBe(400);
@@ -32,7 +32,7 @@ describe(
 
     it('returns 400 when prompt is missing', async () => {
       const res = await request(app)
-        .post('/story/editor')
+        .post('/story/water-write')
         .set(mockAuthHeaders())
         .send({ documentId: MOCK_DOC_ID, selection: { start: 0, end: 5 } });
       expect(res.status).toBe(400);
@@ -41,7 +41,7 @@ describe(
     it('returns 404 when document is not found', async () => {
       mockEditText.mockRejectedValueOnce(new DocumentNotFoundError());
 
-      const res = await request(app).post('/story/editor').set(mockAuthHeaders()).send(validBody);
+      const res = await request(app).post('/story/water-write').set(mockAuthHeaders()).send(validBody);
 
       expect(res.status).toBe(404);
       expect(res.body.error).toBe('Document not found');
@@ -50,7 +50,7 @@ describe(
     it('returns 400 when selection range is invalid', async () => {
       mockEditText.mockRejectedValueOnce(new InvalidSelectionError());
 
-      const res = await request(app).post('/story/editor').set(mockAuthHeaders()).send(validBody);
+      const res = await request(app).post('/story/water-write').set(mockAuthHeaders()).send(validBody);
 
       expect(res.status).toBe(400);
       expect(res.body.error).toBe('Invalid selection range');
@@ -63,7 +63,7 @@ describe(
         res.end();
       });
 
-      const res = await request(app).post('/story/editor').set(mockAuthHeaders()).send(validBody);
+      const res = await request(app).post('/story/water-write').set(mockAuthHeaders()).send(validBody);
 
       expect(res.status).toBe(200);
       expect(mockEditText).toHaveBeenCalledWith(

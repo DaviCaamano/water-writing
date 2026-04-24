@@ -1,4 +1,5 @@
 import { Plan } from '#types/shared/enum/plan';
+import { StripeSubscriptionStatus } from '#types/enum/stripe';
 
 jest.mock('#utils/database/with-query');
 jest.mock('#services/story/world.service');
@@ -36,7 +37,9 @@ describe(
       mockClient.query
         .mockResolvedValueOnce({ rows: [MOCK_USER] })
         .mockResolvedValueOnce(undefined)
-        .mockResolvedValueOnce({ rows: [{ plan_type: Plan.pro }] });
+        .mockResolvedValueOnce({
+          rows: [{ plan_type: Plan.pro, subscription_status: StripeSubscriptionStatus.active }],
+        });
       mockFetchLegacy.mockImplementation(async () => mockLegacyResponse());
       mockBcryptCompare.mockResolvedValueOnce(true);
       (jwt.sign as jest.Mock).mockReturnValueOnce(MOCK_LOGIN_TOKEN);

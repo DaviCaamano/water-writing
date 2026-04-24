@@ -9,10 +9,13 @@ import {
   MOCK_STRIPE_PAYMENT_INTENT_ID,
   mockStipePaymentMethodId,
   mockStripeCustomerId,
+  mockStripePriceId,
   mockStripeSubscriptionId,
 } from '#__tests__/constants/mock-stripe';
 import { MOCK_DATE } from '#__tests__/constants/mock-basic';
 import { mockLegacyResponse } from '#__tests__/utils/mock-linked-documents';
+import { RenewOn } from '#types/shared/enum/renew-on';
+import { StripeSubscriptionStatus } from '#types/enum/stripe';
 
 export const MOCK_LOGIN_EMAIL = 'jane@example.com';
 export const MOCK_LOGIN_TOKEN = 'mock-jwt-token';
@@ -71,9 +74,12 @@ export const MOCK_PLAN: PlanRow = {
   user_id: MOCK_USER_ID,
   plan_type: Plan.pro,
   is_year_plan: false,
-  renew_on: 'monthly',
+  renew_on: RenewOn.monthly,
   renew_date: MOCK_DATE,
+  stripe_price_id: mockStripePriceId,
   stripe_subscription_id: mockStripeSubscriptionId,
+  subscription_status: StripeSubscriptionStatus.active,
+  cancel_at_period_end: false,
   start_date: MOCK_DATE,
   end_date: MOCK_DATE,
   created_at: MOCK_DATE,

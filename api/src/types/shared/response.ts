@@ -6,6 +6,7 @@
 // API response types
 import { Response } from 'express';
 import { Plan } from '#types/shared/enum/plan';
+import { StripeSubscriptionStatus } from '#types/enum/stripe';
 
 export type RouteResponse<T> = Response<T | { error: string }>;
 
@@ -68,4 +69,14 @@ export interface BillingResponse {
   isYearPlan: boolean;
   amountCents: number;
   billedAt: Date;
+}
+
+export interface SubscriptionResponse {
+  action: 'subscribed' | 'updated' | 'cancellation_scheduled' | 'already_canceled';
+  amountCents: number | null;
+  cancelAtPeriodEnd: boolean;
+  planType: Plan | null;
+  renewDate: Date | null;
+  subscriptionStatus: StripeSubscriptionStatus | null;
+  yearPlan: boolean;
 }

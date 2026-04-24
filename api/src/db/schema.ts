@@ -14,10 +14,16 @@ import {
 } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 import { Plan } from '#types/shared/enum/plan';
+import { RenewOn } from '#types/shared/enum/renew-on';
+import { StripeSubscriptionStatus } from '#types/enum/stripe';
 
 // Enums
 export const planTypeEnum = pgEnum('plan_type', Plan);
-export const renewOnEnum = pgEnum('renew_on', ['monthly', 'yearly']);
+export const renewOnEnum = pgEnum('renew_on', RenewOn);
+export const stripeSubscriptionStatusEnum = pgEnum(
+  'stripe_subscription_status',
+  StripeSubscriptionStatus,
+);
 
 // Users
 export const users = pgTable('users', {
@@ -145,7 +151,10 @@ export const plans = pgTable('plans', {
   isYearPlan: boolean('is_year_plan').notNull().default(false),
   renewOn: renewOnEnum('renew_on'),
   renewDate: timestamp('renew_date', { withTimezone: true }).notNull().defaultNow(),
+  stripePriceId: varchar('stripe_price_id', { length: 255 }),
   stripeSubscriptionId: varchar('stripe_subscription_id', { length: 255 }),
+  subscriptionStatus: stripeSubscriptionStatusEnum('subscription_status'),
+  cancelAtPeriodEnd: boolean('cancel_at_period_end').notNull().default(false),
   startDate: timestamp('start_date', { withTimezone: true }).notNull().defaultNow(),
   endDate: timestamp('end_date', { withTimezone: true }),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),

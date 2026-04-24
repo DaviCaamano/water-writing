@@ -7,6 +7,7 @@ export const mockStripeEmail = 'jane@example.com';
 export const mockStripeEmailRecipient = 'john@example.com';
 export const mockStripeCustomerId = 'cus_1234567890';
 export const mockStripeSubscriptionId = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13';
+export const mockStripePriceId = 'price_pro_monthly';
 export const mockStipePaymentMethodId = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a15';
 
 export const MOCK_STRIPE_INVOICE_ID = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bdyy0a16';
@@ -415,3 +416,67 @@ export const mockStripePaymentIntent: Stripe.PaymentIntent = {
   },
   transfer_group: null,
 };
+
+export const mockStripeSubscription = {
+  id: mockStripeSubscriptionId,
+  object: 'subscription',
+  cancel_at_period_end: false,
+  canceled_at: null,
+  current_period_end: Math.floor(MOCK_DATE.getTime() / 1000),
+  current_period_start: Math.floor(MOCK_DATE.getTime() / 1000),
+  customer: mockStripeCustomerId,
+  default_payment_method: mockStipePaymentMethodId,
+  items: {
+    object: 'list',
+    data: [
+      {
+        id: 'si_1234567890',
+        object: 'subscription_item',
+        created: Math.floor(MOCK_DATE.getTime() / 1000),
+        metadata: {},
+        plan: null,
+        price: {
+          id: mockStripePriceId,
+          object: 'price',
+          active: true,
+          billing_scheme: 'per_unit',
+          created: Math.floor(MOCK_DATE.getTime() / 1000),
+          currency: 'usd',
+          custom_unit_amount: null,
+          livemode: false,
+          lookup_key: null,
+          metadata: {},
+          nickname: 'Pro Monthly',
+          product: 'prod_123',
+          recurring: {
+            aggregate_usage: null,
+            interval: 'month',
+            interval_count: 1,
+            meter: null,
+            trial_period_days: null,
+            usage_type: 'licensed',
+          },
+          tax_behavior: 'unspecified',
+          tiers_mode: null,
+          transform_quantity: null,
+          type: 'recurring',
+          unit_amount: 1000,
+          unit_amount_decimal: '1000',
+        },
+        quantity: 1,
+        subscription: mockStripeSubscriptionId,
+        tax_rates: [],
+      },
+    ],
+    has_more: false,
+    url: `/v1/subscription_items?subscription=${mockStripeSubscriptionId}`,
+  },
+  latest_invoice: {
+    ...mockStripeInvoice,
+    payment_intent: mockStripePaymentIntent,
+  },
+  livemode: false,
+  metadata: {},
+  start_date: Math.floor(MOCK_DATE.getTime() / 1000),
+  status: 'active',
+} as unknown as Stripe.Subscription;

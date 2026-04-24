@@ -1,14 +1,28 @@
 import bcrypt from 'bcrypt';
+import Stripe from 'stripe';
 import pool from '#config/database';
 import stripe from '#config/stripe';
 import logger from '#config/logger';
 import type { CreateUserBody, UpdateUserBody, SubscribeBody } from '#schemas/user.schemas';
 import { PlanRow, UserRow } from '#types/database';
 import { EmailTakenError, StripePaymentFailed } from '#constants/error/custom-errors';
-import { UserResponse } from '#types/shared/response';
+import { SubscriptionResponse, UserResponse } from '#types/shared/response';
 import { Plan } from '#types/shared/enum/plan';
+import {
+  assertBillableSubscription,
+  extractPaymentIntentId,
+  getAmountCentsFromSubscription,
+  getStoredPlanType,
+  getStripePriceId,
+  getSubscriptionDate,
+  isAccessibleSubscriptionStatus,
+  syncPlanSnapshot,
+  toStripeSubscriptionStatus,
+} from '#services/stripe/subscription-sync.service';
 import { withTransaction } from '#utils/database/with-transaction';
 import { PoolClient } from 'pg';
+import { RenewOn } from '#types/shared/enum/renew-on';
+import { StripeSubscriptionStatus } from '#types/enum/stripe';
 
 const SALT_ROUNDS = 12;
 
@@ -61,7 +75,10 @@ export const updateUser = async (userId: string, data: UpdateUserBody): Promise<
 
     const userQuery = client.query<UserRow>('SELECT * FROM users WHERE user_id = $1', [userId]);
     const planQuery = client.query<PlanRow>(
-      'SELECT plan_type FROM plans WHERE user_id = $1 AND renew_on IS NOT NULL LIMIT 1',
+      `SELECT plan_type, subscription_status
+       FROM plans
+       WHERE user_id = $1
+       LIMIT 1`,
       [userId],
     );
 
@@ -74,7 +91,11 @@ export const updateUser = async (userId: string, data: UpdateUserBody): Promise<
       firstName: user.first_name,
       lastName: user.last_name,
       email: user.email,
-      plan: planResult.rows.length > 0 ? planResult.rows[0].plan_type : null,
+      plan:
+        planResult.rows.length > 0 &&
+        isAccessibleSubscriptionStatus(planResult.rows[0].subscription_status)
+          ? planResult.rows[0].plan_type
+          : null,
     };
   });
 };
@@ -88,16 +109,21 @@ export async function deleteUser(userId: string) {
 }
 
 // Subscribe
-export async function subscribe(userId: string, data: SubscribeBody) {
+export async function subscribe(
+  userId: string,
+  data: SubscribeBody,
+): Promise<SubscriptionResponse> {
   return withTransaction(async (client: PoolClient) => {
-    const { planType, yearPlan, paymentMethodId } = data;
-    const renewOn = planType === Plan.none ? null : yearPlan ? 'yearly' : 'monthly';
-    const amountCents = await calculatePrice(userId, planType, yearPlan, client);
-
     const userResult = await client.query<UserRow>('SELECT * FROM users WHERE user_id = $1', [
       userId,
     ]);
     const user = userResult.rows[0];
+
+    const existingPlanResult = await client.query<PlanRow>(
+      'SELECT * FROM plans WHERE user_id = $1',
+      [userId],
+    );
+    const existingPlan = existingPlanResult.rows[0] ?? null;
 
     let stripeCustomerId = user.stripe_customer_id;
     if (!stripeCustomerId) {
@@ -112,77 +138,179 @@ export async function subscribe(userId: string, data: SubscribeBody) {
       ]);
     }
 
-    await stripe.paymentMethods.attach(paymentMethodId, { customer: stripeCustomerId });
-
-    const paymentIntent = await stripe.paymentIntents.create(
-      {
-        amount: amountCents,
-        currency: 'usd',
-        customer: stripeCustomerId,
-        payment_method: paymentMethodId,
-        confirm: true,
-        automatic_payment_methods: { enabled: true, allow_redirects: 'never' },
-      },
-      { idempotencyKey: `subscribe_${userId}_${Date.now()}` },
-    );
-
-    if (paymentIntent.status !== 'succeeded') {
-      logger.warn({ userId, status: paymentIntent.status }, 'Payment not succeeded');
-      throw new StripePaymentFailed();
+    if (data.planType === Plan.none) {
+      return cancelSubscription(client, userId, existingPlan);
     }
 
-    const upsertPlanQuery = client.query(
+    const { planType, yearPlan, paymentMethodId } = data;
+    const renewOn = yearPlan ? RenewOn.yearly : RenewOn.monthly;
+    const priceId = getStripePriceId(planType, yearPlan);
+
+    await stripe.paymentMethods.attach(paymentMethodId, { customer: stripeCustomerId });
+    await stripe.customers.update(stripeCustomerId, {
+      invoice_settings: { default_payment_method: paymentMethodId },
+    });
+
+    const subscription = await createOrUpdateSubscription({
+      existingPlan,
+      paymentMethodId,
+      priceId,
+      stripeCustomerId,
+    });
+
+    assertBillableSubscription(subscription);
+
+    const amountCents = getAmountCentsFromSubscription(subscription, priceId);
+
+    await syncPlanSnapshot(client, {
+      userId,
+      planType,
+      subscription,
+      renewOn,
+      yearPlan,
+    });
+
+    await client.query(
+      `INSERT INTO billing (user_id, plan_type, is_year_plan, amount_cents, stripe_payment_intent_id)
+       VALUES ($1, $2, $3, $4, $5)`,
+      [userId, planType, yearPlan, amountCents, extractPaymentIntentId(subscription)],
+    );
+
+    logger.info(
+      { userId, planType, yearPlan, amountCents, subscriptionId: subscription.id },
+      existingPlan?.stripe_subscription_id ? 'Subscription updated' : 'Subscription created',
+    );
+
+    return {
+      action: existingPlan?.stripe_subscription_id ? 'updated' : 'subscribed',
+      amountCents,
+      cancelAtPeriodEnd: subscription.cancel_at_period_end,
+      planType,
+      renewDate: getSubscriptionDate(subscription.current_period_end),
+      subscriptionStatus: toStripeSubscriptionStatus(subscription.status),
+      yearPlan,
+    };
+  });
+}
+
+// Private helpers
+async function cancelSubscription(
+  client: PoolClient,
+  userId: string,
+  existingPlan: PlanRow | null,
+): Promise<SubscriptionResponse> {
+  if (!existingPlan?.stripe_subscription_id) {
+    await client.query(
       `INSERT INTO plans (
          user_id,
          plan_type,
          is_year_plan,
          renew_on,
+         renew_date,
+         stripe_price_id,
          stripe_subscription_id,
+         subscription_status,
+         cancel_at_period_end,
          start_date,
          end_date,
          updated_at
        )
-       VALUES ($1, $2, $3, $4, $5, NOW(), NULL, NOW())
+       VALUES ($1, $2, FALSE, NULL, NOW(), NULL, NULL, $3, FALSE, NOW(), NOW(), NOW())
        ON CONFLICT (user_id)
        DO UPDATE SET
          plan_type = EXCLUDED.plan_type,
          is_year_plan = EXCLUDED.is_year_plan,
          renew_on = EXCLUDED.renew_on,
+         renew_date = EXCLUDED.renew_date,
+         stripe_price_id = EXCLUDED.stripe_price_id,
          stripe_subscription_id = EXCLUDED.stripe_subscription_id,
-         start_date = EXCLUDED.start_date,
+         subscription_status = EXCLUDED.subscription_status,
+         cancel_at_period_end = EXCLUDED.cancel_at_period_end,
          end_date = EXCLUDED.end_date,
          updated_at = NOW()`,
-      [userId, planType, yearPlan, renewOn, paymentIntent.id],
-    );
-    const insertBillingQuery = client.query(
-      `INSERT INTO billing (user_id, plan_type, is_year_plan, amount_cents, stripe_payment_intent_id)
-       VALUES ($1, $2, $3, $4, $5)`,
-      [userId, planType, yearPlan, amountCents, paymentIntent.id],
+      [userId, Plan.none, StripeSubscriptionStatus.canceled],
     );
 
-    await Promise.all([upsertPlanQuery, insertBillingQuery]);
+    return {
+      action: 'already_canceled',
+      amountCents: null,
+      cancelAtPeriodEnd: false,
+      planType: null,
+      renewDate: null,
+      subscriptionStatus: StripeSubscriptionStatus.canceled,
+      yearPlan: false,
+    };
+  }
 
-    logger.info({ userId, planType, yearPlan, amountCents }, 'Subscription created');
-
-    return { amountCents, planType, yearPlan };
+  const subscription = await stripe.subscriptions.update(existingPlan.stripe_subscription_id, {
+    cancel_at_period_end: true,
   });
+
+  await syncPlanSnapshot(client, {
+    userId,
+    planType: existingPlan.plan_type,
+    subscription,
+    renewOn: null,
+    yearPlan: existingPlan.is_year_plan,
+  });
+
+  logger.info({ userId, subscriptionId: subscription.id }, 'Subscription cancellation scheduled');
+
+  return {
+    action: 'cancellation_scheduled',
+    amountCents: null,
+    cancelAtPeriodEnd: subscription.cancel_at_period_end,
+    planType: getStoredPlanType(existingPlan),
+    renewDate: getSubscriptionDate(subscription.current_period_end),
+      subscriptionStatus: toStripeSubscriptionStatus(subscription.status),
+      yearPlan: existingPlan.is_year_plan,
+  };
 }
 
-// Private helpers
-async function calculatePrice(
-  userId: string,
-  planType: Plan,
-  yearPlan: boolean,
-  client: PoolClient,
-): Promise<number> {
-  if (yearPlan) return planType === Plan.pro ? 10000 : 30000;
+async function createOrUpdateSubscription(args: {
+  existingPlan: PlanRow | null;
+  paymentMethodId: string;
+  priceId: string;
+  stripeCustomerId: string;
+}): Promise<Stripe.Subscription> {
+  const { existingPlan, paymentMethodId, priceId, stripeCustomerId } = args;
 
-  const countResult = await client.query(
-    'SELECT COUNT(*) as cnt FROM billing WHERE user_id = $1 AND plan_type = $2 AND is_year_plan = FALSE',
-    [userId, planType],
-  );
-  const monthsBilled = parseInt(countResult.rows[0].cnt, 10);
+  if (existingPlan?.stripe_subscription_id) {
+    const existingSubscription = await stripe.subscriptions.retrieve(
+      existingPlan.stripe_subscription_id,
+    );
 
-  if (planType === Plan.pro) return monthsBilled < 3 ? 500 : 1000;
-  return monthsBilled < 3 ? 1500 : 3000;
+    if (
+      [
+        StripeSubscriptionStatus.canceled,
+        StripeSubscriptionStatus.incompleteExpired,
+      ].includes(toStripeSubscriptionStatus(existingSubscription.status))
+    ) {
+      return stripe.subscriptions.create({
+        customer: stripeCustomerId,
+        default_payment_method: paymentMethodId,
+        items: [{ price: priceId }],
+        payment_behavior: 'error_if_incomplete',
+      });
+    }
+
+    const currentItem = existingSubscription.items.data[0];
+    if (!currentItem) {
+      throw new StripePaymentFailed();
+    }
+
+    return stripe.subscriptions.update(existingSubscription.id, {
+      cancel_at_period_end: false,
+      default_payment_method: paymentMethodId,
+      items: [{ id: currentItem.id, price: priceId }],
+      proration_behavior: 'create_prorations',
+    });
+  }
+
+  return stripe.subscriptions.create({
+    customer: stripeCustomerId,
+    default_payment_method: paymentMethodId,
+    items: [{ price: priceId }],
+    payment_behavior: 'error_if_incomplete',
+  });
 }

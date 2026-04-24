@@ -8,6 +8,7 @@ import { withQuery } from '#utils/database/with-query';
 import { LoginResponse } from '#types/shared/response';
 import { parseExpiration } from '#utils/database/parse-expiration';
 import { fetchLegacy } from '#services/story/world.service';
+import { isAccessibleSubscriptionStatus } from '#services/stripe/subscription-sync.service';
 
 export const login = async (data: LoginBody): Promise<LoginResponse> => {
   return withQuery(async (client) => {
@@ -41,7 +42,10 @@ export const login = async (data: LoginBody): Promise<LoginResponse> => {
     );
 
     const planResult = await client.query<PlanRow>(
-      'SELECT plan_type FROM plans WHERE user_id = $1 AND renew_on IS NOT NULL LIMIT 1',
+      `SELECT plan_type, subscription_status
+       FROM plans
+       WHERE user_id = $1
+       LIMIT 1`,
       [user.user_id],
     );
 
@@ -52,7 +56,10 @@ export const login = async (data: LoginBody): Promise<LoginResponse> => {
     return {
       email: user.email,
       userId: user.user_id,
-      plan: planResult.rows.length > 0 ? planResult.rows[0].plan_type : null,
+      plan:
+        planResult.rows.length > 0 && isAccessibleSubscriptionStatus(planResult.rows[0].subscription_status)
+          ? planResult.rows[0].plan_type
+          : null,
       firstName: user.first_name,
       lastName: user.last_name,
       legacy,

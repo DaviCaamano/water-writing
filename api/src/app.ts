@@ -3,6 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import pinoHttp from 'pino-http';
 import logger from '#config/logger';
+import stripeRoutes from '#routes/stripe.routes';
 import userRoutes from '#routes/user.routes';
 import storyRoutes from '#routes/story.routes';
 import docsRoutes from '#routes/docs.routes';
@@ -38,6 +39,9 @@ app.use(
     maxAge: 3600,
   }),
 );
+
+// Stripe webhook verification requires the raw request body before JSON parsing.
+app.use('/stripe', stripeRoutes);
 
 app.use(express.json({ limit: '1mb' }));
 

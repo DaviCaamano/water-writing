@@ -1,0 +1,179 @@
+import Stripe from 'stripe';
+import type { PoolClient } from 'pg';
+import pool from '#config/database';
+import logger from '#config/logger';
+import stripe from '#config/stripe';
+import { withTransaction } from '#utils/database/with-transaction';
+import {
+  getStoredPlanType,
+  inferPlanTypeFromPriceId,
+  inferRenewOnFromSubscription,
+  inferYearPlanFromSubscription,
+  syncPlanSnapshot,
+} from '#services/stripe/subscription-sync.service';
+import type { PlanRow, UserRow } from '#types/database';
+
+export async function handleStripeWebhook(event: Stripe.Event): Promise<void> {
+  switch (event.type) {
+    case 'customer.subscription.created':
+    case 'customer.subscription.updated':
+    case 'customer.subscription.deleted': {
+      await syncFromSubscriptionEvent(event.data.object as Stripe.Subscription);
+      return;
+    }
+    case 'invoice.paid': {
+      await handleInvoicePaid(event.data.object as Stripe.Invoice);
+      return;
+    }
+    case 'invoice.payment_failed': {
+      await handleInvoicePaymentFailed(event.data.object as Stripe.Invoice);
+      return;
+    }
+    default:
+      logger.debug({ eventType: event.type }, 'Ignoring unsupported Stripe webhook event');
+  }
+}
+
+async function syncFromSubscriptionEvent(subscription: Stripe.Subscription): Promise<void> {
+  const user = await findUserByStripeCustomerId(getCustomerId(subscription.customer));
+  if (!user) return;
+
+  await withTransaction(async (client) => {
+    const existingPlan = await getExistingPlan(client, user.user_id);
+    const priceId = subscription.items.data[0]?.price?.id ?? existingPlan?.stripe_price_id ?? null;
+    const planType = inferPlanTypeFromPriceId(priceId, getStoredPlanType(existingPlan));
+
+    await syncPlanSnapshot(client, {
+      userId: user.user_id,
+      planType,
+      subscription,
+      renewOn: inferRenewOnFromSubscription(subscription),
+      yearPlan: inferYearPlanFromSubscription(subscription),
+    });
+  });
+
+  logger.info({ userId: user.user_id, event: 'customer.subscription' }, 'Synced subscription snapshot from Stripe');
+}
+
+async function handleInvoicePaid(invoice: Stripe.Invoice): Promise<void> {
+  const customerId = getCustomerId(invoice.customer);
+  const subscriptionId = getSubscriptionId(invoice.subscription);
+  if (!customerId || !subscriptionId) return;
+
+  const user = await findUserByStripeCustomerId(customerId);
+  if (!user) return;
+
+  const subscription = await stripe.subscriptions.retrieve(subscriptionId, {
+    expand: ['latest_invoice.payment_intent'],
+  });
+
+  await withTransaction(async (client) => {
+    const existingPlan = await getExistingPlan(client, user.user_id);
+    const priceId = invoice.lines.data[0]?.price?.id ?? existingPlan?.stripe_price_id ?? null;
+    const planType = inferPlanTypeFromPriceId(priceId, getStoredPlanType(existingPlan));
+
+    await syncPlanSnapshot(client, {
+      userId: user.user_id,
+      planType,
+      subscription,
+      renewOn: inferRenewOnFromSubscription(subscription),
+      yearPlan: inferYearPlanFromSubscription(subscription),
+    });
+
+    const existingBilling = await client.query<{ billing_id: string }>(
+      'SELECT billing_id FROM billing WHERE stripe_invoice_id = $1 LIMIT 1',
+      [invoice.id],
+    );
+
+    if (existingBilling.rows.length === 0) {
+      await client.query(
+        `INSERT INTO billing (
+           user_id,
+           plan_type,
+           is_year_plan,
+           amount_cents,
+           stripe_payment_intent_id,
+           stripe_invoice_id,
+           billed_at
+         )
+         VALUES ($1, $2, $3, $4, $5, $6, TO_TIMESTAMP($7))`,
+        [
+          user.user_id,
+          planType,
+          inferYearPlanFromSubscription(subscription),
+          invoice.amount_paid,
+          getPaymentIntentId(invoice.payment_intent),
+          invoice.id,
+          invoice.status_transitions.paid_at ?? invoice.created,
+        ],
+      );
+    }
+  });
+
+  logger.info({ userId: user.user_id, invoiceId: invoice.id }, 'Synced paid invoice from Stripe');
+}
+
+async function handleInvoicePaymentFailed(invoice: Stripe.Invoice): Promise<void> {
+  const customerId = getCustomerId(invoice.customer);
+  const subscriptionId = getSubscriptionId(invoice.subscription);
+  if (!customerId || !subscriptionId) return;
+
+  const user = await findUserByStripeCustomerId(customerId);
+  if (!user) return;
+
+  const subscription = await stripe.subscriptions.retrieve(subscriptionId, {
+    expand: ['latest_invoice.payment_intent'],
+  });
+
+  await withTransaction(async (client) => {
+    const existingPlan = await getExistingPlan(client, user.user_id);
+    const priceId = subscription.items.data[0]?.price?.id ?? existingPlan?.stripe_price_id ?? null;
+    const planType = inferPlanTypeFromPriceId(priceId, getStoredPlanType(existingPlan));
+
+    await syncPlanSnapshot(client, {
+      userId: user.user_id,
+      planType,
+      subscription,
+      renewOn: inferRenewOnFromSubscription(subscription),
+      yearPlan: inferYearPlanFromSubscription(subscription),
+    });
+  });
+
+  logger.info(
+    { userId: user.user_id, invoiceId: invoice.id },
+    'Synced failed invoice status from Stripe',
+  );
+}
+
+async function findUserByStripeCustomerId(customerId: string | null): Promise<UserRow | null> {
+  if (!customerId) return null;
+
+  const result = await pool.query<UserRow>(
+    'SELECT * FROM users WHERE stripe_customer_id = $1 LIMIT 1',
+    [customerId],
+  );
+
+  return result.rows[0] ?? null;
+}
+
+async function getExistingPlan(client: { query: PoolClient['query'] }, userId: string): Promise<PlanRow | null> {
+  const result = await client.query<PlanRow>('SELECT * FROM plans WHERE user_id = $1 LIMIT 1', [userId]);
+  return result.rows[0] ?? null;
+}
+
+function getCustomerId(customer: string | Stripe.Customer | Stripe.DeletedCustomer | null): string | null {
+  if (!customer) return null;
+  return typeof customer === 'string' ? customer : customer.id;
+}
+
+function getSubscriptionId(subscription: string | Stripe.Subscription | null): string | null {
+  if (!subscription) return null;
+  return typeof subscription === 'string' ? subscription : subscription.id;
+}
+
+function getPaymentIntentId(
+  paymentIntent: string | Stripe.PaymentIntent | null | undefined,
+): string | null {
+  if (!paymentIntent) return null;
+  return typeof paymentIntent === 'string' ? paymentIntent : paymentIntent.id;
+}

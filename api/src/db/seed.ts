@@ -10,6 +10,8 @@ import type { StoryRowWithDocuments, WorldRowWithStories } from '#types/database
 import { Plan } from '#types/shared/enum/plan';
 import { billing, documents, plans, stories, users, worlds } from '#db/schema';
 import { mockLegacy } from '#__tests__/utils/mock-linked-documents';
+import { RenewOn } from '#types/shared/enum/renew-on';
+import { StripeSubscriptionStatus } from '#types/enum/stripe';
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const db = drizzle(pool);
@@ -146,14 +148,22 @@ async function seed() {
         userId: seedUserId,
         planType: Plan.pro,
         isYearPlan: false,
-        renewOn: 'monthly',
+        renewOn: RenewOn.monthly,
+        renewDate: new Date(),
+        stripePriceId: null,
+        subscriptionStatus: StripeSubscriptionStatus.active,
+        cancelAtPeriodEnd: false,
       })
       .onConflictDoUpdate({
         target: plans.userId,
         set: {
           planType: Plan.pro,
           isYearPlan: false,
-          renewOn: 'monthly',
+          renewOn: RenewOn.monthly,
+          renewDate: new Date(),
+          stripePriceId: null,
+          subscriptionStatus: StripeSubscriptionStatus.active,
+          cancelAtPeriodEnd: false,
           endDate: null,
           updatedAt: new Date(),
         },

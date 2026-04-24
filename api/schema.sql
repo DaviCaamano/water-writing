@@ -10,8 +10,18 @@ CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 -- ENUMS
 -- =============================================================
 
-CREATE TYPE plan_type AS ENUM ('pro-plan', 'max-plan');
+CREATE TYPE plan_type AS ENUM ('none', 'pro-plan', 'max-plan');
 CREATE TYPE renew_on AS ENUM ('monthly', 'yearly');
+CREATE TYPE stripe_subscription_status AS ENUM (
+    'incomplete',
+    'incomplete_expired',
+    'trialing',
+    'active',
+    'past_due',
+    'canceled',
+    'unpaid',
+    'paused'
+);
 
 
 -- =============================================================
@@ -142,7 +152,10 @@ CREATE TABLE plans (
     is_year_plan        BOOLEAN     NOT NULL DEFAULT FALSE,
     renew_on            renew_on,
     renew_date          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    stripe_price_id     VARCHAR(255),
     stripe_subscription_id VARCHAR(255),
+    subscription_status stripe_subscription_status,
+    cancel_at_period_end BOOLEAN    NOT NULL DEFAULT FALSE,
     start_date          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     end_date            TIMESTAMPTZ,
     created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),

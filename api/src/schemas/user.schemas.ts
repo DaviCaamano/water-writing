@@ -40,11 +40,19 @@ export const BillingHistoryParamsSchema = z.object({
   userId: z.uuid('userId must be a valid UUID'),
 });
 
-export const SubscribeSchema = z.object({
-  planType: z.enum(Plan, { message: 'planType must be "pro-plan" or "max-plan"' }),
-  yearPlan: z.boolean().optional().default(false),
-  paymentMethodId: z.string().min(1, 'paymentMethodId is required (from Stripe.js)'),
-});
+export const SubscribeSchema = z.discriminatedUnion('planType', [
+  z.object({
+    planType: z.literal(Plan.none),
+    yearPlan: z.boolean().optional().default(false),
+  }),
+  z.object({
+    planType: z.enum([Plan.pro, Plan.max], {
+      message: 'planType must be "pro-plan" or "max-plan"',
+    }),
+    yearPlan: z.boolean().optional().default(false),
+    paymentMethodId: z.string().min(1, 'paymentMethodId is required (from Stripe.js)'),
+  }),
+]);
 
 // Inferred types — use these instead of manually typing req.body
 export type LoginBody = z.infer<typeof LoginSchema>;
