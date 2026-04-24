@@ -1,0 +1,32 @@
+<svg id="Profile_Icon" data-name="Profile Icon" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
+  <defs>
+    <style>
+      .cls-1, .cls-2 {
+        fill: #555;
+      }
+
+      .cls-1 {
+        fill-rule: evenodd;
+      }
+    </style>
+  </defs>
+  <path id="Rim" class="cls-1" d="M7.938,7C4.241,11.081,1,18.049,1,23.989a23,23,0,0,0,23,23c5.232,0,10.078-1.043,13.942-3.986,0-.211,1.98-1.032,3-3h-3A21.234,21.234,0,0,1,2.809,23.989,20.932,20.932,0,0,1,7.938,10V7Z"/>
+  <g id="Bubbles">
+    <circle class="cls-2" cx="42.5" cy="36.5" r="1.5"/>
+    <circle id="Ellipse_2_copy" data-name="Ellipse 2 copy" class="cls-2" cx="44.5" cy="31.5" r="1.5"/>
+    <circle id="Ellipse_2_copy_2" data-name="Ellipse 2 copy 2" class="cls-2" cx="45.5" cy="25.5" r="1.5"/>
+    <circle id="Ellipse_2_copy_3" data-name="Ellipse 2 copy 3" class="cls-2" cx="11.5" cy="5.5" r="1.5"/>
+    <circle id="Ellipse_2_copy_4" data-name="Ellipse 2 copy 4" class="cls-2" cx="16.5" cy="3.5" r="1.5"/>
+    <circle id="Ellipse_2_copy_5" data-name="Ellipse 2 copy 5" class="cls-2" cx="22.5" cy="2.5" r="1.5"/>
+  </g>
+  <g id="Icon">
+    <path id="Ellipse_3_copy_3" data-name="Ellipse 3 copy 3" class="cls-1" d="M36,34c0-4.842-4.962-11-12-11-7.888,0-12,6.064-12,11,0,1.747,5.124,6,12,6C29.961,40,36,35.983,36,34Z"/>
+    <circle id="Ellipse_3_copy_2" data-name="Ellipse 3 copy 2" class="cls-2" cx="24.297" cy="14.734" r="6.078"/>
+  </g>
+  <g id="Pedals">
+    <path class="cls-1" d="M38.048,10.988A7.221,7.221,0,0,0,41.69,9.821a8.682,8.682,0,0,0,2.216-2.23c0.142-.2.521-0.72,0.531-0.713,0.715,0.492,2.8,1.617,2.411,3.46a3.126,3.126,0,0,1-2.245,2.18,9.6,9.6,0,0,1-6.555-1.53"/>
+    <path id="Shape_2_copy_2" data-name="Shape 2 copy 2" class="cls-1" d="M37.28,10.808a7.221,7.221,0,0,0,.81-3.737,8.682,8.682,0,0,0-.823-3.034c-0.1-.223-0.363-0.811-0.352-0.816,0.784-.373,2.8-1.617,4.2-0.358A3.126,3.126,0,0,1,41.882,5.9a9.6,9.6,0,0,1-4.6,4.912"/>
+    <path id="Shape_2_copy_3" data-name="Shape 2 copy 3" class="cls-1" d="M36.446,9.622a7.22,7.22,0,0,0-2.832-2.57,8.683,8.683,0,0,0-3.039-.8c-0.245-.022-0.884-0.092-0.883-0.1,0.069-.865,0-3.234,1.791-3.818a3.126,3.126,0,0,1,3.01.854,9.6,9.6,0,0,1,1.952,6.441"/>
+    <path id="Shape_2_copy" data-name="Shape 2 copy" class="cls-1" d="M38.911,12.845A7.22,7.22,0,0,0,42.2,14.8a8.684,8.684,0,0,0,3.138.184c0.244-.027.885-0.086,0.886-0.074,0.1,0.862.642,3.169-1,4.1a3.126,3.126,0,0,1-3.12-.239,9.6,9.6,0,0,1-3.193-5.925"/>
+  </g>
+</svg>

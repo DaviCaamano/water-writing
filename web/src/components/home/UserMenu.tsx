@@ -1,6 +1,5 @@
 'use client';
 
-import { UserRound } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,13 +26,15 @@ export function UserMenu({ onOpenAuth, onOpenSettings }: UserMenuProps) {
 
   if (!isLoggedIn) {
     return (
-      <button
-        onClick={onOpenAuth}
-        className="p-2 rounded-full hover:bg-accent transition-colors"
-        aria-label="Sign in"
-      >
-        <UserRound className="w-6 h-6" />
-      </button>
+      <div className="-home-user-menu- pointer-events-auto">
+        <button
+          onClick={onOpenAuth}
+          className="p-2 rounded-full hover:bg-accent transition-colors"
+          aria-label="Sign in"
+        >
+          <img src="/profile.svg" className="w-6 h-6" />
+        </button>
+      </div>
     );
   }
 
@@ -43,7 +44,7 @@ export function UserMenu({ onOpenAuth, onOpenSettings }: UserMenuProps) {
         className="p-2 rounded-full hover:bg-accent transition-colors"
         aria-label="User menu"
       >
-        <UserRound className="w-6 h-6" />
+        <img src="/profile.svg" className="w-6 h-6" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48">
         <DropdownMenuItem onClick={() => onOpenSettings('general')}>Settings</DropdownMenuItem>

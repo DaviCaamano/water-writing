@@ -1,4 +1,5 @@
-import { create } from 'zustand';
+import { useMemo } from 'react';
+import { Store, useStore } from '@tanstack/react-store';
 import { api } from '@/lib/api';
 import type { ViewMode, Story, World } from '@/types';
 
@@ -12,7 +13,9 @@ interface NavigationState {
   currentStory: Story | null;
   currentWorld: World | null;
   selectedDocumentId: string | null;
+}
 
+interface NavigationActions {
   setView: (view: ViewMode) => void;
   navigateUp: () => void;
   navigateToEditor: (documentId: string, storyId: string, worldId: string) => void;
@@ -25,75 +28,100 @@ interface NavigationState {
   loadLegacy: () => Promise<void>;
 }
 
-export const useNavigationStore = create<NavigationState>((set, get) => ({
-  currentView: 'editor',
-  currentWorldId: null,
-  currentStoryId: null,
-  currentDocumentId: null,
-  worlds: [],
-  currentStory: null,
-  currentWorld: null,
-  selectedDocumentId: null,
+function createInitialNavigationState(): NavigationState {
+  return {
+    currentView: 'editor',
+    currentWorldId: null,
+    currentStoryId: null,
+    currentDocumentId: null,
+    worlds: [],
+    currentStory: null,
+    currentWorld: null,
+    selectedDocumentId: null,
+  };
+}
 
-  setView: (view) => set({ currentView: view }),
+const navigationStore = new Store<NavigationState>(createInitialNavigationState());
+
+const navigationActions: NavigationActions = {
+  setView: (view) => {
+    navigationStore.setState((state) => ({ ...state, currentView: view }));
+  },
 
   navigateUp: () => {
-    const { currentView, currentStoryId, currentWorldId } = get();
+    const { currentView, currentStoryId, currentWorldId } = navigationStore.state;
     switch (currentView) {
       case 'editor':
-        set({ currentView: 'story-canvas', selectedDocumentId: null });
-        if (currentStoryId) get().loadStory(currentStoryId);
+        navigationStore.setState((state) => ({
+          ...state,
+          currentView: 'story-canvas',
+          selectedDocumentId: null,
+        }));
+        if (currentStoryId) {
+          void navigationActions.loadStory(currentStoryId);
+        }
         break;
       case 'story-canvas':
-        set({ currentView: 'world-canvas', selectedDocumentId: null });
-        if (currentWorldId) get().loadWorld(currentWorldId);
+        navigationStore.setState((state) => ({
+          ...state,
+          currentView: 'world-canvas',
+          selectedDocumentId: null,
+        }));
+        if (currentWorldId) {
+          void navigationActions.loadWorld(currentWorldId);
+        }
         break;
       case 'world-canvas':
-        set({ currentView: 'legacy' });
-        get().loadLegacy();
+        navigationStore.setState((state) => ({ ...state, currentView: 'legacy' }));
+        void navigationActions.loadLegacy();
         break;
     }
   },
 
   navigateToEditor: (documentId, storyId, worldId) => {
-    set({
+    navigationStore.setState((state) => ({
+      ...state,
       currentView: 'editor',
       currentDocumentId: documentId,
       currentStoryId: storyId,
       currentWorldId: worldId,
       selectedDocumentId: null,
-    });
+    }));
   },
 
   navigateToStory: (storyId, worldId) => {
-    set({
+    navigationStore.setState((state) => ({
+      ...state,
       currentView: 'story-canvas',
       currentStoryId: storyId,
       currentWorldId: worldId,
       selectedDocumentId: null,
-    });
-    get().loadStory(storyId);
+    }));
+    void navigationActions.loadStory(storyId);
   },
 
   navigateToWorld: (worldId) => {
-    set({
+    navigationStore.setState((state) => ({
+      ...state,
       currentView: 'world-canvas',
       currentWorldId: worldId,
-    });
-    get().loadWorld(worldId);
+    }));
+    void navigationActions.loadWorld(worldId);
   },
 
   navigateToLegacy: () => {
-    set({ currentView: 'legacy' });
-    get().loadLegacy();
+    navigationStore.setState((state) => ({ ...state, currentView: 'legacy' }));
+    void navigationActions.loadLegacy();
   },
 
-  selectDocument: (id) => set({ selectedDocumentId: id }),
+  selectDocument: (id) => {
+    navigationStore.setState((state) => ({ ...state, selectedDocumentId: id }));
+  },
 
   loadStory: async (storyId) => {
     try {
       const story = await api<Story>(`/story/${storyId}`);
-      set({ currentStory: story });
+      navigationStore.setState((state) => ({ ...state, currentStory: story }));
     } catch (e) {
       console.error('Failed to load story:', e);
     }
@@ -102,7 +130,7 @@ export const useNavigationStore = create<NavigationState>((set, get) => ({
   loadWorld: async (worldId) => {
     try {
       const world = await api<World>(`/world/${worldId}`);
-      set({ currentWorld: world });
+      navigationStore.setState((state) => ({ ...state, currentWorld: world }));
     } catch (e) {
       console.error('Failed to load world:', e);
     }
@@ -111,9 +139,23 @@ export const useNavigationStore = create<NavigationState>((set, get) => ({
   loadLegacy: async () => {
     try {
       const worlds = await api<World[]>('/worlds');
-      set({ worlds });
+      navigationStore.setState((state) => ({ ...state, worlds }));
     } catch (e) {
       console.error('Failed to load legacy:', e);
     }
   },
-}));
+};
+
+type NavigationStore = NavigationState & NavigationActions;
+
+export function useNavigationStore(): NavigationStore {
+  const state = useStore(navigationStore, (currentState) => currentState);
+
+  return useMemo(
+    () => ({
+      ...state,
+      ...navigationActions,
+    }),
+    [state],
+  );
+}

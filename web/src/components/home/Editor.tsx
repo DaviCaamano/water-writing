@@ -46,7 +46,7 @@ export function Editor() {
 
   return (
     <div
-      className={`flex-1 flex flex-col w-full h-full ${themeClasses[theme]} transition-colors duration-300`}
+      className={`flex-1 flex flex-col w-full h-full ${themeClasses[theme]} transition-colors duration-300 mx-auto max-w-4xl`}
     >
       {/* Title */}
       <input

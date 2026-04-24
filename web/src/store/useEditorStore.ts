@@ -1,4 +1,5 @@
-import { create } from 'zustand';
+import { useMemo } from 'react';
+import { Store, useStore } from '@tanstack/react-store';
 import { api } from '@/lib/api';
 import type { EditorTheme } from '@/types';
 
@@ -12,7 +13,9 @@ interface EditorState {
   fontSize: number;
   fontFamily: string;
   theme: EditorTheme;
+}
 
+interface EditorActions {
   setTitle: (title: string) => void;
   setBody: (body: string) => void;
   saveDocument: () => Promise<void>;
@@ -28,50 +31,86 @@ interface EditorState {
   resetEditor: () => void;
 }
 
-export const useEditorStore = create<EditorState>((set, get) => ({
-  documentId: null,
-  storyId: null,
-  title: '',
-  body: '',
-  isDirty: false,
-  lastSaved: null,
-  fontSize: 18,
-  fontFamily: 'Georgia, serif',
-  theme: 'light',
+function createInitialEditorState(): EditorState {
+  return {
+    documentId: null,
+    storyId: null,
+    title: '',
+    body: '',
+    isDirty: false,
+    lastSaved: null,
+    fontSize: 18,
+    fontFamily: 'Georgia, serif',
+    theme: 'light',
+  };
+}
 
-  setTitle: (title) => set({ title, isDirty: true }),
-  setBody: (body) => set({ body, isDirty: true }),
+const editorStore = new Store<EditorState>(createInitialEditorState());
+
+const editorActions: EditorActions = {
+  setTitle: (title) => {
+    editorStore.setState((state) => ({ ...state, title, isDirty: true }));
+  },
+
+  setBody: (body) => {
+    editorStore.setState((state) => ({ ...state, body, isDirty: true }));
+  },
 
   saveDocument: async () => {
-    const { title, body, documentId, storyId } = get();
+    const { title, body, documentId, storyId } = editorStore.state;
     await api('/story', {
       method: 'POST',
       body: JSON.stringify({ documentId, storyId, title, body }),
     });
-    set({ isDirty: false, lastSaved: new Date() });
+    editorStore.setState((state) => ({ ...state, isDirty: false, lastSaved: new Date() }));
   },
 
   loadDocument: (doc) => {
-    set({
+    editorStore.setState((state) => ({
+      ...state,
       documentId: doc.id,
       storyId: doc.storyId,
       title: doc.title,
       body: doc.body,
       isDirty: false,
-    });
+    }));
   },
 
-  setFontSize: (fontSize) => set({ fontSize }),
-  setFontFamily: (fontFamily) => set({ fontFamily }),
-  setTheme: (theme) => set({ theme }),
+  setFontSize: (fontSize) => {
+    editorStore.setState((state) => ({ ...state, fontSize }));
+  },
 
-  resetEditor: () =>
-    set({
+  setFontFamily: (fontFamily) => {
+    editorStore.setState((state) => ({ ...state, fontFamily }));
+  },
+
+  setTheme: (theme) => {
+    editorStore.setState((state) => ({ ...state, theme }));
+  },
+
+  resetEditor: () => {
+    editorStore.setState((state) => ({
+      ...state,
       documentId: null,
       storyId: null,
       title: '',
       body: '',
       isDirty: false,
       lastSaved: null,
+    }));
+  },
+};
+
+type EditorStore = EditorState & EditorActions;
+
+export function useEditorStore(): EditorStore {
+  const state = useStore(editorStore, (currentState) => currentState);
+
+  return useMemo(
+    () => ({
+      ...state,
+      ...editorActions,
     }),
-}));
+    [state],
+  );
+}

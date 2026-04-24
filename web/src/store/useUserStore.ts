@@ -1,4 +1,5 @@
-import { create } from 'zustand';
+import { useMemo } from 'react';
+import { Store, useStore } from '@tanstack/react-store';
 import { api } from '@/lib/api';
 
 interface LoginResponse {
@@ -24,7 +25,9 @@ interface UserState {
   genres: string[];
   token: string | null;
   isLoggedIn: boolean;
+}
 
+interface UserActions {
   login: (email: string, password: string) => Promise<void>;
   signup: (data: {
     email: string;
@@ -41,18 +44,20 @@ interface UserState {
   reset: () => void;
 }
 
-const initialState = {
-  accountId: null as string | null,
-  username: '',
-  firstName: '',
-  lastName: '',
-  email: '',
-  subscription: 'none' as const,
-  documentNames: [] as string[],
-  genres: [] as string[],
-  token: null as string | null,
-  isLoggedIn: false,
-};
+function createInitialUserState(): UserState {
+  return {
+    accountId: null,
+    username: '',
+    firstName: '',
+    lastName: '',
+    email: '',
+    subscription: 'none',
+    documentNames: [],
+    genres: [],
+    token: null,
+    isLoggedIn: false,
+  };
+}
 
 function applyLoginResponse(data: LoginResponse) {
   localStorage.setItem('token', data.token);
@@ -72,9 +77,9 @@ function applyLoginResponse(data: LoginResponse) {
   };
 }
 
-export const useUserStore = create<UserState>((set) => ({
-  ...initialState,
+const userStore = new Store<UserState>(createInitialUserState());
 
+const userActions: UserActions = {
   login: async (email, password) => {
     const data = await api<LoginResponse>(
       '/user/login',
@@ -84,7 +89,7 @@ export const useUserStore = create<UserState>((set) => ({
       },
       false,
     );
-    set(applyLoginResponse(data));
+    userStore.setState(applyLoginResponse(data));
   },
 
   signup: async (signupData) => {
@@ -96,7 +101,7 @@ export const useUserStore = create<UserState>((set) => ({
       },
       false,
     );
-    set(applyLoginResponse(data));
+    userStore.setState(applyLoginResponse(data));
   },
 
   logout: async () => {
@@ -105,7 +110,7 @@ export const useUserStore = create<UserState>((set) => ({
     } finally {
       localStorage.removeItem('token');
       localStorage.removeItem('account_id');
-      set(initialState);
+      userStore.setState(createInitialUserState());
     }
   },
 
@@ -114,7 +119,7 @@ export const useUserStore = create<UserState>((set) => ({
       method: 'POST',
       body: JSON.stringify({ firstName, lastName }),
     });
-    set({ firstName, lastName });
+    userStore.setState((state) => ({ ...state, firstName, lastName }));
   },
 
   updateGenres: async (genres) => {
@@ -122,7 +127,7 @@ export const useUserStore = create<UserState>((set) => ({
       method: 'POST',
       body: JSON.stringify({ genres }),
     });
-    set({ genres });
+    userStore.setState((state) => ({ ...state, genres }));
   },
 
   deleteAccount: async () => {
@@ -140,12 +145,28 @@ export const useUserStore = create<UserState>((set) => ({
         { method: 'GET' },
         false,
       );
-      set(applyLoginResponse(data));
+      userStore.setState(applyLoginResponse(data));
     } catch {
       localStorage.removeItem('token');
       localStorage.removeItem('account_id');
     }
   },
 
-  reset: () => set(initialState),
-}));
+  reset: () => {
+    userStore.setState(createInitialUserState());
+  },
+};
+
+type UserStore = UserState & UserActions;
+
+export function useUserStore(): UserStore {
+  const state = useStore(userStore, (currentState) => currentState);
+
+  return useMemo(
+    () => ({
+      ...state,
+      ...userActions,
+    }),
+    [state],
+  );
+}

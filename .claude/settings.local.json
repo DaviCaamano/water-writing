@@ -4,7 +4,8 @@
       "Bash(node analyze-bundle.mjs)",
       "Bash(bun run *)",
       "Bash(bun add *)",
-      "Bash(bun remove *)"
+      "Bash(bun remove *)",
+      "mcp__Claude_Preview__preview_start"
     ]
   }
 }

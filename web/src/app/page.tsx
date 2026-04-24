@@ -2,17 +2,17 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CircleArrowOutUpLeft } from 'lucide-react';
 import { useUserStore } from '@/store/useUserStore';
 import { useNavigationStore } from '@/store/useNavigationStore';
-import { UserMenu } from '@/components/UserMenu';
-import { AuthDialog } from '@/components/AuthDialog';
-import { SettingsModal } from '@/components/SettingsModal';
-import { Editor } from '@/components/Editor';
-import { FontSettings } from '@/components/FontSettings';
-import { StoryCanvas } from '@/components/StoryCanvas';
-import { WorldCanvas } from '@/components/WorldCanvas';
-import { LegacyView } from '@/components/LegacyView';
+import { UserMenu } from '@/components/home/UserMenu';
+import { AuthDialog } from '@/components/home/AuthDialog';
+import { SettingsModal } from '@/components/home/SettingsModal';
+import { Editor } from '@/components/home/Editor';
+import { EditorSettings } from '@/components/home/EditorSettings';
+import { StoryCanvas } from '@/components/home/StoryCanvas';
+import { WorldCanvas } from '@/components/home/WorldCanvas';
+import { LegacyView } from '@/components/home/LegacyView';
+import { NavButton } from '@/components/home/NavButton';
 
 type SettingsSection = 'general' | 'subscription' | 'billing';
 
@@ -36,37 +36,16 @@ export default function Home() {
   const showBackButton = currentView !== 'legacy';
 
   return (
-    <div className="h-screen flex flex-col relative overflow-hidden">
-      {/* Top bar overlay */}
-      <div className="absolute top-0 left-0 right-0 z-30 flex items-center justify-between px-4 py-3 pointer-events-none">
-        {/* Top left: Back navigation */}
-        <div className="pointer-events-auto">
-          {showBackButton && (
-            <button
-              onClick={navigateUp}
-              className="p-2 rounded-full hover:bg-accent/80 transition-colors"
-              aria-label="Navigate up"
-            >
-              <CircleArrowOutUpLeft className="w-6 h-6" />
-            </button>
-          )}
-        </div>
-
-        {/* Top right: User menu */}
-        <div className="pointer-events-auto">
-          <UserMenu
-            onOpenAuth={() => setAuthOpen(true)}
-            onOpenSettings={handleOpenSettings}
-          />
-        </div>
+    <div className="-home- h-screen flex flex-col relative overflow-hidden">
+      <div className="-home-header-button-framer- absolute top-0 left-0 right-0 z-30 flex items-center justify-between px-4 py-3 pointer-events-none">
+        {/* Top left navigation button */}
+        <NavButton navigateUp={navigateUp} showBackButton={showBackButton} />
+        {/* Top right user menu */}
+        <UserMenu onOpenAuth={() => setAuthOpen(true)} onOpenSettings={handleOpenSettings} />
       </div>
 
-      {/* Bottom left: Font settings (editor only) */}
-      {currentView === 'editor' && (
-        <div className="absolute bottom-4 left-4 z-30">
-          <FontSettings />
-        </div>
-      )}
+      {/* Bottom left theme selector and editor options  */}
+      {currentView === 'editor' && <EditorSettings />}
 
       {/* Main content area */}
       <AnimatePresence mode="wait">

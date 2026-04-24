@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Solace — AI Writing Companion',
+  title: 'Water Writing—Where Words Begin to Flow',
   description: 'Create, organize, and enhance your writing with AI assistance.',
 };
 

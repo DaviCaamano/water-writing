@@ -1,0 +1,38 @@
+<svg id="Theme_Icon" data-name="Theme Icon" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
+  <defs>
+    <style>
+      .cls-1, .cls-2 {
+        fill: #555;
+      }
+
+      .cls-1 {
+        fill-rule: evenodd;
+      }
+    </style>
+  </defs>
+  <path id="Rim" class="cls-1" d="M40.063,41C43.759,36.919,47,29.951,47,24.012a23,23,0,0,0-23-23C18.772,1.014,13.927,2.057,10.063,5c0,0.211-1.98,1.033-3,3h3A21.234,21.234,0,0,1,45.191,24.011,20.933,20.933,0,0,1,40.063,38v3Z"/>
+  <g id="Bubbles">
+    <circle class="cls-2" cx="5.5" cy="11.5" r="1.5"/>
+    <circle id="Ellipse_2_copy" data-name="Ellipse 2 copy" class="cls-2" cx="3.5" cy="16.5" r="1.5"/>
+    <circle id="Ellipse_2_copy_2" data-name="Ellipse 2 copy 2" class="cls-2" cx="2.5" cy="22.5" r="1.5"/>
+    <circle id="Ellipse_2_copy_3" data-name="Ellipse 2 copy 3" class="cls-2" cx="36.5" cy="42.5" r="1.5"/>
+    <circle id="Ellipse_2_copy_4" data-name="Ellipse 2 copy 4" class="cls-2" cx="31.5" cy="44.5" r="1.5"/>
+    <circle id="Ellipse_2_copy_5" data-name="Ellipse 2 copy 5" class="cls-2" cx="25.5" cy="45.5" r="1.5"/>
+  </g>
+  <g id="Icon">
+    <g id="Icon-2" data-name="Icon">
+      <path id="Ellipse_3_copy_4" data-name="Ellipse 3 copy 4" class="cls-1" d="M23.181,36.965c6.184,0,10.714-5.538,10.714-11.722A11.568,11.568,0,0,0,22.483,13.831,11.236,11.236,0,0,0,11.06,24.843v-3.03c0-7.9,6.943-14.3,14.841-14.3A14.772,14.772,0,0,1,40.474,22.083c0,7.9-6.365,14.882-14.262,14.882h-3.03Z"/>
+      <g id="Sun">
+        <path class="cls-1" d="M8,34H6L5,33l1-1H8v2Z"/>
+        <path id="Rectangle_3_copy" data-name="Rectangle 3 copy" class="cls-1" d="M14,26V24l1-1,1,1v2H14Z"/>
+        <path id="Rectangle_3_copy_2" data-name="Rectangle 3 copy 2" class="cls-1" d="M22,32h2l1,1-1,1H22V32Z"/>
+        <path id="Rectangle_3_copy_3" data-name="Rectangle 3 copy 3" class="cls-1" d="M16,40v2l-1,1-1-1V40h2Z"/>
+        <path id="Rectangle_3_copy_4" data-name="Rectangle 3 copy 4" class="cls-1" d="M9.343,28.757L7.929,27.343V25.929H9.343l1.414,1.414Z"/>
+        <path id="Rectangle_3_copy_4-2" data-name="Rectangle 3 copy 4" class="cls-1" d="M19.243,27.343l1.414-1.414h1.414v1.414l-1.414,1.414Z"/>
+        <path id="Rectangle_3_copy_4-3" data-name="Rectangle 3 copy 4" class="cls-1" d="M20.657,37.243l1.414,1.414v1.414H20.657l-1.414-1.414Z"/>
+        <path id="Rectangle_3_copy_4-4" data-name="Rectangle 3 copy 4" class="cls-1" d="M10.757,38.657L9.343,40.071H7.929V38.657l1.414-1.414Z"/>
+        <circle class="cls-2" cx="14.875" cy="33.156" r="7"/>
+      </g>
+    </g>
+  </g>
+</svg>
