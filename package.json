@@ -9,7 +9,7 @@
   ],
   "scripts": {
     "web:dev": "bun --filter water-writing dev",
-    "apidev": "bun --filter water-writing-api dev",
+    "api:dev": "bun --filter water-writing-api dev",
     "web:build": "bun --filter water-writing build",
     "api:build": "bun --filter water-writing-api build",
     "lint": "bun --filter '*' lint"

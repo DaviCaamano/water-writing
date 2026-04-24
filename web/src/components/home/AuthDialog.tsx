@@ -108,6 +108,8 @@ export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
               <Label htmlFor="login-email">Email</Label>
               <Input
                 id="login-email"
+                name="login-email"
+                aria-label="login-email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -118,6 +120,8 @@ export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
               <Label htmlFor="login-password">Password</Label>
               <Input
                 id="login-password"
+                name="login-password"
+                aria-label="login-password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -135,6 +139,8 @@ export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
                 <Label htmlFor="signup-first">First Name</Label>
                 <Input
                   id="signup-first"
+                  name="signup-first"
+                  aria-label="signup-first"
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
                   required
@@ -144,6 +150,8 @@ export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
                 <Label htmlFor="signup-last">Last Name</Label>
                 <Input
                   id="signup-last"
+                  name="signup-last"
+                  aria-label="signup-last"
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
                   required
@@ -154,6 +162,8 @@ export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
               <Label htmlFor="signup-username">Username</Label>
               <Input
                 id="signup-username"
+                name="signup-username"
+                aria-label="signup-username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
@@ -163,6 +173,8 @@ export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
               <Label htmlFor="signup-email">Email</Label>
               <Input
                 id="signup-email"
+                name="signup-email"
+                aria-label="signup-email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -173,6 +185,8 @@ export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
               <Label htmlFor="signup-password">Password</Label>
               <Input
                 id="signup-password"
+                name="signup-password"
+                aria-label="signup-password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}

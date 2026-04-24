@@ -7,7 +7,11 @@
   "main": "dist/index.js",
   "scripts": {
     "dev": "NODE_ENV=development bun run --watch src/index.ts",
+    "web:dev": "bun --filter water-writing dev",
+    "api:dev": "bun dev",
     "build": "bunx tsc",
+    "web:build": "bun --filter water-writing build",
+    "api:build": "bun build",
     "start": "bun src/index.ts",
     "lint": "bunx eslint \"src/**/*.ts\"",
     "lint:fix": "bunx eslint \"src/**/*.ts\" --fix",

@@ -4,7 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "bun run next dev",
+    "web:dev": "bun dev",
+    "api:dev": "bun --filter water-writing-api dev",
     "build": "bun run next build",
+    "web:build": "bun build",
+    "api:build": "bun --filter water-writing-api build",
     "analyze": "next experimental-analyze",
     "start": "bun run next start",
     "lint": "eslint .",
