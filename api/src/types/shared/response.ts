@@ -9,7 +9,7 @@ import { Plan } from '#types/shared/enum/plan';
 import { StripeSubscriptionStatus } from '#types/enum/stripe';
 
 export type RouteResponse<T> = Response<T | { error: string }>;
-
+export type OmitRowData<T> = Omit<T, 'createdAt' | 'updatedAt'>;
 export interface DocumentResponse {
   documentId: string;
   storyId: string;

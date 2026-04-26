@@ -32,6 +32,22 @@ export const EditorSchema = z
     path: ['selection'],
   });
 
+
+
+
+
+export const DocumentParamsSchema = z.object({
+  documentId: z.uuid('documentId must be a valid UUID'),
+});
+
+export const StoryParamsSchema = z.object({
+  storyId: z.uuid('documentId must be a valid UUID'),
+});
+
+export const WorldParamsSchema = z.object({
+  worldId: z.uuid('documentId must be a valid UUID'),
+});
+
 export const GenresSchema = z.object({
   story_id: z.uuid('story_id must be a valid UUID'),
   genres: z
@@ -45,3 +61,6 @@ export type UpsertStoryBody = z.infer<typeof UpsertStorySchema>;
 export type UpsertWorldBody = z.infer<typeof UpsertWorldSchema>;
 export type EditorBody = z.infer<typeof EditorSchema>;
 export type GenresBody = z.infer<typeof GenresSchema>;
+export type DocumentParams = z.infer<typeof DocumentParamsSchema>;
+export type StoryParams = z.infer<typeof StoryParamsSchema>;
+export type WorldParams = z.infer<typeof WorldParamsSchema>;

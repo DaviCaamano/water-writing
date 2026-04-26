@@ -23,6 +23,12 @@ import {
   DropdownMenuTrigger,
 } from '~components/ui/dropdown-menu';
 import { useNavigationStore } from '~store/useNavigationStore';
+import { useUserStore } from '~store/useUserStore';
+import { useLegacyQuery, useWorldQuery } from '~lib/queries/story';
+import {
+  useDeleteStoryMutation,
+  useUpsertStoryMutation,
+} from '~lib/mutations/story';
 
 function summarizeStory(documentCount: number): string {
   if (documentCount === 0) {
@@ -46,34 +52,47 @@ function promptForTitle(kind: string, currentTitle: string): string | null {
   return nextTitle.trim() || currentTitle;
 }
 
+function generateUntitledStory(existing: string[]): string {
+  let i = 1;
+  while (existing.includes(`Untitled Story ${i}`)) i += 1;
+  return `Untitled Story ${i}`;
+}
+
 export function WorldView() {
-  const {
-    worlds,
-    currentWorld,
-    createStory,
-    deleteStory,
-    moveStoryToWorld,
-    updateStory,
-    navigateToStory,
-  } = useNavigationStore();
+  const { userId } = useUserStore();
+  const { currentWorldId, navigateToStory } = useNavigationStore();
+  const { data: currentWorld } = useWorldQuery(currentWorldId);
+  const { data: worlds = [] } = useLegacyQuery(userId);
+  const upsertStory = useUpsertStoryMutation();
+  const deleteStory = useDeleteStoryMutation();
 
   const stories = currentWorld?.stories ?? [];
-  const totalDocuments = stories.reduce((sum, story) => sum + story.documents.length, 0);
+  const totalDocuments = stories.reduce(
+    (sum, story) => sum + (story.documents?.length ?? 0),
+    0,
+  );
 
   const handleAddStory = () => {
     if (!currentWorld) return;
-    createStory(currentWorld.id);
+    upsertStory.mutate({
+      worldId: currentWorld.worldId,
+      title: generateUntitledStory(stories.map((s) => s.title)),
+    });
   };
 
   const handleRenameStory = (storyId: string, currentTitle: string) => {
     const nextTitle = promptForTitle('story', currentTitle);
     if (!nextTitle) return;
-    updateStory(storyId, { title: nextTitle });
+    upsertStory.mutate({ storyId, title: nextTitle });
   };
 
   const handleDeleteStory = (storyId: string, title: string) => {
     if (!window.confirm(`Delete "${title}"?`)) return;
-    deleteStory(storyId);
+    deleteStory.mutate(storyId);
+  };
+
+  const handleMoveStoryToWorld = (storyId: string, targetWorldId: string, title: string) => {
+    upsertStory.mutate({ storyId, worldId: targetWorldId, title });
   };
 
   return (
@@ -95,20 +114,20 @@ export function WorldView() {
       {stories.length > 0 ? (
         <section className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           {stories.map((story) => {
-            const worldTargets = worlds.filter((world) => world.id !== story.worldId);
+            const worldTargets = worlds.filter((world) => world.worldId !== story.worldId);
 
             return (
               <CatalogCard
-                key={story.id}
+                key={story.storyId}
                 itemLabel="Story"
                 title={story.title}
-                description={summarizeStory(story.documents.length)}
-                meta={`${story.documents.length} document${story.documents.length === 1 ? '' : 's'}`}
+                description={summarizeStory(story.documents?.length ?? 0)}
+                meta={`${story.documents?.length ?? 0} document${(story.documents?.length ?? 0) === 1 ? '' : 's'}`}
                 badgeText="Story"
                 coverImage={null}
                 accentClassName="from-amber-500 via-orange-400 to-rose-500"
                 Icon={BookMarked}
-                onOpen={() => navigateToStory(story.id, story.worldId)}
+                onOpen={() => navigateToStory(story.storyId, story.worldId)}
                 onUploadCover={() => {}}
                 menuContent={({ openCoverPicker }) => (
                   <DropdownMenu>
@@ -125,7 +144,9 @@ export function WorldView() {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-60">
                       <DropdownMenuLabel>{story.title}</DropdownMenuLabel>
-                      <DropdownMenuItem onClick={() => navigateToStory(story.id, story.worldId)}>
+                      <DropdownMenuItem
+                        onClick={() => navigateToStory(story.storyId, story.worldId)}
+                      >
                         <BookMarked />
                         Open story
                       </DropdownMenuItem>
@@ -138,8 +159,10 @@ export function WorldView() {
                           {worldTargets.length > 0 ? (
                             worldTargets.map((world) => (
                               <DropdownMenuItem
-                                key={`${story.id}-${world.id}`}
-                                onClick={() => moveStoryToWorld(story.id, world.id)}
+                                key={`${story.storyId}-${world.worldId}`}
+                                onClick={() =>
+                                  handleMoveStoryToWorld(story.storyId, world.worldId, story.title)
+                                }
                               >
                                 {world.title}
                               </DropdownMenuItem>
@@ -150,7 +173,9 @@ export function WorldView() {
                         </DropdownMenuSubContent>
                       </DropdownMenuSub>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={() => handleRenameStory(story.id, story.title)}>
+                      <DropdownMenuItem
+                        onClick={() => handleRenameStory(story.storyId, story.title)}
+                      >
                         <PencilLine />
                         Rename story
                       </DropdownMenuItem>
@@ -160,7 +185,7 @@ export function WorldView() {
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         variant="destructive"
-                        onClick={() => handleDeleteStory(story.id, story.title)}
+                        onClick={() => handleDeleteStory(story.storyId, story.title)}
                       >
                         <Trash2 />
                         Delete story

@@ -1,9 +1,6 @@
 import { useMemo } from 'react';
 import { Store, useStore } from '@tanstack/react-store';
-import { queryApi } from '~lib/api';
-import { syncDocumentInNavigationStore } from '~store/useNavigationStore';
-import { EditorActions, EditorState, EditorStore } from '~types/state';
-import { apiRoutes } from '#types/shared/api-route';
+import { EditorActions, EditorState, EditorStore } from '~types/state/editor-state';
 
 function createInitialEditorState(): EditorState {
   return {
@@ -21,6 +18,8 @@ function createInitialEditorState(): EditorState {
 
 const editorStore = new Store<EditorState>(createInitialEditorState());
 
+export const editorStoreSnapshot = () => editorStore.state;
+
 const editorActions: EditorActions = {
   setTitle: (title) => {
     editorStore.setState((state) => ({ ...state, title, isDirty: true }));
@@ -28,18 +27,6 @@ const editorActions: EditorActions = {
 
   setBody: (body) => {
     editorStore.setState((state) => ({ ...state, body, isDirty: true }));
-  },
-
-  saveDocument: async () => {
-    const { title, body, documentId, storyId } = editorStore.state;
-
-    if (documentId) {
-      syncDocumentInNavigationStore(documentId, { title, body });
-    }
-
-    await queryApi(apiRoutes.story.upsertDocument(), { body: { documentId, storyId, title, body } });
-
-    editorStore.setState((state) => ({ ...state, isDirty: false, lastSaved: new Date() }));
   },
 
   loadDocument: (doc) => {
@@ -51,6 +38,10 @@ const editorActions: EditorActions = {
       body: doc.body,
       isDirty: false,
     }));
+  },
+
+  markSaved: () => {
+    editorStore.setState((state) => ({ ...state, isDirty: false, lastSaved: new Date() }));
   },
 
   setFontSize: (fontSize) => {

@@ -1,3 +1,5 @@
+import { createRoute } from '#utils/createRoute';
+
 export type ApiRouteBody = {
   url: string;
   method: 'GET' | 'POST' | 'PUT' | 'DELETE';
@@ -22,6 +24,31 @@ class BillingApiRoute {
 }
 
 class StoryApiRoute {
+  fetchDocument = createRoute({
+    url: '/story/document/:documentId',
+    method: 'GET',
+    includeAuth: true,
+  });
+  fetchStory = createRoute({
+    url: '/story/story/:storyId',
+    method: 'GET',
+    includeAuth: true,
+  });
+  fetchStories = createRoute({
+    url: '/story/stories',
+    method: 'GET',
+    includeAuth: true,
+  });
+  fetchWorld = createRoute({
+    url: '/story/world/:worldId',
+    method: 'GET',
+    includeAuth: true,
+  });
+  fetchLegacy = createRoute({
+    url: '/story/legacy',
+    method: 'GET',
+    includeAuth: true,
+  });
   upsertDocument = createRoute({
     url: '/story/document',
     method: 'POST',
@@ -45,6 +72,21 @@ class StoryApiRoute {
   upsertGenre = createRoute({
     url: '/story/genre',
     method: 'POST',
+    includeAuth: true,
+  });
+  deleteWorld = createRoute({
+    url: '/story/world/:worldId',
+    method: 'DELETE',
+    includeAuth: true,
+  });
+  deleteStory = createRoute({
+    url: '/story/story/:storyId',
+    method: 'DELETE',
+    includeAuth: true,
+  });
+  deleteDocument = createRoute({
+    url: '/story/document/:documentId',
+    method: 'DELETE',
     includeAuth: true,
   });
 }
@@ -99,24 +141,3 @@ class HealthApiRoute {
 
 export const apiRoutes = new ApiRoute();
 
-export type ApiRouteHandler = (...args: (string | number | boolean | undefined)[]) => ApiRouteBody;
-
-export function fillRouteParams(
-  route: string,
-  ...values: Array<string | number | boolean | undefined>
-): string {
-  let index = 0;
-
-  return route.replace(/:[^/]+/g, () => {
-    const value = values[index++];
-    if (value === undefined) return '';
-    return String(value);
-  });
-}
-export const createRoute = (route: ApiRouteBody): ApiRouteHandler => {
-  if (!route.url.includes(':')) return () => route;
-  return (...values: (string | number | boolean | undefined)[]) => ({
-    ...route,
-    url: fillRouteParams(route.url, ...values),
-  });
-};

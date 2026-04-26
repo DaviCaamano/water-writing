@@ -6,7 +6,12 @@ jest.mock('#utils/database/with-query');
 
 import { withTransaction } from '#utils/database/with-transaction';
 import { withQuery } from '#utils/database/with-query';
-import { fetchDocument, upsertDocument } from '#services/story/document.service';
+import {
+  deleteDocument,
+  fetchDocument,
+  fetchUserDocument,
+  upsertDocument,
+} from '#services/story/document.service';
 import { DocumentNotFoundError, StoryNotFoundError } from '#constants/error/custom-errors';
 import { fetchWorld } from '#services/story/world.service';
 import {
@@ -33,6 +38,134 @@ describe(
       const mockClient = createMockClient();
       mockPool.query.mockResolvedValueOnce({ rows: [MOCK_DOC] });
       expect(await fetchDocument(MOCK_DOC_ID)).toEqual(MOCK_DOCK_RESPONSE);
+    });
+
+    it('throws DocumentNotFoundError when no row matches the document', async () => {
+      mockPool.query.mockResolvedValueOnce({ rows: [] });
+      await expect(fetchDocument(MOCK_DOC_ID)).rejects.toThrow(DocumentNotFoundError);
+    });
+  }),
+);
+
+describe(
+  'fetchUserDocument',
+  mockClear(() => {
+    it('returns the document when it belongs to the user', async () => {
+      mockPool.query.mockResolvedValueOnce({ rows: [MOCK_DOC] });
+
+      const result = await fetchUserDocument(MOCK_USER_ID, MOCK_DOC_ID);
+
+      expect(result).toEqual(MOCK_DOCK_RESPONSE);
+      expect(mockPool.query).toHaveBeenCalledWith(expect.stringContaining('JOIN worlds w'), [
+        MOCK_DOC_ID,
+        MOCK_USER_ID,
+      ]);
+    });
+
+    it('throws DocumentNotFoundError when no row matches the user/document pair', async () => {
+      mockPool.query.mockResolvedValueOnce({ rows: [] });
+
+      await expect(fetchUserDocument(MOCK_USER_ID, MOCK_DOC_ID)).rejects.toThrow(
+        DocumentNotFoundError,
+      );
+    });
+  }),
+);
+
+describe(
+  'deleteDocument',
+  mockClear(() => {
+    it('relinks predecessor and successor when deleting a middle document', async () => {
+      const mockClient = createMockClient();
+      mockClient.query.mockResolvedValueOnce({
+        rows: [{ ...MOCK_DOC, predecessor_id: 'pred-id', successor_id: 'succ-id' }],
+      }); // SELECT existing doc
+      mockClient.query.mockResolvedValueOnce({}); // UPDATE predecessor
+      mockClient.query.mockResolvedValueOnce({}); // UPDATE successor
+      mockClient.query.mockResolvedValueOnce({}); // DELETE doc
+      mockWithTransaction.mockImplementation((callback) => callback(mockClient));
+
+      await expect(deleteDocument(MOCK_USER_ID, MOCK_DOC_ID)).resolves.toBeUndefined();
+
+      expect(mockClient.query).toHaveBeenNthCalledWith(
+        2,
+        'UPDATE documents SET successor_id = $1, updated_at = NOW() WHERE document_id = $2',
+        ['succ-id', 'pred-id'],
+      );
+      expect(mockClient.query).toHaveBeenNthCalledWith(
+        3,
+        'UPDATE documents SET predecessor_id = $1, updated_at = NOW() WHERE document_id = $2',
+        ['pred-id', 'succ-id'],
+      );
+      expect(mockClient.query).toHaveBeenNthCalledWith(
+        4,
+        'DELETE FROM documents WHERE document_id = $1',
+        [MOCK_DOC_ID],
+      );
+    });
+
+    it('clears successor on the predecessor when deleting the tail document', async () => {
+      const mockClient = createMockClient();
+      mockClient.query.mockResolvedValueOnce({
+        rows: [{ ...MOCK_DOC, predecessor_id: 'pred-id', successor_id: null }],
+      });
+      mockClient.query.mockResolvedValueOnce({});
+      mockClient.query.mockResolvedValueOnce({});
+      mockWithTransaction.mockImplementation((callback) => callback(mockClient));
+
+      await deleteDocument(MOCK_USER_ID, MOCK_DOC_ID);
+
+      expect(mockClient.query).toHaveBeenNthCalledWith(
+        2,
+        'UPDATE documents SET successor_id = NULL, updated_at = NOW() WHERE document_id = $1',
+        ['pred-id'],
+      );
+    });
+
+    it('clears predecessor on the successor when deleting the head document', async () => {
+      const mockClient = createMockClient();
+      mockClient.query.mockResolvedValueOnce({
+        rows: [{ ...MOCK_DOC, predecessor_id: null, successor_id: 'succ-id' }],
+      });
+      mockClient.query.mockResolvedValueOnce({});
+      mockClient.query.mockResolvedValueOnce({});
+      mockWithTransaction.mockImplementation((callback) => callback(mockClient));
+
+      await deleteDocument(MOCK_USER_ID, MOCK_DOC_ID);
+
+      expect(mockClient.query).toHaveBeenNthCalledWith(
+        2,
+        'UPDATE documents SET predecessor_id = NULL, updated_at = NOW() WHERE document_id = $1',
+        ['succ-id'],
+      );
+    });
+
+    it('only deletes when the document is a singleton (no neighbors)', async () => {
+      const mockClient = createMockClient();
+      mockClient.query.mockResolvedValueOnce({
+        rows: [{ ...MOCK_DOC, predecessor_id: null, successor_id: null }],
+      });
+      mockClient.query.mockResolvedValueOnce({});
+      mockWithTransaction.mockImplementation((callback) => callback(mockClient));
+
+      await deleteDocument(MOCK_USER_ID, MOCK_DOC_ID);
+
+      expect(mockClient.query).toHaveBeenCalledTimes(2);
+      expect(mockClient.query).toHaveBeenNthCalledWith(
+        2,
+        'DELETE FROM documents WHERE document_id = $1',
+        [MOCK_DOC_ID],
+      );
+    });
+
+    it('throws DocumentNotFoundError when no row matches the user/document pair', async () => {
+      const mockClient = createMockClient();
+      mockClient.query.mockResolvedValueOnce({ rows: [] });
+      mockWithTransaction.mockImplementation((callback) => callback(mockClient));
+
+      await expect(deleteDocument(MOCK_USER_ID, MOCK_DOC_ID)).rejects.toThrow(
+        DocumentNotFoundError,
+      );
     });
   }),
 );

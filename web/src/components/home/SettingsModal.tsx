@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Dialog, DialogContent } from '~components/ui/dialog';
 import { Button } from '~components/ui/button';
 import { Input } from '~components/ui/input';
@@ -11,8 +11,8 @@ import { Separator } from '~components/ui/separator';
 import { Tooltip, TooltipContent, TooltipTrigger } from '~components/ui/tooltip';
 import { Check, Pencil, X } from 'lucide-react';
 import { useUserStore } from '~store/useUserStore';
+import { useBillingHistoryQuery } from '~lib/queries/billing';
 import { queryApi } from '~lib/api';
-import type { BillingHistoryEntry, BillingResponse, CardInfo } from '~types/story';
 import { Plan } from '#types/shared/enum/plan';
 import { SettingsSection } from '~types/components/settings-modal';
 import { apiRoutes } from '#types/shared/api-route';
@@ -299,47 +299,9 @@ function SubscriptionSection() {
 
 function BillingSection() {
   const { userId } = useUserStore();
-  return <BillingSectionContent key={userId ?? 'guest'} userId={userId} />;
-}
+  const { data: history = [], isLoading } = useBillingHistoryQuery(userId);
 
-function BillingSectionContent({ userId }: { userId: string | null }) {
-  const [loading, setLoading] = useState(Boolean(userId));
-  const [card, setCard] = useState<CardInfo | null>(null);
-  const [history, setHistory] = useState<BillingHistoryEntry[]>([]);
-
-  useEffect(() => {
-    if (!userId) {
-      return;
-    }
-
-    let cancelled = false;
-
-    const loadBilling = async () => {
-      try {
-        const data = await queryApi<BillingResponse>(apiRoutes.billing.history(userId));
-        if (cancelled) return;
-
-        setCard(data.card);
-        setHistory(data.history);
-      } catch (e) {
-        if (!cancelled) {
-          console.error('Failed to load billing:', e);
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
-      }
-    };
-
-    void loadBilling();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [userId]);
-
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="space-y-6">
         <div>
@@ -363,19 +325,7 @@ function BillingSectionContent({ userId }: { userId: string | null }) {
     <div className="space-y-6">
       <div>
         <h3 className="text-lg font-semibold mb-3">Card on File</h3>
-        {card ? (
-          <div className="flex items-center gap-3">
-            <span className="text-sm">
-              <span className="capitalize font-medium">{card.network}</span> ending in{' '}
-              <span className="font-mono">{card.last4}</span>
-            </span>
-            <Button variant="outline" size="sm">
-              Update
-            </Button>
-          </div>
-        ) : (
-          <p className="text-sm text-muted-foreground">No card on file</p>
-        )}
+        <p className="text-sm text-muted-foreground">No card on file</p>
       </div>
 
       <Separator />
@@ -386,24 +336,20 @@ function BillingSectionContent({ userId }: { userId: string | null }) {
           <div className="space-y-2">
             <div className="grid grid-cols-3 text-xs font-medium text-muted-foreground px-2">
               <span>Date</span>
+              <span>Plan</span>
               <span>Amount</span>
-              <span />
             </div>
-            {history.map((entry, i) => (
+            {history.map((entry) => (
               <div
-                key={i}
+                key={entry.billingId}
                 className="grid grid-cols-3 items-center text-sm px-2 py-2 rounded hover:bg-accent/50"
               >
-                <span>{entry.date}</span>
-                <span>${entry.amount.toFixed(2)}</span>
-                <a
-                  href={entry.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-primary underline underline-offset-2 text-sm"
-                >
-                  More Details
-                </a>
+                <span>{new Date(entry.billedAt).toLocaleDateString()}</span>
+                <span>
+                  {entry.planType}
+                  {entry.isYearPlan ? ' (yearly)' : ''}
+                </span>
+                <span>${(entry.amountCents / 100).toFixed(2)}</span>
               </div>
             ))}
           </div>

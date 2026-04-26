@@ -5,6 +5,16 @@ import pool from '#config/database';
 import { DocumentRow, StoryRow, StoryRowWithDocuments, WorldRow } from '#types/database';
 import { mapWorldResponse } from '#utils/story/map-story';
 
+export const deleteWorld = async (userId: string, worldId: string): Promise<void> => {
+  const result = await pool.query(
+    'DELETE FROM worlds WHERE world_id = $1 AND user_id = $2',
+    [worldId, userId],
+  );
+  if (result.rowCount === 0) {
+    throw new WorldNotFoundError();
+  }
+};
+
 export const upsertWorld = async (
   userId: string,
   data: UpsertWorldBody,
@@ -37,12 +47,14 @@ export const upsertWorld = async (
 /**
  * Fetches a single world with all nested stories and documents.
  */
-export const fetchWorld = async (worldId: string): Promise<WorldResponse | null> => {
+export const fetchWorld = async (worldId: string): Promise<WorldResponse> => {
   const worldResult = await pool.query<WorldRow>('SELECT * FROM worlds WHERE world_id = $1', [
     worldId,
   ]);
 
-  if (worldResult.rows.length === 0) return null;
+  if (worldResult.rows.length === 0) {
+    throw new WorldNotFoundError();
+  }
 
   const world = worldResult.rows[0];
 

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useUserStore } from '~store/useUserStore';
 import { useNavigationStore } from '~store/useNavigationStore';
 import { useEditorStore } from '~store/useEditorStore';
+import { useDocumentQuery } from '~lib/queries/story';
 import { UserMenu } from '~components/home/UserMenu';
 import { AuthDialog } from '~components/home/AuthDialog';
 import { SettingsModal } from '~components/home/SettingsModal';
@@ -19,27 +20,22 @@ export default function Home() {
 
   const { refreshSession } = useUserStore();
   const { documentId: editorDocumentId, loadDocument } = useEditorStore();
-  const { currentView, currentStory, currentDocumentId, navigateUp } = useNavigationStore();
+  const { currentView, currentDocumentId, navigateUp } = useNavigationStore();
+  const shouldFetchDocument =
+    currentView === 'editor' && currentDocumentId !== null && currentDocumentId !== editorDocumentId;
+  const { data: documentData } = useDocumentQuery(shouldFetchDocument ? currentDocumentId : null);
 
   useEffect(() => void refreshSession(), [refreshSession]);
 
   useEffect(() => {
-    if (currentView !== 'editor' || !currentStory || !currentDocumentId) {
-      return;
-    }
-
-    const document = currentStory.documents.find((entry) => entry.id === currentDocumentId);
-    if (!document || editorDocumentId === document.id) {
-      return;
-    }
-
+    if (!documentData || editorDocumentId === documentData.documentId) return;
     loadDocument({
-      id: document.id,
-      title: document.title,
-      body: document.body,
-      storyId: document.storyId,
+      id: documentData.documentId,
+      title: documentData.title,
+      body: documentData.body,
+      storyId: documentData.storyId,
     });
-  }, [currentDocumentId, currentStory, currentView, editorDocumentId, loadDocument]);
+  }, [documentData, editorDocumentId, loadDocument]);
 
   const handleOpenSettings = (section: SettingsSection = SettingsSection.general) => {
     setSettingsSection(section);

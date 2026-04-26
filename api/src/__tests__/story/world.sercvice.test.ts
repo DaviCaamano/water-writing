@@ -16,7 +16,7 @@ import { mockClear } from '#__tests__/utils/test-wrappers';
 
 import * as worldService from '#services/story/world.service';
 import { DocType, checkLegacyStructure, mockLegacy } from '#__tests__/utils/mock-linked-documents';
-import { fetchLegacy } from '#services/story/world.service';
+import { deleteWorld, fetchLegacy } from '#services/story/world.service';
 import { MOCK_USER_ID } from '#__tests__/constants/mock-user';
 
 describe(
@@ -66,11 +66,10 @@ describe(
 describe(
   'fetchWorld',
   mockClear(() => {
-    it('should return null when the world does not exist', async () => {
+    it('should throw WorldNotFoundError when the world does not exist', async () => {
       mockPool.query.mockResolvedValueOnce({ rows: [] });
 
-      const result = await worldService.fetchWorld(MOCK_WORLD_ID);
-      expect(result).toBeNull();
+      await expect(worldService.fetchWorld(MOCK_WORLD_ID)).rejects.toThrow(WorldNotFoundError);
     });
 
     it('should return the world with nested stories and documents', async () => {
@@ -150,6 +149,27 @@ describe(
       const result = await worldService.fetchWorld(MOCK_WORLD_ID);
       expect(result).not.toBeNull();
       expect(checkLegacyStructure([result!], DocType.worldResponse)).toBe(true);
+    });
+  }),
+);
+
+describe(
+  'deleteWorld',
+  mockClear(() => {
+    it('deletes the world when it belongs to the user', async () => {
+      mockPool.query.mockResolvedValueOnce({ rowCount: 1 });
+
+      await expect(deleteWorld(MOCK_USER_ID, MOCK_WORLD_ID)).resolves.toBeUndefined();
+      expect(mockPool.query).toHaveBeenCalledWith(
+        'DELETE FROM worlds WHERE world_id = $1 AND user_id = $2',
+        [MOCK_WORLD_ID, MOCK_USER_ID],
+      );
+    });
+
+    it('throws WorldNotFoundError when no row is deleted', async () => {
+      mockPool.query.mockResolvedValueOnce({ rowCount: 0 });
+
+      await expect(deleteWorld(MOCK_USER_ID, MOCK_WORLD_ID)).rejects.toThrow(WorldNotFoundError);
     });
   }),
 );

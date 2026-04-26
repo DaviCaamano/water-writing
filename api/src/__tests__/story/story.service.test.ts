@@ -18,7 +18,7 @@ import { createMockClient } from '#__tests__/constants/mock-database';
 import { PoolClient } from 'pg';
 import { mockClear } from '#__tests__/utils/test-wrappers';
 import { StoryNotFoundError, WorldNotFoundError } from '#constants/error/custom-errors';
-import { upsertGenre } from '#services/story/story.service';
+import { deleteStory, upsertGenre } from '#services/story/story.service';
 
 const mockWithTransaction = withTransaction as jest.MockedFunction<typeof withTransaction>;
 const mockWithQuery = withQuery as jest.MockedFunction<typeof withQuery>;
@@ -140,6 +140,72 @@ describe(
           worldId: MOCK_WORLD_ID,
         }),
       ).rejects.toThrow(WorldNotFoundError);
+    });
+  }),
+);
+
+describe(
+  'deleteStory',
+  mockClear(() => {
+    it('deletes the story when it belongs to the user', async () => {
+      mockPool.query.mockResolvedValueOnce({ rowCount: 1 });
+
+      await expect(deleteStory(MOCK_USER_ID, MOCK_STORY_ID)).resolves.toBeUndefined();
+      expect(mockPool.query).toHaveBeenCalledWith(
+        expect.stringContaining('DELETE FROM stories'),
+        [MOCK_STORY_ID, MOCK_USER_ID],
+      );
+    });
+
+    it('throws StoryNotFoundError when no row is deleted', async () => {
+      mockPool.query.mockResolvedValueOnce({ rowCount: 0 });
+
+      await expect(deleteStory(MOCK_USER_ID, MOCK_STORY_ID)).rejects.toThrow(StoryNotFoundError);
+    });
+  }),
+);
+
+describe(
+  'fetchUserStories',
+  mockClear(() => {
+    it('returns stories with their documents grouped by story_id', async () => {
+      mockPool.query
+        .mockResolvedValueOnce({ rows: [MOCK_STORY] })
+        .mockResolvedValueOnce({ rows: [MOCK_DOC] });
+
+      const result = await storyService.fetchUserStories(MOCK_USER_ID);
+
+      expect(result).toEqual([{ ...MOCK_STORY_RESPONSE, documents: [
+        {
+          documentId: MOCK_DOC.document_id,
+          storyId: MOCK_DOC.story_id,
+          title: MOCK_DOC.title,
+          body: MOCK_DOC.body,
+          predecessorId: MOCK_DOC.predecessor_id,
+          successorId: MOCK_DOC.successor_id,
+          createdAt: MOCK_DOC.created_at,
+          updatedAt: MOCK_DOC.updated_at,
+        },
+      ] }]);
+      expect(mockPool.query).toHaveBeenNthCalledWith(
+        1,
+        expect.stringContaining('FROM stories'),
+        [MOCK_USER_ID],
+      );
+      expect(mockPool.query).toHaveBeenNthCalledWith(
+        2,
+        expect.stringContaining('FROM documents'),
+        [[MOCK_STORY_ID]],
+      );
+    });
+
+    it('returns an empty array when the user has no stories', async () => {
+      mockPool.query.mockResolvedValueOnce({ rows: [] });
+
+      const result = await storyService.fetchUserStories(MOCK_USER_ID);
+
+      expect(result).toEqual([]);
+      expect(mockPool.query).toHaveBeenCalledTimes(1);
     });
   }),
 );

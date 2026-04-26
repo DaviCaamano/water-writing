@@ -1,6 +1,6 @@
 import type { UpsertStoryBody } from '#schemas/story.schemas';
 import { withTransaction } from '#utils/database/with-transaction';
-import { GenreRow, StoryRow, StoryRowWithDocuments } from '#types/database';
+import { DocumentRow, GenreRow, StoryRow, StoryRowWithDocuments } from '#types/database';
 import { StoryNotFoundError, WorldNotFoundError } from '#constants/error/custom-errors';
 import { withQuery } from '#utils/database/with-query';
 import { StoryResponse } from '#types/shared/response';
@@ -111,6 +111,48 @@ export async function upsertStory(userId: string, data: UpsertStoryBody): Promis
   });
 }
 
+
+export async function deleteStory(userId: string, storyId: string): Promise<void> {
+  const result = await pool.query(
+    `DELETE FROM stories
+     WHERE story_id = $1
+       AND world_id IN (SELECT world_id FROM worlds WHERE user_id = $2)`,
+    [storyId, userId],
+  );
+  if (result.rowCount === 0) {
+    throw new StoryNotFoundError();
+  }
+}
+
+export async function fetchUserStories(userId: string): Promise<StoryResponse[]> {
+  const storiesResult = await pool.query<StoryRow>(
+    `SELECT s.*
+     FROM stories s
+     JOIN worlds w ON w.world_id = s.world_id
+     WHERE w.user_id = $1
+     ORDER BY s.created_at`,
+    [userId],
+  );
+
+  if (storiesResult.rows.length === 0) return [];
+
+  const storyIds = storiesResult.rows.map((s) => s.story_id);
+  const docsResult = await pool.query<DocumentRow>(
+    'SELECT * FROM documents WHERE story_id = ANY($1) ORDER BY created_at',
+    [storyIds],
+  );
+
+  const docsByStory = new Map<string, DocumentRow[]>();
+  for (const doc of docsResult.rows) {
+    const arr = docsByStory.get(doc.story_id) ?? [];
+    arr.push(doc);
+    docsByStory.set(doc.story_id, arr);
+  }
+
+  return storiesResult.rows.map((story) =>
+    mapStoryResponse(story, docsByStory.get(story.story_id) ?? []),
+  );
+}
 
 // Genres
 export async function upsertGenre(storyId: string, genres: string[]) {

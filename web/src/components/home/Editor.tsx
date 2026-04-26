@@ -1,24 +1,32 @@
 'use client';
 
 import { useEffect, useRef, useCallback } from 'react';
-import { useEditorStore } from '~store/useEditorStore';
+import { editorStoreSnapshot, useEditorStore } from '~store/useEditorStore';
+import { useUpsertDocumentMutation } from '~lib/mutations/story';
 
 export function Editor() {
-  const { title, body, fontSize, fontFamily, theme, setTitle, setBody, saveDocument, isDirty } =
+  const { title, body, fontSize, fontFamily, theme, setTitle, setBody, isDirty, markSaved } =
     useEditorStore();
   const bodyRef = useRef<HTMLTextAreaElement>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const upsertDocument = useUpsertDocumentMutation();
 
   const handleSave = useCallback(async () => {
-    if (!isDirty) return;
+    const snapshot = editorStoreSnapshot();
+    if (!snapshot.isDirty || !snapshot.documentId) return;
     try {
-      await saveDocument();
+      await upsertDocument.mutateAsync({
+        documentId: snapshot.documentId,
+        storyId: snapshot.storyId ?? undefined,
+        title: snapshot.title,
+        body: snapshot.body,
+      });
+      markSaved();
     } catch (e) {
       console.error('Auto-save failed:', e);
     }
-  }, [isDirty, saveDocument]);
+  }, [upsertDocument, markSaved]);
 
-  // Auto-save every 5 minutes
   useEffect(() => {
     intervalRef.current = setInterval(handleSave, 5 * 60 * 1000);
     return () => {
@@ -26,17 +34,19 @@ export function Editor() {
     };
   }, [handleSave]);
 
-  // Handle Ctrl+S manual save
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 's') {
         e.preventDefault();
-        handleSave();
+        void handleSave();
       }
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [handleSave]);
+
+  // Reference isDirty so re-renders keep handleSave snapshot fresh; saving uses store snapshot directly.
+  void isDirty;
 
   const themeClasses = {
     light: 'bg-white text-gray-900',
@@ -48,7 +58,6 @@ export function Editor() {
     <div
       className={`flex-1 flex flex-col w-full h-full ${themeClasses[theme]} transition-colors duration-300 mx-auto max-w-4xl`}
     >
-      {/* Title */}
       <input
         type="text"
         value={title}
@@ -63,7 +72,6 @@ export function Editor() {
         }}
       />
 
-      {/* Body */}
       <textarea
         ref={bodyRef}
         value={body}

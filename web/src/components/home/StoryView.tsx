@@ -1,11 +1,6 @@
 'use client';
 
 import {
-  ArrowDown,
-  ArrowDownToLine,
-  ArrowRightLeft,
-  ArrowUp,
-  ArrowUpToLine,
   EllipsisVertical,
   FileText,
   ImagePlus,
@@ -21,13 +16,15 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '~components/ui/dropdown-menu';
 import { useEditorStore } from '~store/useEditorStore';
-import { DocumentMovePosition, useNavigationStore } from '~store/useNavigationStore';
+import { useNavigationStore } from '~store/useNavigationStore';
+import { useStoryQuery, useWorldQuery } from '~lib/queries/story';
+import {
+  useDeleteDocumentMutation,
+  useUpsertDocumentMutation,
+} from '~lib/mutations/story';
 
 function summarizeDocument(body: string): string {
   const trimmed = body.trim();
@@ -53,52 +50,55 @@ function promptForTitle(kind: string, currentTitle: string): string | null {
   return nextTitle.trim() || currentTitle;
 }
 
+function generateUntitledDocument(existing: string[]): string {
+  let i = 1;
+  while (existing.includes(`Untitled Document ${i}`)) i += 1;
+  return `Untitled Document ${i}`;
+}
+
 export function StoryView() {
-  const {
-    worlds,
-    currentStory,
-    currentWorld,
-    createDocument,
-    deleteDocument,
-    moveDocumentToStory,
-    moveDocumentPosition,
-    updateDocument,
-    navigateToEditor,
-  } = useNavigationStore();
+  const { currentWorldId, currentStoryId, navigateToEditor } = useNavigationStore();
+  const { data: currentStory } = useStoryQuery(currentStoryId);
+  const { data: currentWorld } = useWorldQuery(currentWorldId);
   const { loadDocument } = useEditorStore();
+  const upsertDocument = useUpsertDocumentMutation();
+  const deleteDocument = useDeleteDocumentMutation();
 
   const documents = currentStory?.documents ?? [];
 
   const handleAddDocument = () => {
     if (!currentStory) return;
-
-    createDocument(currentStory.id);
+    upsertDocument.mutate({
+      storyId: currentStory.storyId,
+      title: generateUntitledDocument(documents.map((d) => d.title)),
+      body: '',
+    });
   };
 
   const handleOpenDocument = (documentId: string) => {
-    if (!currentStory || !currentWorld?.id) return;
+    if (!currentStory || !currentWorldId) return;
 
-    const document = currentStory.documents.find((entry) => entry.id === documentId);
+    const document = documents.find((entry) => entry.documentId === documentId);
     if (!document) return;
 
     loadDocument({
-      id: document.id,
+      id: document.documentId,
       title: document.title,
       body: document.body,
       storyId: document.storyId,
     });
-    navigateToEditor(document.id, document.storyId, currentWorld?.id);
+    navigateToEditor(document.documentId, document.storyId, currentWorldId);
   };
 
   const handleRenameDocument = (documentId: string, currentTitle: string) => {
     const nextTitle = promptForTitle('document', currentTitle);
     if (!nextTitle) return;
-    updateDocument(documentId, { title: nextTitle });
+    upsertDocument.mutate({ documentId, title: nextTitle });
   };
 
   const handleDeleteDocument = (documentId: string, title: string) => {
     if (!window.confirm(`Delete "${title}"?`)) return;
-    deleteDocument(documentId);
+    deleteDocument.mutate(documentId);
   };
 
   const totalCharacters = documents.reduce((sum, document) => sum + document.body.length, 0);
@@ -122,140 +122,61 @@ export function StoryView() {
     >
       {documents.length > 0 ? (
         <section className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-          {documents.map((document, index) => {
-            const moveTargets = worlds.flatMap((world) =>
-              world.stories
-                .filter((story) => story.id !== currentStory?.id)
-                .map((story) => ({
-                  worldName: world.title,
-                  storyId: story.id,
-                  storyName: story.title,
-                })),
-            );
-
-            return (
-              <CatalogCard
-                key={document.id}
-                itemLabel="Document"
-                title={document.title}
-                description={summarizeDocument(document.body)}
-                meta={`#${index + 1} in story Â· ${document.body.length.toLocaleString()} characters`}
-                badgeText="Document"
-                coverImage={null}
-                accentClassName="from-cyan-500 via-sky-500 to-indigo-500"
-                Icon={FileText}
-                onOpen={() => handleOpenDocument(document.id)}
-                onUploadCover={() => {}}
-                menuContent={({ openCoverPicker }) => (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        type="button"
-                        size="icon-sm"
-                        variant="secondary"
-                        className="bg-slate-950/75 text-white hover:bg-slate-950"
-                        aria-label={`Document actions for ${document.title}`}
-                      >
-                        <EllipsisVertical />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-60">
-                      <DropdownMenuLabel>{document.title}</DropdownMenuLabel>
-                      <DropdownMenuItem onClick={() => handleOpenDocument(document.id)}>
-                        <FileText />
-                        Open document
-                      </DropdownMenuItem>
-                      <DropdownMenuSub>
-                        <DropdownMenuSubTrigger>
-                          <ArrowRightLeft />
-                          Change story
-                        </DropdownMenuSubTrigger>
-                        <DropdownMenuSubContent className="w-64">
-                          {moveTargets.length > 0 ? (
-                            moveTargets.map((target) => (
-                              <DropdownMenuItem
-                                key={`${document.id}-${target.storyId}`}
-                                onClick={() => moveDocumentToStory(document.id, target.storyId)}
-                              >
-                                {target.storyName}
-                                <span className="ml-auto text-xs text-muted-foreground">
-                                  {target.worldName}
-                                </span>
-                              </DropdownMenuItem>
-                            ))
-                          ) : (
-                            <DropdownMenuItem disabled>No other stories yet</DropdownMenuItem>
-                          )}
-                        </DropdownMenuSubContent>
-                      </DropdownMenuSub>
-                      <DropdownMenuSub>
-                        <DropdownMenuSubTrigger>
-                          <ArrowUpDownIcon />
-                          Change position
-                        </DropdownMenuSubTrigger>
-                        <DropdownMenuSubContent className="w-52">
-                          <DropdownMenuItem
-                            disabled={index === 0}
-                            onClick={() =>
-                              moveDocumentPosition(document.id, DocumentMovePosition.first)
-                            }
-                          >
-                            <ArrowUpToLine />
-                            Move to first
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            disabled={index === 0}
-                            onClick={() =>
-                              moveDocumentPosition(document.id, DocumentMovePosition.earlier)
-                            }
-                          >
-                            <ArrowUp />
-                            Move earlier
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            disabled={index === documents.length - 1}
-                            onClick={() =>
-                              moveDocumentPosition(document.id, DocumentMovePosition.later)
-                            }
-                          >
-                            <ArrowDown />
-                            Move later
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            disabled={index === documents.length - 1}
-                            onClick={() =>
-                              moveDocumentPosition(document.id, DocumentMovePosition.last)
-                            }
-                          >
-                            <ArrowDownToLine />
-                            Move to last
-                          </DropdownMenuItem>
-                        </DropdownMenuSubContent>
-                      </DropdownMenuSub>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        onClick={() => handleRenameDocument(document.id, document.title)}
-                      >
-                        <PencilLine />
-                        Rename document
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={openCoverPicker}>
-                        <ImagePlus />
-                        Upload cover image
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        variant="destructive"
-                        onClick={() => handleDeleteDocument(document.id, document.title)}
-                      >
-                        <Trash2 />
-                        Delete document
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                )}
-              />
-            );
-          })}
+          {documents.map((document, index) => (
+            <CatalogCard
+              key={document.documentId}
+              itemLabel="Document"
+              title={document.title}
+              description={summarizeDocument(document.body)}
+              meta={`#${index + 1} in story · ${document.body.length.toLocaleString()} characters`}
+              badgeText="Document"
+              coverImage={null}
+              accentClassName="from-cyan-500 via-sky-500 to-indigo-500"
+              Icon={FileText}
+              onOpen={() => handleOpenDocument(document.documentId)}
+              onUploadCover={() => {}}
+              menuContent={({ openCoverPicker }) => (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      type="button"
+                      size="icon-sm"
+                      variant="secondary"
+                      className="bg-slate-950/75 text-white hover:bg-slate-950"
+                      aria-label={`Document actions for ${document.title}`}
+                    >
+                      <EllipsisVertical />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-60">
+                    <DropdownMenuLabel>{document.title}</DropdownMenuLabel>
+                    <DropdownMenuItem onClick={() => handleOpenDocument(document.documentId)}>
+                      <FileText />
+                      Open document
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={() => handleRenameDocument(document.documentId, document.title)}
+                    >
+                      <PencilLine />
+                      Rename document
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={openCoverPicker}>
+                      <ImagePlus />
+                      Upload cover image
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      variant="destructive"
+                      onClick={() => handleDeleteDocument(document.documentId, document.title)}
+                    >
+                      <Trash2 />
+                      Delete document
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+            />
+          ))}
         </section>
       ) : (
         <section className="rounded-[28px] border border-dashed border-slate-300 bg-white/70 px-6 py-12 text-center shadow-[0_15px_45px_-35px_rgba(15,23,42,0.45)]">
@@ -274,14 +195,5 @@ export function StoryView() {
         </section>
       )}
     </CatalogShell>
-  );
-}
-
-function ArrowUpDownIcon() {
-  return (
-    <span className="inline-flex items-center gap-0.5">
-      <ArrowUp className="size-3.5" />
-      <ArrowDown className="size-3.5" />
-    </span>
   );
 }

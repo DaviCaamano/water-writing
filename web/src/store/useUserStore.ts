@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { Store, useStore } from '@tanstack/react-store';
 import { api } from '~lib/api';
 import { LoginResponse } from '#types/shared/response';
-import { UserState } from '~types/state';
+import { UserState } from '~types/state/user-state';
 
 export interface UserActions {
   login: (email: string, password: string) => Promise<void>;

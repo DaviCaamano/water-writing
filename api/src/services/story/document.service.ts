@@ -29,6 +29,74 @@ export async function fetchDocument(documentId: string): Promise<DocumentRespons
   };
 }
 
+export async function fetchUserDocument(
+  userId: string,
+  documentId: string,
+): Promise<DocumentResponse> {
+  const result = await pool.query<DocumentRow>(
+    `SELECT d.*
+     FROM documents d
+     JOIN stories s ON s.story_id = d.story_id
+     JOIN worlds w ON w.world_id = s.world_id
+     WHERE d.document_id = $1 AND w.user_id = $2`,
+    [documentId, userId],
+  );
+  if (result.rows.length === 0) {
+    throw new DocumentNotFoundError();
+  }
+  const row = result.rows[0];
+  return {
+    documentId: row.document_id,
+    storyId: row.story_id,
+    title: row.title,
+    body: row.body ?? '',
+    predecessorId: row.predecessor_id,
+    successorId: row.successor_id,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+export async function deleteDocument(userId: string, documentId: string): Promise<void> {
+  return withTransaction(async (client) => {
+    const existing = await client.query<DocumentRow>(
+      `SELECT d.* FROM documents d
+       JOIN stories s ON s.story_id = d.story_id
+       JOIN worlds w ON w.world_id = s.world_id
+       WHERE d.document_id = $1 AND w.user_id = $2
+       FOR UPDATE`,
+      [documentId, userId],
+    );
+    if (existing.rows.length === 0) {
+      throw new DocumentNotFoundError();
+    }
+    const { predecessor_id, successor_id } = existing.rows[0];
+
+    if (predecessor_id && successor_id) {
+      await client.query(
+        'UPDATE documents SET successor_id = $1, updated_at = NOW() WHERE document_id = $2',
+        [successor_id, predecessor_id],
+      );
+      await client.query(
+        'UPDATE documents SET predecessor_id = $1, updated_at = NOW() WHERE document_id = $2',
+        [predecessor_id, successor_id],
+      );
+    } else if (predecessor_id) {
+      await client.query(
+        'UPDATE documents SET successor_id = NULL, updated_at = NOW() WHERE document_id = $1',
+        [predecessor_id],
+      );
+    } else if (successor_id) {
+      await client.query(
+        'UPDATE documents SET predecessor_id = NULL, updated_at = NOW() WHERE document_id = $1',
+        [successor_id],
+      );
+    }
+
+    await client.query('DELETE FROM documents WHERE document_id = $1', [documentId]);
+  });
+}
+
 export async function upsertDocument(userId: string, data: UpsertDocumentBody) {
   const { documentId, title, body, storyId } = data;
 

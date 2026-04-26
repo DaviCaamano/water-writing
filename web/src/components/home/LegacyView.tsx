@@ -14,6 +14,11 @@ import {
 } from '~components/ui/dropdown-menu';
 import { useNavigationStore } from '~store/useNavigationStore';
 import { useUserStore } from '~store/useUserStore';
+import { useLegacyQuery } from '~lib/queries/story';
+import {
+  useDeleteWorldMutation,
+  useUpsertWorldMutation,
+} from '~lib/mutations/story';
 
 function summarizeWorld(storyCount: number, documentCount: number): string {
   if (storyCount === 0) {
@@ -33,30 +38,44 @@ function promptForTitle(kind: string, currentTitle: string): string | null {
   return nextTitle.trim() || currentTitle;
 }
 
+function generateUntitled(existing: string[]): string {
+  let i = 1;
+  while (existing.includes(`Untitled World ${i}`)) i += 1;
+  return `Untitled World ${i}`;
+}
+
 export function LegacyView() {
   const { userId } = useUserStore();
-  const { worlds, createWorld, renameWorld, deleteWorld, navigateToWorld } = useNavigationStore();
+  const { navigateToWorld } = useNavigationStore();
+  const { data: worlds = [] } = useLegacyQuery(userId);
+  const upsertWorld = useUpsertWorldMutation();
+  const deleteWorld = useDeleteWorldMutation();
 
   const totalStories = worlds.reduce((sum, world) => sum + world.stories.length, 0);
   const totalDocuments = worlds.reduce(
     (sum, world) =>
-      sum + world.stories.reduce((storySum, story) => storySum + story.documents.length, 0),
+      sum +
+      world.stories.reduce(
+        (storySum, story) => storySum + (story.documents?.length ?? 0),
+        0,
+      ),
     0,
   );
 
   const handleAddWorld = () => {
-    if (userId !== null) createWorld(userId);
+    if (!userId) return;
+    upsertWorld.mutate({ title: generateUntitled(worlds.map((w) => w.title)) });
   };
 
   const handleRenameWorld = (worldId: string, currentTitle: string) => {
     const nextTitle = promptForTitle('world', currentTitle);
     if (!nextTitle) return;
-    renameWorld(worldId, nextTitle);
+    upsertWorld.mutate({ worldId, title: nextTitle });
   };
 
   const handleDeleteWorld = (worldId: string, title: string) => {
     if (!window.confirm(`Delete "${title}"?`)) return;
-    deleteWorld(worldId);
+    deleteWorld.mutate(worldId);
   };
 
   return (
@@ -76,13 +95,13 @@ export function LegacyView() {
         <section className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           {worlds.map((world) => {
             const documentCount = world.stories.reduce(
-              (sum, story) => sum + story.documents.length,
+              (sum, story) => sum + (story.documents?.length ?? 0),
               0,
             );
 
             return (
               <CatalogCard
-                key={world.id}
+                key={world.worldId}
                 itemLabel="World"
                 title={world.title}
                 description={summarizeWorld(world.stories.length, documentCount)}
@@ -91,7 +110,7 @@ export function LegacyView() {
                 coverImage={null}
                 accentClassName="from-sky-600 via-teal-500 to-emerald-500"
                 Icon={Globe2}
-                onOpen={() => navigateToWorld(world.id)}
+                onOpen={() => navigateToWorld(world.worldId)}
                 onUploadCover={() => {}}
                 menuContent={({ openCoverPicker }) => (
                   <DropdownMenu>
@@ -108,12 +127,14 @@ export function LegacyView() {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-60">
                       <DropdownMenuLabel>{world.title}</DropdownMenuLabel>
-                      <DropdownMenuItem onClick={() => navigateToWorld(world.id)}>
+                      <DropdownMenuItem onClick={() => navigateToWorld(world.worldId)}>
                         <Globe2 />
                         Open world
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={() => handleRenameWorld(world.id, world.title)}>
+                      <DropdownMenuItem
+                        onClick={() => handleRenameWorld(world.worldId, world.title)}
+                      >
                         <PencilLine />
                         Rename world
                       </DropdownMenuItem>
@@ -123,7 +144,7 @@ export function LegacyView() {
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         variant="destructive"
-                        onClick={() => handleDeleteWorld(world.id, world.title)}
+                        onClick={() => handleDeleteWorld(world.worldId, world.title)}
                       >
                         <Trash2 />
                         Delete world
