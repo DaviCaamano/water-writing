@@ -11,10 +11,11 @@ import { Separator } from '~components/ui/separator';
 import { Tooltip, TooltipContent, TooltipTrigger } from '~components/ui/tooltip';
 import { Check, Pencil, X } from 'lucide-react';
 import { useUserStore } from '~store/useUserStore';
-import { api } from '~lib/api';
+import { queryApi } from '~lib/api';
 import type { BillingHistoryEntry, BillingResponse, CardInfo } from '~types/story';
 import { Plan } from '#types/shared/enum/plan';
 import { SettingsSection } from '~types/components/settings-modal';
+import { apiRoutes } from '#types/shared/api-route';
 
 interface SettingsModalProps {
   open: boolean;
@@ -157,7 +158,7 @@ function SubscriptionSection() {
 
   const handleCancelSubscription = async () => {
     try {
-      await api('/user/cancel-subscription', { method: 'POST' });
+      await queryApi(apiRoutes.user.subscribe(), { body: { plan, yearly } });
     } catch (e) {
       console.error('Cancel failed:', e);
     }
@@ -315,7 +316,7 @@ function BillingSectionContent({ userId }: { userId: string | null }) {
 
     const loadBilling = async () => {
       try {
-        const data = await api<BillingResponse>(`/users/billing/history/${userId}`);
+        const data = await queryApi<BillingResponse>(apiRoutes.billing.history(userId));
         if (cancelled) return;
 
         setCard(data.card);

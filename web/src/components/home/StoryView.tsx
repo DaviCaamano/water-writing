@@ -27,7 +27,7 @@ import {
   DropdownMenuTrigger,
 } from '~components/ui/dropdown-menu';
 import { useEditorStore } from '~store/useEditorStore';
-import { useNavigationStore } from '~store/useNavigationStore';
+import { DocumentMovePosition, useNavigationStore } from '~store/useNavigationStore';
 
 function summarizeDocument(body: string): string {
   const trimmed = body.trim();
@@ -58,13 +58,11 @@ export function StoryView() {
     worlds,
     currentStory,
     currentWorld,
-    currentWorldId,
     createDocument,
-    renameDocument,
     deleteDocument,
     moveDocumentToStory,
     moveDocumentPosition,
-    updateDocumentCover,
+    updateDocument,
     navigateToEditor,
   } = useNavigationStore();
   const { loadDocument } = useEditorStore();
@@ -78,7 +76,7 @@ export function StoryView() {
   };
 
   const handleOpenDocument = (documentId: string) => {
-    if (!currentStory || !currentWorldId) return;
+    if (!currentStory || !currentWorld?.id) return;
 
     const document = currentStory.documents.find((entry) => entry.id === documentId);
     if (!document) return;
@@ -89,13 +87,13 @@ export function StoryView() {
       body: document.body,
       storyId: document.storyId,
     });
-    navigateToEditor(document.id, document.storyId, currentWorldId);
+    navigateToEditor(document.id, document.storyId, currentWorld?.id);
   };
 
   const handleRenameDocument = (documentId: string, currentTitle: string) => {
     const nextTitle = promptForTitle('document', currentTitle);
     if (!nextTitle) return;
-    renameDocument(documentId, nextTitle);
+    updateDocument(documentId, { title: nextTitle });
   };
 
   const handleDeleteDocument = (documentId: string, title: string) => {
@@ -108,14 +106,14 @@ export function StoryView() {
   return (
     <CatalogShell
       eyebrow="Story view"
-      title={currentStory?.name ?? 'Story documents'}
+      title={currentStory?.title ?? 'Story documents'}
       description={
         currentStory
-          ? `This full-screen catalog holds every document in ${currentStory.name}. Click a card to jump into the editor, or use the ellipsis menu to reorganize the story.`
+          ? `This full-screen catalog holds every document in ${currentStory.title}. Click a card to jump into the editor, or use the ellipsis menu to reorganize the story.`
           : 'Choose a story to manage its document catalog.'
       }
       metrics={[
-        currentWorld ? currentWorld.name : 'No world selected',
+        currentWorld ? currentWorld.title : 'No world selected',
         `${documents.length} document${documents.length === 1 ? '' : 's'}`,
         `${totalCharacters.toLocaleString()} characters`,
       ]}
@@ -129,9 +127,9 @@ export function StoryView() {
               world.stories
                 .filter((story) => story.id !== currentStory?.id)
                 .map((story) => ({
-                  worldName: world.name,
+                  worldName: world.title,
                   storyId: story.id,
-                  storyName: story.name,
+                  storyName: story.title,
                 })),
             );
 
@@ -143,11 +141,11 @@ export function StoryView() {
                 description={summarizeDocument(document.body)}
                 meta={`#${index + 1} in story Â· ${document.body.length.toLocaleString()} characters`}
                 badgeText="Document"
-                coverImage={document.coverImage}
+                coverImage={null}
                 accentClassName="from-cyan-500 via-sky-500 to-indigo-500"
                 Icon={FileText}
                 onOpen={() => handleOpenDocument(document.id)}
-                onUploadCover={(coverImage) => updateDocumentCover(document.id, coverImage)}
+                onUploadCover={() => {}}
                 menuContent={({ openCoverPicker }) => (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -198,28 +196,36 @@ export function StoryView() {
                         <DropdownMenuSubContent className="w-52">
                           <DropdownMenuItem
                             disabled={index === 0}
-                            onClick={() => moveDocumentPosition(document.id, 'first')}
+                            onClick={() =>
+                              moveDocumentPosition(document.id, DocumentMovePosition.first)
+                            }
                           >
                             <ArrowUpToLine />
                             Move to first
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             disabled={index === 0}
-                            onClick={() => moveDocumentPosition(document.id, 'earlier')}
+                            onClick={() =>
+                              moveDocumentPosition(document.id, DocumentMovePosition.earlier)
+                            }
                           >
                             <ArrowUp />
                             Move earlier
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             disabled={index === documents.length - 1}
-                            onClick={() => moveDocumentPosition(document.id, 'later')}
+                            onClick={() =>
+                              moveDocumentPosition(document.id, DocumentMovePosition.later)
+                            }
                           >
                             <ArrowDown />
                             Move later
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             disabled={index === documents.length - 1}
-                            onClick={() => moveDocumentPosition(document.id, 'last')}
+                            onClick={() =>
+                              moveDocumentPosition(document.id, DocumentMovePosition.last)
+                            }
                           >
                             <ArrowDownToLine />
                             Move to last

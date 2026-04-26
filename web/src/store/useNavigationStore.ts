@@ -1,19 +1,19 @@
 import { useMemo } from 'react';
 import { Store, useStore } from '@tanstack/react-store';
-import { api } from '~lib/api';
-import {
-  createMockLegacyWorlds,
-  mapLegacyStory,
-  mapLegacyWorld,
-  mapLegacyWorlds,
-  type LegacyStoryResponse,
-  type LegacyWorldResponse,
-} from '~lib/legacy-data';
-import type { Story, StoryDocument, ViewMode, World } from '~types/story';
+import { queryApi } from '~lib/api';
+import { Document, Story, ViewMode, World } from '~types/story';
+import { mapStoryState, mapWorldState } from '~utils/map-story-state';
+import { StoryResponse, WorldResponse } from '#types/shared/response';
+import { apiRoutes } from '#types/shared/api-route';
 
 const IS_DEVELOPMENT = process.env.NODE_ENV === 'development';
 
-type DocumentMovePosition = 'first' | 'earlier' | 'later' | 'last';
+export enum DocumentMovePosition {
+  first = 'first',
+  earlier = 'earlier',
+  later = 'later',
+  last = 'last',
+}
 
 interface NavigationState {
   currentView: ViewMode;
@@ -21,14 +21,12 @@ interface NavigationState {
   currentStoryId: string | null;
   currentDocumentId: string | null;
   worlds: World[];
-  currentStory: Story | null;
-  currentWorld: World | null;
   selectedDocumentId: string | null;
 }
 
 interface CreatedItem {
   id: string;
-  name: string;
+  title: string;
 }
 
 interface StoryLocation {
@@ -39,7 +37,7 @@ interface StoryLocation {
 interface DocumentLocation {
   world: World;
   story: Story;
-  document: StoryDocument;
+  document: Document;
 }
 
 interface NavigationActions {
@@ -53,25 +51,20 @@ interface NavigationActions {
   loadStory: (storyId: string) => Promise<void>;
   loadWorld: (worldId: string) => Promise<void>;
   loadLegacy: () => Promise<void>;
-  createWorld: () => CreatedItem;
-  renameWorld: (worldId: string, name: string) => void;
+  createWorld: (userId: string) => CreatedItem;
+  renameWorld: (worldId: string, title: string) => void;
   deleteWorld: (worldId: string) => void;
   updateWorldCover: (worldId: string, coverImage: string) => void;
   createStory: (worldId: string) => CreatedItem | null;
-  renameStory: (storyId: string, name: string) => void;
+  renameStory: (storyId: string, title: string) => void;
   deleteStory: (storyId: string) => void;
   moveStoryToWorld: (storyId: string, targetWorldId: string) => void;
-  updateStoryCover: (storyId: string, coverImage: string) => void;
+  updateStory: (storyId: string, updatingStory: Partial<Story>) => void;
   createDocument: (storyId: string) => CreatedItem | null;
-  renameDocument: (documentId: string, title: string) => void;
   deleteDocument: (documentId: string) => void;
   moveDocumentToStory: (documentId: string, targetStoryId: string) => void;
   moveDocumentPosition: (documentId: string, position: DocumentMovePosition) => void;
-  updateDocumentCover: (documentId: string, coverImage: string) => void;
-  updateDocumentContent: (
-    documentId: string,
-    updates: Pick<StoryDocument, 'title' | 'body'>,
-  ) => void;
+  updateDocument: (documentId: string, updates: Partial<Document>) => void;
 }
 
 function createId(prefix: string): string {
@@ -82,7 +75,7 @@ function createId(prefix: string): string {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
-function createUntitledName(existingNames: string[], baseName: string): string {
+function generateTitle(existingNames: string[], baseName: string): string {
   let index = 1;
 
   while (existingNames.includes(`${baseName} ${index}`)) {
@@ -101,44 +94,31 @@ function moveItem<T>(items: T[], fromIndex: number, toIndex: number): T[] {
   return nextItems;
 }
 
-function normalizeDocuments(documents: StoryDocument[], storyId: string): StoryDocument[] {
-  return documents.map((document, index) => ({
-    ...document,
-    storyId,
-    predecessorId: index > 0 ? documents[index - 1].id : null,
-    successorId: index < documents.length - 1 ? documents[index + 1].id : null,
-    characters: document.characters ?? [],
-    places: document.places ?? [],
-    coverImage: document.coverImage ?? null,
-  }));
-}
-
 function normalizeStory(story: Story): Story {
-  const documents = normalizeDocuments(story.documents, story.id);
+  const source = story.documents;
+  const documents: Document[] = source.map((document, index) => ({
+    ...document,
+    storyId: story.id,
+    predecessorId: index > 0 ? source[index - 1].id : null,
+    successorId: index < source.length - 1 ? source[index + 1].id : null,
+  }));
 
   return {
     ...story,
     documents,
-    documentCount: documents.length,
-    coverImage: story.coverImage ?? null,
   };
 }
 
-function normalizeWorld(world: World): World {
-  return {
+function normalizeWorlds(worlds: World[]): World[] {
+  return worlds.map((world: World) => ({
     ...world,
-    coverImage: world.coverImage ?? null,
     stories: world.stories.map((story) =>
       normalizeStory({
         ...story,
         worldId: world.id,
       }),
     ),
-  };
-}
-
-function normalizeWorlds(worlds: World[]): World[] {
-  return worlds.map(normalizeWorld);
+  }));
 }
 
 function findWorld(worlds: World[], worldId: string | null): World | null {
@@ -174,44 +154,17 @@ function findDocument(worlds: World[], documentId: string | null): DocumentLocat
   return null;
 }
 
-function getFirstWorld(worlds: World[]): World | null {
-  return worlds[0] ?? null;
-}
-
-function getFirstStory(world: World | null): Story | null {
-  return world?.stories[0] ?? null;
-}
-
-function getFirstDocument(story: Story | null): StoryDocument | null {
-  return story?.documents[0] ?? null;
-}
-
 function deriveNavigationState(state: NavigationState): NavigationState {
   const worlds = normalizeWorlds(state.worlds);
-  const explicitWorld = findWorld(worlds, state.currentWorldId);
-  const explicitStory = findStory(worlds, state.currentStoryId);
-  const explicitDocument = findDocument(worlds, state.currentDocumentId);
-
-  const currentWorld =
-    explicitWorld ?? explicitStory?.world ?? explicitDocument?.world ?? getFirstWorld(worlds);
-  const explicitStoryInCurrentWorld =
-    explicitStory && explicitStory.world.id === currentWorld?.id ? explicitStory.story : null;
-  const explicitDocumentStoryInCurrentWorld =
-    explicitDocument && explicitDocument.world.id === currentWorld?.id
-      ? explicitDocument.story
-      : null;
-  const matchingStory =
-    currentWorld?.stories.find((story) => story.id === state.currentStoryId) ?? null;
-
+  const currentWorld = findWorld(worlds, state.currentWorldId) ?? worlds[0] ?? null;
   const currentStory =
-    matchingStory ??
-    explicitStoryInCurrentWorld ??
-    explicitDocumentStoryInCurrentWorld ??
-    getFirstStory(currentWorld);
-  const matchingDocument =
-    currentStory?.documents.find((document) => document.id === state.currentDocumentId) ?? null;
-
-  const currentDocument = matchingDocument ?? getFirstDocument(currentStory);
+    currentWorld?.stories.find((story) => story.id === state.currentStoryId) ??
+    currentWorld?.stories[0] ??
+    null;
+  const currentDocument =
+    currentStory?.documents.find((document) => document.id === state.currentDocumentId) ??
+    currentStory?.documents[0] ??
+    null;
 
   const selectedDocumentId =
     state.selectedDocumentId &&
@@ -223,11 +176,53 @@ function deriveNavigationState(state: NavigationState): NavigationState {
     ...state,
     worlds,
     currentWorldId: currentWorld?.id ?? null,
-    currentWorld,
     currentStoryId: currentStory?.id ?? null,
-    currentStory,
     currentDocumentId: currentDocument?.id ?? null,
     selectedDocumentId,
+  };
+}
+
+function mapWorld(
+  state: NavigationState,
+  worldId: string,
+  updater: (world: World) => World,
+): NavigationState {
+  return {
+    ...state,
+    worlds: state.worlds.map((world) => (world.id === worldId ? updater(world) : world)),
+  };
+}
+
+function mapStory(
+  state: NavigationState,
+  storyId: string,
+  updater: (story: Story) => Story,
+): NavigationState {
+  return {
+    ...state,
+    worlds: state.worlds.map((world) => ({
+      ...world,
+      stories: world.stories.map((story) => (story.id === storyId ? updater(story) : story)),
+    })),
+  };
+}
+
+function mapDocument(
+  state: NavigationState,
+  documentId: string,
+  updater: (document: Document) => Document,
+): NavigationState {
+  return {
+    ...state,
+    worlds: state.worlds.map((world) => ({
+      ...world,
+      stories: world.stories.map((story) => ({
+        ...story,
+        documents: story.documents.map((document) =>
+          document.id === documentId ? updater(document) : document,
+        ),
+      })),
+    })),
   };
 }
 
@@ -236,20 +231,13 @@ function updateNavigationState(updater: (state: NavigationState) => NavigationSt
 }
 
 function createInitialNavigationState(): NavigationState {
-  const worlds = IS_DEVELOPMENT ? createMockLegacyWorlds() : [];
-  const initialWorld = getFirstWorld(worlds);
-  const initialStory = getFirstStory(initialWorld);
-  const initialDocument = getFirstDocument(initialStory);
-
   return deriveNavigationState({
-    currentView: 'editor',
-    currentWorldId: initialWorld?.id ?? null,
-    currentStoryId: initialStory?.id ?? null,
-    currentDocumentId: initialDocument?.id ?? null,
-    worlds,
-    currentStory: initialStory ?? null,
-    currentWorld: initialWorld ?? null,
-    selectedDocumentId: initialDocument?.id ?? null,
+    currentView: ViewMode.editor,
+    currentWorldId: null,
+    currentStoryId: null,
+    currentDocumentId: null,
+    worlds: [],
+    selectedDocumentId: null,
   });
 }
 
@@ -263,12 +251,12 @@ const navigationActions: NavigationActions = {
   navigateUp: () => {
     updateNavigationState((state) => {
       switch (state.currentView) {
-        case 'editor':
-          return { ...state, currentView: 'story-view' };
-        case 'story-view':
-          return { ...state, currentView: 'world-view' };
-        case 'world-view':
-          return { ...state, currentView: 'legacy' };
+        case ViewMode.editor:
+          return { ...state, currentView: ViewMode.storyView };
+        case ViewMode.storyView:
+          return { ...state, currentView: ViewMode.worldView };
+        case ViewMode.worldView:
+          return { ...state, currentView: ViewMode.legacy };
         default:
           return state;
       }
@@ -278,7 +266,7 @@ const navigationActions: NavigationActions = {
   navigateToEditor: (documentId, storyId, worldId) => {
     updateNavigationState((state) => ({
       ...state,
-      currentView: 'editor',
+      currentView: ViewMode.editor,
       currentWorldId: worldId,
       currentStoryId: storyId,
       currentDocumentId: documentId,
@@ -289,13 +277,13 @@ const navigationActions: NavigationActions = {
   navigateToStory: (storyId, worldId) => {
     updateNavigationState((state) => ({
       ...state,
-      currentView: 'story-view',
+      currentView: ViewMode.storyView,
       currentWorldId: worldId,
       currentStoryId: storyId,
       selectedDocumentId: null,
     }));
 
-    if (!IS_DEVELOPMENT && !navigationStore.state.currentStory) {
+    if (!findStory(navigationStore.state.worlds, storyId)) {
       void navigationActions.loadStory(storyId);
     }
   },
@@ -303,12 +291,12 @@ const navigationActions: NavigationActions = {
   navigateToWorld: (worldId) => {
     updateNavigationState((state) => ({
       ...state,
-      currentView: 'world-view',
+      currentView: ViewMode.worldView,
       currentWorldId: worldId,
       selectedDocumentId: null,
     }));
 
-    if (!IS_DEVELOPMENT && !navigationStore.state.currentWorld) {
+    if (!IS_DEVELOPMENT && !findWorld(navigationStore.state.worlds, worldId)) {
       void navigationActions.loadWorld(worldId);
     }
   },
@@ -316,7 +304,7 @@ const navigationActions: NavigationActions = {
   navigateToLegacy: () => {
     updateNavigationState((state) => ({
       ...state,
-      currentView: 'legacy',
+      currentView: ViewMode.legacy,
       selectedDocumentId: null,
     }));
 
@@ -330,22 +318,9 @@ const navigationActions: NavigationActions = {
   },
 
   loadStory: async (storyId) => {
-    if (IS_DEVELOPMENT) {
-      const storyLocation = findStory(navigationStore.state.worlds, storyId);
-      if (!storyLocation) return;
-
-      updateNavigationState((state) => ({
-        ...state,
-        currentView: 'story-view',
-        currentWorldId: storyLocation.world.id,
-        currentStoryId: storyLocation.story.id,
-      }));
-      return;
-    }
-
     try {
-      const storyResponse = await api<LegacyStoryResponse>(`/story/${storyId}`);
-      const story = mapLegacyStory(storyResponse);
+      const storyResponse = await queryApi<StoryResponse>(apiRoutes.story.fetchStory(storyId));
+      const story = mapStoryState(storyResponse);
 
       updateNavigationState((state) => ({
         ...state,
@@ -357,7 +332,7 @@ const navigationActions: NavigationActions = {
               }
             : world,
         ),
-        currentView: 'story-view',
+        currentView: ViewMode.storyView,
         currentWorldId: story.worldId,
         currentStoryId: story.id,
       }));
@@ -370,20 +345,20 @@ const navigationActions: NavigationActions = {
     if (IS_DEVELOPMENT) {
       updateNavigationState((state) => ({
         ...state,
-        currentView: 'world-view',
+        currentView: ViewMode.worldView,
         currentWorldId: worldId,
       }));
       return;
     }
 
     try {
-      const worldResponse = await api<LegacyWorldResponse>(`/world/${worldId}`);
-      const world = mapLegacyWorld(worldResponse);
+      const worldResponse = await queryApi<WorldResponse>(apiRoutes.story.fetchWorld(worldId));
+      const world = mapWorldState(worldResponse);
 
       updateNavigationState((state) => ({
         ...state,
         worlds: [world, ...state.worlds.filter((entry) => entry.id !== world.id)],
-        currentView: 'world-view',
+        currentView: ViewMode.worldView,
         currentWorldId: world.id,
       }));
     } catch (error) {
@@ -393,32 +368,33 @@ const navigationActions: NavigationActions = {
 
   loadLegacy: async () => {
     if (IS_DEVELOPMENT) {
-      updateNavigationState((state) => ({ ...state, currentView: 'legacy' }));
+      updateNavigationState((state) => ({ ...state, currentView: ViewMode.legacy }));
       return;
     }
 
     try {
-      const worlds = mapLegacyWorlds(await api<LegacyWorldResponse[]>('/worlds'));
+      const legacyResponse = await queryApi<WorldResponse[]>(apiRoutes.story.fetchLegacy());
+      const worlds = legacyResponse.map(mapWorldState);
       updateNavigationState((state) => ({
         ...state,
         worlds,
-        currentView: 'legacy',
+        currentView: ViewMode.legacy,
       }));
     } catch (error) {
       console.error('Failed to load legacy:', error);
     }
   },
 
-  createWorld: () => {
-    const name = createUntitledName(
-      navigationStore.state.worlds.map((world) => world.name),
+  createWorld: (userId: string) => {
+    const title = generateTitle(
+      navigationStore.state.worlds.map((world) => world.title),
       'Untitled World',
     );
     const createdWorld: World = {
       id: createId('world'),
-      name,
       stories: [],
-      coverImage: null,
+      title,
+      userId,
     };
 
     updateNavigationState((state) => ({
@@ -427,123 +403,74 @@ const navigationActions: NavigationActions = {
       currentWorldId: createdWorld.id,
     }));
 
-    return { id: createdWorld.id, name: createdWorld.name };
+    return { id: createdWorld.id, title: createdWorld.title };
   },
 
-  renameWorld: (worldId, name) => {
-    updateNavigationState((state) => ({
-      ...state,
-      worlds: state.worlds.map((world) =>
-        world.id === worldId
-          ? {
-              ...world,
-              name,
-            }
-          : world,
-      ),
-    }));
+  renameWorld: (worldId, title) => {
+    updateNavigationState((state) => mapWorld(state, worldId, (world) => ({ ...world, title })));
   },
 
   deleteWorld: (worldId) => {
-    updateNavigationState((state) => {
-      const deletingCurrentWorld = state.currentWorldId === worldId;
-
-      return {
-        ...state,
-        worlds: state.worlds.filter((world) => world.id !== worldId),
-        currentView: deletingCurrentWorld ? 'legacy' : state.currentView,
-        currentWorldId: deletingCurrentWorld ? null : state.currentWorldId,
-        currentStoryId: deletingCurrentWorld ? null : state.currentStoryId,
-        currentDocumentId: deletingCurrentWorld ? null : state.currentDocumentId,
-        selectedDocumentId: deletingCurrentWorld ? null : state.selectedDocumentId,
-      };
-    });
+    updateNavigationState((state) => ({
+      ...state,
+      worlds: state.worlds.filter((world) => world.id !== worldId),
+      currentView: state.currentWorldId === worldId ? ViewMode.legacy : state.currentView,
+    }));
   },
 
   updateWorldCover: (worldId, coverImage) => {
-    updateNavigationState((state) => ({
-      ...state,
-      worlds: state.worlds.map((world) =>
-        world.id === worldId
-          ? {
-              ...world,
-              coverImage,
-            }
-          : world,
-      ),
-    }));
+    updateNavigationState((state) =>
+      mapWorld(state, worldId, (world) => ({ ...world, coverImage })),
+    );
   },
 
   createStory: (worldId) => {
     const world = findWorld(navigationStore.state.worlds, worldId);
     if (!world) return null;
 
-    const name = createUntitledName(
-      world.stories.map((story) => story.name),
+    const title = generateTitle(
+      world.stories.map((story) => story.title),
       'Untitled Story',
     );
     const createdStory: Story = {
       id: createId('story'),
-      name,
+      title,
       worldId,
-      documentCount: 0,
       documents: [],
-      coverImage: null,
+      predecessorId: !world.stories.length
+        ? null
+        : (world.stories[world.stories.length - 1]?.id ?? null),
+      successorId: null,
     };
 
     updateNavigationState((state) => ({
-      ...state,
-      worlds: state.worlds.map((entry) =>
-        entry.id === worldId
-          ? {
-              ...entry,
-              stories: [createdStory, ...entry.stories],
-            }
-          : entry,
-      ),
+      ...mapWorld(state, worldId, (world) => ({
+        ...world,
+        stories: [createdStory, ...world.stories],
+      })),
       currentWorldId: worldId,
       currentStoryId: createdStory.id,
     }));
 
-    return { id: createdStory.id, name: createdStory.name };
+    return { id: createdStory.id, title: createdStory.title };
   },
 
-  renameStory: (storyId, name) => {
+  renameStory: (storyId, title) => {
+    updateNavigationState((state) => mapStory(state, storyId, (story) => ({ ...story, title })));
+  },
+
+  deleteStory: (storyId) => {
     updateNavigationState((state) => ({
       ...state,
       worlds: state.worlds.map((world) => ({
         ...world,
-        stories: world.stories.map((story) =>
-          story.id === storyId
-            ? {
-                ...story,
-                name,
-              }
-            : story,
-        ),
+        stories: world.stories.filter((story) => story.id !== storyId),
       })),
+      currentView:
+        state.currentStoryId === storyId && state.currentView === ViewMode.storyView
+          ? ViewMode.worldView
+          : state.currentView,
     }));
-  },
-
-  deleteStory: (storyId) => {
-    updateNavigationState((state) => {
-      const deletingCurrentStory = state.currentStoryId === storyId;
-
-      return {
-        ...state,
-        worlds: state.worlds.map((world) => ({
-          ...world,
-          stories: world.stories.filter((story) => story.id !== storyId),
-        })),
-        currentView:
-          deletingCurrentStory && state.currentView === 'story-view'
-            ? 'world-view'
-            : state.currentView,
-        currentStoryId: deletingCurrentStory ? null : state.currentStoryId,
-        currentDocumentId: deletingCurrentStory ? null : state.currentDocumentId,
-        selectedDocumentId: deletingCurrentStory ? null : state.selectedDocumentId,
-      };
-    });
   },
 
   moveStoryToWorld: (storyId, targetWorldId) => {
@@ -582,55 +509,33 @@ const navigationActions: NavigationActions = {
     });
   },
 
-  updateStoryCover: (storyId, coverImage) => {
-    updateNavigationState((state) => ({
-      ...state,
-      worlds: state.worlds.map((world) => ({
-        ...world,
-        stories: world.stories.map((story) =>
-          story.id === storyId
-            ? {
-                ...story,
-                coverImage,
-              }
-            : story,
-        ),
-      })),
-    }));
+  updateStory: (storyId, updatingStory) => {
+    updateNavigationState((state) =>
+      mapStory(state, storyId, (story) => ({ ...story, ...updatingStory })),
+    );
   },
 
   createDocument: (storyId) => {
     const storyLocation = findStory(navigationStore.state.worlds, storyId);
     if (!storyLocation) return null;
 
-    const name = createUntitledName(
+    const title = generateTitle(
       storyLocation.story.documents.map((document) => document.title),
       'Untitled Document',
     );
-    const createdDocument: StoryDocument = {
+    const createdDocument: Document = {
       id: createId('document'),
-      title: name,
+      title: title,
       body: '',
       storyId,
       predecessorId: null,
       successorId: null,
-      characters: [],
-      places: [],
-      coverImage: null,
     };
 
     updateNavigationState((state) => ({
-      ...state,
-      worlds: state.worlds.map((world) => ({
-        ...world,
-        stories: world.stories.map((story) =>
-          story.id === storyId
-            ? {
-                ...story,
-                documents: [createdDocument, ...story.documents],
-              }
-            : story,
-        ),
+      ...mapStory(state, storyId, (story) => ({
+        ...story,
+        documents: [createdDocument, ...story.documents],
       })),
       currentWorldId: storyLocation.world.id,
       currentStoryId: storyId,
@@ -638,67 +543,36 @@ const navigationActions: NavigationActions = {
       selectedDocumentId: createdDocument.id,
     }));
 
-    return { id: createdDocument.id, name: createdDocument.title };
+    return { id: createdDocument.id, title: createdDocument.title };
   },
 
-  renameDocument: (documentId, title) => {
+  deleteDocument: (documentId) => {
     updateNavigationState((state) => ({
       ...state,
       worlds: state.worlds.map((world) => ({
         ...world,
         stories: world.stories.map((story) => ({
           ...story,
-          documents: story.documents.map((document) =>
-            document.id === documentId
-              ? {
-                  ...document,
-                  title,
-                }
-              : document,
-          ),
+          documents: story.documents.filter((document) => document.id !== documentId),
         })),
       })),
+      currentView:
+        state.currentDocumentId === documentId && state.currentView === 'editor'
+          ? ViewMode.storyView
+          : state.currentView,
     }));
-  },
-
-  deleteDocument: (documentId) => {
-    updateNavigationState((state) => {
-      const deletingCurrentDocument = state.currentDocumentId === documentId;
-
-      return {
-        ...state,
-        worlds: state.worlds.map((world) => ({
-          ...world,
-          stories: world.stories.map((story) => ({
-            ...story,
-            documents: story.documents.filter((document) => document.id !== documentId),
-          })),
-        })),
-        currentView:
-          deletingCurrentDocument && state.currentView === 'editor'
-            ? 'story-view'
-            : state.currentView,
-        currentDocumentId: deletingCurrentDocument ? null : state.currentDocumentId,
-        selectedDocumentId:
-          state.selectedDocumentId === documentId ? null : state.selectedDocumentId,
-      };
-    });
   },
 
   moveDocumentToStory: (documentId, targetStoryId) => {
     updateNavigationState((state) => {
-      const documentLocation = findDocument(state.worlds, documentId);
-      const targetStoryLocation = findStory(state.worlds, targetStoryId);
-      if (
-        !documentLocation ||
-        !targetStoryLocation ||
-        documentLocation.story.id === targetStoryId
-      ) {
+      const document = findDocument(state.worlds, documentId);
+      const targetStory = findStory(state.worlds, targetStoryId);
+      if (!document || !targetStory || document.story.id === targetStoryId) {
         return state;
       }
 
-      const movedDocument: StoryDocument = {
-        ...documentLocation.document,
+      const movedDocument: Document = {
+        ...document.document,
         storyId: targetStoryId,
       };
 
@@ -707,26 +581,26 @@ const navigationActions: NavigationActions = {
         worlds: state.worlds.map((world) => ({
           ...world,
           stories: world.stories.map((story) => {
-            if (story.id === documentLocation.story.id) {
+            // On previous story where the document existed, remove the document
+            if (story.id === document.story.id) {
               return {
                 ...story,
-                documents: story.documents.filter((document) => document.id !== documentId),
+                documents: story.documents.filter(
+                  (storyDocument) => storyDocument.id !== documentId,
+                ),
               };
             }
-
+            // On the new target story, add the document
             if (story.id === targetStoryId) {
               return {
                 ...story,
                 documents: [movedDocument, ...story.documents],
               };
             }
-
+            // Story is not being changed targeted for adding or removing document
             return story;
           }),
         })),
-        currentDocumentId: state.currentDocumentId === documentId ? null : state.currentDocumentId,
-        selectedDocumentId:
-          state.selectedDocumentId === documentId ? null : state.selectedDocumentId,
       };
     });
   },
@@ -767,71 +641,31 @@ const navigationActions: NavigationActions = {
 
       const reorderedDocuments = moveItem(documents, fromIndex, toIndex);
 
-      return {
-        ...state,
-        worlds: state.worlds.map((world) => ({
-          ...world,
-          stories: world.stories.map((story) =>
-            story.id === documentLocation.story.id
-              ? {
-                  ...story,
-                  documents: reorderedDocuments,
-                }
-              : story,
-          ),
-        })),
-      };
+      return mapStory(state, documentLocation.story.id, (story) => ({
+        ...story,
+        documents: reorderedDocuments,
+      }));
     });
   },
 
-  updateDocumentCover: (documentId, coverImage) => {
-    updateNavigationState((state) => ({
-      ...state,
-      worlds: state.worlds.map((world) => ({
-        ...world,
-        stories: world.stories.map((story) => ({
-          ...story,
-          documents: story.documents.map((document) =>
-            document.id === documentId
-              ? {
-                  ...document,
-                  coverImage,
-                }
-              : document,
-          ),
-        })),
-      })),
-    }));
-  },
-
-  updateDocumentContent: (documentId, updates) => {
-    updateNavigationState((state) => ({
-      ...state,
-      worlds: state.worlds.map((world) => ({
-        ...world,
-        stories: world.stories.map((story) => ({
-          ...story,
-          documents: story.documents.map((document) =>
-            document.id === documentId
-              ? {
-                  ...document,
-                  ...updates,
-                }
-              : document,
-          ),
-        })),
-      })),
-    }));
+  updateDocument: (documentId, updates) => {
+    updateNavigationState((state) =>
+      mapDocument(state, documentId, (document) => ({ ...document, ...updates })),
+    );
   },
 };
 
-type NavigationStore = NavigationState & NavigationActions;
+type NavigationStore = NavigationState &
+  NavigationActions & {
+    currentWorld: World | null;
+    currentStory: Story | null;
+  };
 
 export function syncDocumentInNavigationStore(
   documentId: string,
-  updates: Pick<StoryDocument, 'title' | 'body'>,
+  updates: Pick<Document, 'title' | 'body'>,
 ): void {
-  navigationActions.updateDocumentContent(documentId, updates);
+  navigationActions.updateDocument(documentId, updates);
 }
 
 export function useNavigationStore(): NavigationStore {
@@ -840,6 +674,8 @@ export function useNavigationStore(): NavigationStore {
   return useMemo(
     () => ({
       ...state,
+      currentWorld: findWorld(state.worlds, state.currentWorldId),
+      currentStory: findStory(state.worlds, state.currentStoryId)?.story ?? null,
       ...navigationActions,
     }),
     [state],

@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import type { ViewMode } from '~types/story';
+import { ViewMode } from '~types/story';
 import { Editor } from '~components/home/Editor';
 import { StoryView } from '~components/home/StoryView';
 import { WorldView } from '~components/home/WorldView';
@@ -22,7 +22,7 @@ export const HomeView = ({ currentView }: HomeViewProps) => {
     direction: number;
     key: number;
   } | null>(null);
-  const previousViewRef = useRef<ViewMode>('editor');
+  const previousViewRef = useRef<ViewMode>(ViewMode.editor);
 
   useEffect(() => {
     if (previousViewRef.current === currentView) {
@@ -80,13 +80,13 @@ export const HomeView = ({ currentView }: HomeViewProps) => {
 
 function renderView(view: ViewMode) {
   switch (view) {
-    case 'editor':
+    case ViewMode.editor:
       return <Editor />;
-    case 'story-view':
+    case ViewMode.storyView:
       return <StoryView />;
-    case 'world-view':
+    case ViewMode.worldView:
       return <WorldView />;
-    case 'legacy':
+    case ViewMode.legacy:
       return <LegacyView />;
     default:
       return null;

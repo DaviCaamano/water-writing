@@ -1,5 +1,5 @@
 import ky, { HTTPError } from 'ky';
-import { ApiRoute } from '#types/shared/api-route';
+import { ApiRouteBody } from '#types/shared/api-route';
 
 const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_API_URL || 'http://localhost:3001';
 const apiClient = ky.create({
@@ -48,12 +48,11 @@ export type ApiQueryOptions = Omit<RequestInit, 'body'> & {
   body?: Record<string, unknown> | string;
 };
 
-export const queryApi = (route: ApiRoute, options: ApiQueryOptions) => {
-  const url = typeof route.url === 'function' ? route.url({ ...options.params }) : route.url;
+export const queryApi = <T>(route: ApiRouteBody, options?: ApiQueryOptions): Promise<T> => {
   const queryOptions = { ...options, method: route.method };
   delete queryOptions.params;
-  if (typeof options.body !== 'undefined' && options.body !== 'string') {
+  if (typeof options?.body !== 'undefined' && options.body !== 'string') {
     queryOptions.body = JSON.stringify(options.body);
   }
-  return api(url, queryOptions as ApiQueryOptions & { body?: string }, route.includeAuth);
+  return api(route.url, queryOptions as ApiQueryOptions & { body?: string }, route.includeAuth);
 };

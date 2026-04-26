@@ -1,39 +1,22 @@
-export interface StoryDocument {
+import {
+  DocumentResponse,
+  OmitRowData,
+  StoryResponse,
+  WorldResponse,
+} from '#types/shared/response';
+
+export interface Document extends OmitRowData<Omit<DocumentResponse, 'documentId'>> {
   id: string;
-  title: string;
-  body: string;
-  storyId: string;
-  predecessorId: string | null;
-  successorId: string | null;
-  characters: DocumentCharacter[];
-  places: DocumentPlace[];
-  coverImage: string | null;
 }
 
-export interface DocumentCharacter {
+export interface Story extends OmitRowData<Omit<StoryResponse, 'storyId' | 'documents'>> {
   id: string;
-  name: string;
+  documents: Document[];
 }
 
-export interface DocumentPlace {
+export interface World extends OmitRowData<Omit<WorldResponse, 'worldId' | 'stories'>> {
   id: string;
-  name: string;
-}
-
-export interface Story {
-  id: string;
-  name: string;
-  worldId: string;
-  documentCount: number;
-  documents: StoryDocument[];
-  coverImage: string | null;
-}
-
-export interface World {
-  id: string;
-  name: string;
   stories: Story[];
-  coverImage: string | null;
 }
 
 export interface BillingHistoryEntry {
@@ -52,6 +35,11 @@ export interface BillingResponse {
   card: CardInfo;
 }
 
-export type ViewMode = 'editor' | 'story-view' | 'world-view' | 'legacy';
+export enum ViewMode {
+  editor = 'editor',
+  storyView = 'story-view',
+  worldView = 'world-view',
+  legacy = 'legacy',
+}
 
 export type EditorTheme = 'light' | 'dark' | 'sepia';

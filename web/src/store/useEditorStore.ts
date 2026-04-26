@@ -37,7 +37,7 @@ const editorActions: EditorActions = {
       syncDocumentInNavigationStore(documentId, { title, body });
     }
 
-    await queryApi(apiRoutes.story.updateDocument, { body: { documentId, storyId, title, body } });
+    await queryApi(apiRoutes.story.upsertDocument(), { body: { documentId, storyId, title, body } });
 
     editorStore.setState((state) => ({ ...state, isDirty: false, lastSaved: new Date() }));
   },

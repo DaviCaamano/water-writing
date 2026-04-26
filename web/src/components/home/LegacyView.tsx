@@ -13,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from '~components/ui/dropdown-menu';
 import { useNavigationStore } from '~store/useNavigationStore';
+import { useUserStore } from '~store/useUserStore';
 
 function summarizeWorld(storyCount: number, documentCount: number): string {
   if (storyCount === 0) {
@@ -33,8 +34,8 @@ function promptForTitle(kind: string, currentTitle: string): string | null {
 }
 
 export function LegacyView() {
-  const { worlds, createWorld, renameWorld, deleteWorld, updateWorldCover, navigateToWorld } =
-    useNavigationStore();
+  const { userId } = useUserStore();
+  const { worlds, createWorld, renameWorld, deleteWorld, navigateToWorld } = useNavigationStore();
 
   const totalStories = worlds.reduce((sum, world) => sum + world.stories.length, 0);
   const totalDocuments = worlds.reduce(
@@ -44,7 +45,7 @@ export function LegacyView() {
   );
 
   const handleAddWorld = () => {
-    createWorld();
+    if (userId !== null) createWorld(userId);
   };
 
   const handleRenameWorld = (worldId: string, currentTitle: string) => {
@@ -83,15 +84,15 @@ export function LegacyView() {
               <CatalogCard
                 key={world.id}
                 itemLabel="World"
-                title={world.name}
+                title={world.title}
                 description={summarizeWorld(world.stories.length, documentCount)}
                 meta={`${world.stories.length} stor${world.stories.length === 1 ? 'y' : 'ies'}`}
                 badgeText="World"
-                coverImage={world.coverImage}
+                coverImage={null}
                 accentClassName="from-sky-600 via-teal-500 to-emerald-500"
                 Icon={Globe2}
                 onOpen={() => navigateToWorld(world.id)}
-                onUploadCover={(coverImage) => updateWorldCover(world.id, coverImage)}
+                onUploadCover={() => {}}
                 menuContent={({ openCoverPicker }) => (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -100,19 +101,19 @@ export function LegacyView() {
                         size="icon-sm"
                         variant="secondary"
                         className="bg-slate-950/75 text-white hover:bg-slate-950"
-                        aria-label={`World actions for ${world.name}`}
+                        aria-label={`World actions for ${world.title}`}
                       >
                         <EllipsisVertical />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-60">
-                      <DropdownMenuLabel>{world.name}</DropdownMenuLabel>
+                      <DropdownMenuLabel>{world.title}</DropdownMenuLabel>
                       <DropdownMenuItem onClick={() => navigateToWorld(world.id)}>
                         <Globe2 />
                         Open world
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={() => handleRenameWorld(world.id, world.name)}>
+                      <DropdownMenuItem onClick={() => handleRenameWorld(world.id, world.title)}>
                         <PencilLine />
                         Rename world
                       </DropdownMenuItem>
@@ -122,7 +123,7 @@ export function LegacyView() {
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         variant="destructive"
-                        onClick={() => handleDeleteWorld(world.id, world.name)}
+                        onClick={() => handleDeleteWorld(world.id, world.title)}
                       >
                         <Trash2 />
                         Delete world

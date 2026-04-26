@@ -51,10 +51,9 @@ export function WorldView() {
     worlds,
     currentWorld,
     createStory,
-    renameStory,
     deleteStory,
     moveStoryToWorld,
-    updateStoryCover,
+    updateStory,
     navigateToStory,
   } = useNavigationStore();
 
@@ -69,7 +68,7 @@ export function WorldView() {
   const handleRenameStory = (storyId: string, currentTitle: string) => {
     const nextTitle = promptForTitle('story', currentTitle);
     if (!nextTitle) return;
-    renameStory(storyId, nextTitle);
+    updateStory(storyId, { title: nextTitle });
   };
 
   const handleDeleteStory = (storyId: string, title: string) => {
@@ -80,10 +79,10 @@ export function WorldView() {
   return (
     <CatalogShell
       eyebrow="World view"
-      title={currentWorld?.name ?? 'World stories'}
+      title={currentWorld?.title ?? 'World stories'}
       description={
         currentWorld
-          ? `Each card below is a story in ${currentWorld.name}. Click a card to enter its document catalog, or open the ellipsis menu to move or manage it.`
+          ? `Each card below is a story in ${currentWorld.title}. Click a card to enter its document catalog, or open the ellipsis menu to move or manage it.`
           : 'Choose a world to manage its story catalog.'
       }
       metrics={[
@@ -102,15 +101,15 @@ export function WorldView() {
               <CatalogCard
                 key={story.id}
                 itemLabel="Story"
-                title={story.name}
+                title={story.title}
                 description={summarizeStory(story.documents.length)}
                 meta={`${story.documents.length} document${story.documents.length === 1 ? '' : 's'}`}
                 badgeText="Story"
-                coverImage={story.coverImage}
+                coverImage={null}
                 accentClassName="from-amber-500 via-orange-400 to-rose-500"
                 Icon={BookMarked}
                 onOpen={() => navigateToStory(story.id, story.worldId)}
-                onUploadCover={(coverImage) => updateStoryCover(story.id, coverImage)}
+                onUploadCover={() => {}}
                 menuContent={({ openCoverPicker }) => (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -119,13 +118,13 @@ export function WorldView() {
                         size="icon-sm"
                         variant="secondary"
                         className="bg-slate-950/75 text-white hover:bg-slate-950"
-                        aria-label={`Story actions for ${story.name}`}
+                        aria-label={`Story actions for ${story.title}`}
                       >
                         <EllipsisVertical />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-60">
-                      <DropdownMenuLabel>{story.name}</DropdownMenuLabel>
+                      <DropdownMenuLabel>{story.title}</DropdownMenuLabel>
                       <DropdownMenuItem onClick={() => navigateToStory(story.id, story.worldId)}>
                         <BookMarked />
                         Open story
@@ -142,7 +141,7 @@ export function WorldView() {
                                 key={`${story.id}-${world.id}`}
                                 onClick={() => moveStoryToWorld(story.id, world.id)}
                               >
-                                {world.name}
+                                {world.title}
                               </DropdownMenuItem>
                             ))
                           ) : (
@@ -151,7 +150,7 @@ export function WorldView() {
                         </DropdownMenuSubContent>
                       </DropdownMenuSub>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={() => handleRenameStory(story.id, story.name)}>
+                      <DropdownMenuItem onClick={() => handleRenameStory(story.id, story.title)}>
                         <PencilLine />
                         Rename story
                       </DropdownMenuItem>
@@ -161,7 +160,7 @@ export function WorldView() {
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         variant="destructive"
-                        onClick={() => handleDeleteStory(story.id, story.name)}
+                        onClick={() => handleDeleteStory(story.id, story.title)}
                       >
                         <Trash2 />
                         Delete story
