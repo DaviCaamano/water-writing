@@ -10,6 +10,7 @@ import {
 import { useUserStore } from '~store/useUserStore';
 import { Plan } from '#types/shared/enum/plan';
 import { SettingsSection } from '~types/components/settings-modal';
+import { WaterRipple } from '~components/visual-effects/WaterRipple';
 
 interface UserMenuProps {
   onOpenAuth: () => void;
@@ -29,27 +30,25 @@ export function UserMenu({ onOpenAuth, onOpenSettings }: UserMenuProps) {
 
   if (!isLoggedIn) {
     return (
-      <div className="-home-user-menu- pointer-events-auto">
-        <button
-          onClick={onOpenAuth}
-          className="p-2 rounded-full hover:bg-accent transition-colors"
-          aria-label="Sign in"
-        >
-          <Image src="/profile.svg" alt="" width={24} height={24} className="w-6 h-6" />
-        </button>
-      </div>
+      <WaterRipple className="rounded-full">
+        <div className="-home-user-menu- pointer-events-auto cursor-pointer">
+          <button onClick={onOpenAuth} className="p-2 rounded-full" aria-label="Sign in">
+            <Image src="/profile.svg" alt="" width={24} height={24} className="w-6 h-6" />
+          </button>
+        </div>
+      </WaterRipple>
     );
   }
 
   return (
     <div className="-home-user-menu- pointer-events-auto">
       <DropdownMenu>
-        <DropdownMenuTrigger
-          className="p-2 rounded-full hover:bg-accent transition-colors"
-          aria-label="User menu"
-        >
-          <Image src="/profile.svg" alt="" width={24} height={24} className="w-6 h-6" />
-        </DropdownMenuTrigger>
+        <WaterRipple className="rounded-full">
+          <DropdownMenuTrigger className="p-2 rounded-full cursor-pointer" aria-label="User menu">
+            <Image src="/profile.svg" alt="" width={24} height={24} className="w-6 h-6" />
+          </DropdownMenuTrigger>
+        </WaterRipple>
+
         <DropdownMenuContent align="end" className="w-48">
           <DropdownMenuItem onClick={() => onOpenSettings(SettingsSection.general)}>
             Settings

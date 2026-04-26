@@ -18,7 +18,6 @@ export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
   const [password, setPassword] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
-  const [username, setUsername] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -29,7 +28,6 @@ export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
     setPassword('');
     setFirstName('');
     setLastName('');
-    setUsername('');
     setError('');
   };
 
@@ -53,7 +51,7 @@ export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
     setError('');
     setLoading(true);
     try {
-      await signup({ email, password, firstName, lastName, username });
+      await signup({ email, password, firstName, lastName });
       resetForm();
       onOpenChange(false);
     } catch (err) {
@@ -152,17 +150,6 @@ export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
                   required
                 />
               </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="signup-username">Username</Label>
-              <Input
-                id="signup-username"
-                name="signup-username"
-                aria-label="signup-username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
-              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="signup-email">Email</Label>

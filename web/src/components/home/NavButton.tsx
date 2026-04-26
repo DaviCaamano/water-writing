@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import { WaterRipple } from '~components/visual-effects/WaterRipple';
 
 export interface NavButtonProps {
   navigateUp: () => void;
@@ -6,22 +7,20 @@ export interface NavButtonProps {
 }
 export const NavButton = ({ navigateUp, showBackButton }: NavButtonProps) => {
   return (
-    <div className="-home-nav-button- pointer-events-auto">
-      {showBackButton && (
-        <button
-          onClick={navigateUp}
-          className="p-2 rounded-full hover:bg-accent/80 transition-colors"
-          aria-label="Navigate up"
-        >
-          <Image
-            src="/expand-scope.svg"
-            alt=""
-            width={24}
-            height={24}
-            className="w-6 h-6 dark:invert"
-          />
-        </button>
-      )}
-    </div>
+    <WaterRipple className="rounded-full">
+      <div className="-home-nav-button- pointer-events-auto cursor-pointer">
+        {showBackButton && (
+          <button onClick={navigateUp} className="p-2 rounded-full" aria-label="Navigate up">
+            <Image
+              src="/expand-scope.svg"
+              alt=""
+              width={24}
+              height={24}
+              className="w-6 h-6 dark:invert"
+            />
+          </button>
+        )}
+      </div>
+    </WaterRipple>
   );
 };

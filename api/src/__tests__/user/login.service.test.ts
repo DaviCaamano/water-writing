@@ -8,7 +8,7 @@ jest.mock('jsonwebtoken');
 
 import { withQuery } from '#utils/database/with-query';
 import { fetchLegacy } from '#services/story/world.service';
-import { login } from '#services/user/login.service';
+import { getSession, login } from '#services/user/login.service';
 import {
   MOCK_LOGIN_EMAIL,
   MOCK_LOGIN_RESPONSE,
@@ -20,7 +20,7 @@ import { PoolClient } from 'pg';
 import { createMockClient } from '#__tests__/constants/mock-database';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { InvalidCredentialsError } from '#constants/error/custom-errors';
+import { InvalidCredentialsError, UserNotFoundError } from '#constants/error/custom-errors';
 import { mockClear } from '#__tests__/utils/test-wrappers';
 import { mockLegacyResponse } from '#__tests__/utils/mock-linked-documents';
 
@@ -73,6 +73,51 @@ describe(
       void expect(
         login({ email: MOCK_LOGIN_EMAIL, password: MOCK_STRONG_PASSWORD }),
       ).rejects.toThrow(InvalidCredentialsError);
+    });
+  }),
+);
+
+describe(
+  'login service: getSession',
+  mockClear(() => {
+    it('returns the current authenticated session payload', async () => {
+      const mockClient = createMockClient();
+      mockWithQuery.mockImplementation((callback) => callback(mockClient as PoolClient));
+      mockClient.query
+        .mockResolvedValueOnce({ rows: [MOCK_USER] })
+        .mockResolvedValueOnce({
+          rows: [{ plan_type: Plan.pro, subscription_status: StripeSubscriptionStatus.active }],
+        });
+      mockFetchLegacy.mockImplementation(async () => mockLegacyResponse());
+
+      const response = await getSession(MOCK_USER.user_id, MOCK_LOGIN_TOKEN);
+
+      expect(response).toMatchObject(MOCK_LOGIN_RESPONSE);
+    });
+
+    it('throws UserNotFoundError when the authenticated user no longer exists', async () => {
+      const mockClient = createMockClient();
+      mockWithQuery.mockImplementation((callback) => callback(mockClient as PoolClient));
+      mockClient.query.mockResolvedValueOnce({ rows: [] });
+
+      await expect(getSession(MOCK_USER.user_id, MOCK_LOGIN_TOKEN)).rejects.toThrow(
+        UserNotFoundError,
+      );
+    });
+
+    it('propagates downstream fetchLegacy failures', async () => {
+      const mockClient = createMockClient();
+      mockWithQuery.mockImplementation((callback) => callback(mockClient as PoolClient));
+      mockClient.query
+        .mockResolvedValueOnce({ rows: [MOCK_USER] })
+        .mockResolvedValueOnce({
+          rows: [{ plan_type: Plan.pro, subscription_status: StripeSubscriptionStatus.active }],
+        });
+      mockFetchLegacy.mockRejectedValueOnce(new Error('legacy failed'));
+
+      await expect(getSession(MOCK_USER.user_id, MOCK_LOGIN_TOKEN)).rejects.toThrow(
+        'legacy failed',
+      );
     });
   }),
 );

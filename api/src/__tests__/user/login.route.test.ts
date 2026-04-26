@@ -1,4 +1,4 @@
-import { InvalidCredentialsError } from '#constants/error/custom-errors';
+import { InvalidCredentialsError, UserNotFoundError } from '#constants/error/custom-errors';
 
 jest.mock('#services/user/login.service');
 
@@ -15,6 +15,7 @@ import { mockClear } from '#__tests__/utils/test-wrappers';
 
 const mockLogin = loginService.login as jest.Mock;
 const mockLogout = loginService.logout as jest.Mock;
+const mockGetSession = loginService.getSession as jest.Mock;
 
 describe(
   'POST /user/login',
@@ -65,6 +66,43 @@ describe(
       const res = await request(app).post('/user/logout').set(headers).send();
       expect(res.status).toBe(200);
       expect(res.body.status).toBe('ok');
+    });
+  }),
+);
+
+describe(
+  'GET /user/session',
+  mockClear(() => {
+    it('returns 401 without auth', async () => {
+      const res = await request(app).get('/user/session').send();
+      expect(res.status).toBe(401);
+    });
+
+    it('returns 404 when the authenticated user no longer exists', async () => {
+      mockGetSession.mockRejectedValueOnce(new UserNotFoundError());
+
+      const res = await request(app).get('/user/session').set(mockAuthHeaders()).send();
+
+      expect(res.status).toBe(404);
+      expect(res.body.error).toBe('User not found');
+    });
+
+    it('returns 500 when session refresh fails unexpectedly', async () => {
+      mockGetSession.mockRejectedValueOnce(new Error('boom'));
+
+      const res = await request(app).get('/user/session').set(mockAuthHeaders()).send();
+
+      expect(res.status).toBe(500);
+      expect(res.body.error).toBe('Internal server error');
+    });
+
+    it('returns 200 with the authenticated session payload', async () => {
+      mockGetSession.mockResolvedValueOnce(MOCK_LOGIN_RESPONSE);
+
+      const res = await request(app).get('/user/session').set(mockAuthHeaders()).send();
+
+      expect(res.status).toBe(200);
+      expect(res.body).toMatchObject(JSON.parse(JSON.stringify(MOCK_LOGIN_RESPONSE)));
     });
   }),
 );

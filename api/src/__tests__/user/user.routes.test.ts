@@ -84,13 +84,13 @@ describe(
   }),
 );
 
-// POST /user/deleteme
+// DELETE /user/deleteme
 describe(
-  'POST /user/deleteme',
-  testAuth('/user/deleteme', 'post', () => {
+  'DELETE /user/deleteme',
+  testAuth('/user/deleteme', 'delete', () => {
     it('returns 200 and deletes the user', async () => {
       mockDeleteUser.mockResolvedValueOnce(undefined);
-      const res = await request(app).post('/user/deleteme').set(mockAuthHeaders()).send();
+      const res = await request(app).delete('/user/deleteme').set(mockAuthHeaders()).send();
       expect(res.status).toBe(200);
       expect(res.body.status).toBe('ok');
       expect(mockDeleteUser).toHaveBeenCalledWith(MOCK_LOGIN_RESPONSE.userId);

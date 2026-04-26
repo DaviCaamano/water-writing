@@ -145,6 +145,20 @@ registry.registerPath({
 });
 
 registry.registerPath({
+  method: 'get',
+  path: '/user/session',
+  tags: ['User'],
+  summary: 'Get the current authenticated session payload',
+  security: secured,
+  responses: {
+    200: { description: 'Session loaded', ...json(LoginResponseSchema) },
+    401: err401,
+    404: err404,
+    500: err500,
+  },
+});
+
+registry.registerPath({
   method: 'post',
   path: '/user/create',
   tags: ['User'],

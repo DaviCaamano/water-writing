@@ -105,13 +105,18 @@ class UserApiRoute {
     url: '/user/logout',
     method: 'POST',
   });
+  session = createRoute({
+    url: '/user/session',
+    method: 'GET',
+    includeAuth: true,
+  });
   create = createRoute({
     url: '/user/create',
     method: 'POST',
   });
   deleteAccount = createRoute({
     url: '/user/deleteme',
-    method: 'POST',
+    method: 'DELETE',
     includeAuth: true,
   });
   subscribe = createRoute({
@@ -140,4 +145,3 @@ class HealthApiRoute {
 }
 
 export const apiRoutes = new ApiRoute();
-

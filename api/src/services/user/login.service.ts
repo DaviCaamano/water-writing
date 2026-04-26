@@ -3,7 +3,7 @@ import type { LoginBody } from '#schemas/user.schemas';
 import bcrypt from 'bcrypt';
 import { PlanRow, UserRow } from '#types/database';
 import jwt from 'jsonwebtoken';
-import { InvalidCredentialsError } from '#constants/error/custom-errors';
+import { InvalidCredentialsError, UserNotFoundError } from '#constants/error/custom-errors';
 import { withQuery } from '#utils/database/with-query';
 import { LoginResponse } from '#types/shared/response';
 import { parseExpiration } from '#utils/database/parse-expiration';
@@ -77,5 +77,45 @@ export const logout = async (token: string) => {
     if (result.rows.length > 0) {
       logger.info({ userId: result.rows[0].user_id }, 'User logged out');
     }
+  });
+};
+
+export const getSession = async (userId: string, token: string): Promise<LoginResponse> => {
+  return withQuery(async (client) => {
+    const userResult = await client.query<UserRow>('SELECT * FROM users WHERE user_id = $1', [
+      userId,
+    ]);
+
+    if (userResult.rows.length === 0) {
+      logger.info({ userId }, 'Session refresh failed: unknown user');
+      throw new UserNotFoundError();
+    }
+
+    const user = userResult.rows[0];
+    const planResult = await client.query<PlanRow>(
+      `SELECT plan_type, subscription_status
+       FROM plans
+       WHERE user_id = $1
+       LIMIT 1`,
+      [userId],
+    );
+
+    const legacy = await fetchLegacy(user.user_id);
+
+    logger.info({ userId: user.user_id }, 'User session refreshed');
+
+    return {
+      email: user.email,
+      userId: user.user_id,
+      plan:
+        planResult.rows.length > 0 &&
+        isAccessibleSubscriptionStatus(planResult.rows[0].subscription_status)
+          ? planResult.rows[0].plan_type
+          : null,
+      firstName: user.first_name,
+      lastName: user.last_name,
+      legacy,
+      token,
+    };
   });
 };

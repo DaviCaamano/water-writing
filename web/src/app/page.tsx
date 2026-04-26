@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useUserStore } from '~store/useUserStore';
 import { useNavigationStore } from '~store/useNavigationStore';
 import { useEditorStore } from '~store/useEditorStore';
 import { useDocumentQuery } from '~lib/queries/story';
@@ -18,14 +17,11 @@ export default function Home() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settingsSection, setSettingsSection] = useState<SettingsSection>(SettingsSection.general);
 
-  const { refreshSession } = useUserStore();
   const { documentId: editorDocumentId, loadDocument } = useEditorStore();
   const { currentView, currentDocumentId, navigateUp } = useNavigationStore();
   const shouldFetchDocument =
     currentView === 'editor' && currentDocumentId !== null && currentDocumentId !== editorDocumentId;
   const { data: documentData } = useDocumentQuery(shouldFetchDocument ? currentDocumentId : null);
-
-  useEffect(() => void refreshSession(), [refreshSession]);
 
   useEffect(() => {
     if (!documentData || editorDocumentId === documentData.documentId) return;

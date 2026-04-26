@@ -24,11 +24,12 @@ import {
   subscribe,
 } from '#services/user/user.service';
 import { AuthRequest } from '#types/request';
-import { login, logout } from '#services/user/login.service';
+import { getSession, login, logout } from '#services/user/login.service';
 import {
   EmailTakenError,
   InvalidCredentialsError,
   StripePaymentFailed,
+  UserNotFoundError,
 } from '#constants/error/custom-errors';
 import {
   LoginResponse,
@@ -69,6 +70,22 @@ router.post(
   },
 );
 
+router.get(
+  '/session',
+  authMiddleware,
+  async (req: AuthRequest, res: RouteResponse<LoginResponse>): Promise<void> => {
+    try {
+      res.json(await getSession(req.userId!, req.token!));
+    } catch (err) {
+      if (err instanceof UserNotFoundError) {
+        res.status(404).json({ error: 'User not found' });
+        return;
+      }
+      throw err;
+    }
+  },
+);
+
 // Create account
 // Returns the same response whether the email exists or not to prevent enumeration.
 
@@ -103,7 +120,7 @@ router.post(
 );
 
 // Delete account
-router.post('/deleteme', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
+router.delete('/deleteme', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
   await deleteUser(req.userId!);
   res.json({ status: 'ok' });
 });

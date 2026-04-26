@@ -14,6 +14,7 @@ import {
 } from '~components/ui/select';
 import { useEditorStore } from '~store/useEditorStore';
 import type { EditorTheme } from '~types/story';
+import { WaterRipple } from '~components/visual-effects/WaterRipple';
 
 const FONT_OPTIONS = [
   { label: 'Georgia', value: 'Georgia, serif' },
@@ -38,12 +39,11 @@ export function EditorSettings() {
   return (
     <div className="-home-editor-settings- absolute bottom-4 left-4 z-30">
       <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger
-          className="p-2 rounded-full hover:bg-accent/80 transition-colors"
-          aria-label="Text settings"
-        >
-          <Image src="/theme.svg" alt="" width={24} height={24} className="w-6 h-6" />
-        </PopoverTrigger>
+        <WaterRipple className="rounded-full">
+          <PopoverTrigger className="p-2 rounded-full cursor-pointer" aria-label="Text settings">
+            <Image src="/theme.svg" alt="" width={24} height={24} className="w-6 h-6" />
+          </PopoverTrigger>
+        </WaterRipple>
         <PopoverContent side="top" align="start" className="w-64 space-y-4">
           <div className="space-y-2">
             <Label className="text-xs font-medium">Font Size</Label>

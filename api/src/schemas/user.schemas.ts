@@ -4,7 +4,7 @@ import { Plan } from '#types/shared/enum/plan';
 // Password strength schema (reused for creation & update)
 const strongPassword = z
   .string()
-  .min(12, 'Password must be at least 12 characters')
+  .min(8, 'Password must be at least 12 characters')
   .max(128, 'Password must be under 128 characters')
   .regex(/[A-Z]/, 'Password must contain an uppercase letter')
   .regex(/[a-z]/, 'Password must contain a lowercase letter')
