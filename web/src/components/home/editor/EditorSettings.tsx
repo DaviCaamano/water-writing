@@ -11,6 +11,8 @@ import {
 import { useEditorStore } from '~store/useEditorStore';
 import { useTheme } from 'next-themes';
 import type { EditorTheme } from '~types/story';
+import { WaterRippleFade } from '~components/visual-effects/WaterRippleFade';
+import { cn } from '~utils/merge-css-classes';
 
 const FONT_OPTIONS = [
   { label: 'Georgia', value: 'Georgia, serif' },
@@ -28,61 +30,80 @@ const THEME_OPTIONS: { label: string; value: EditorTheme }[] = [
 
 const FONT_SIZES = [14, 16, 18, 20, 22, 24];
 
-export const EditorSettings = () => {
+export const EditorSettings = ({ open }: { open: boolean }) => {
   const { fontSize, fontFamily, setFontSize, setFontFamily } = useEditorStore();
   const { theme, setTheme } = useTheme();
 
   return (
-    <PopoverContent side="top" align="start" className="-editor-settings- w-64 space-y-4">
-      <div className="space-y-2">
-        <Label className="text-xs font-medium">Font Size</Label>
-        <div className="flex gap-1 flex-wrap">
-          {FONT_SIZES.map((size) => (
-            <Button
-              key={size}
-              variant={fontSize === size ? 'default' : 'outline'}
-              size="sm"
-              className="w-10 h-8 text-xs"
-              onClick={() => setFontSize(size)}
-            >
-              {size}
-            </Button>
-          ))}
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label className="text-xs font-medium">Font</Label>
-        <Select value={fontFamily} onValueChange={(v) => v && setFontFamily(v)}>
-          <SelectTrigger className="h-8 text-xs">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {FONT_OPTIONS.map((font) => (
-              <SelectItem key={font.value} value={font.value}>
-                <span style={{ fontFamily: font.value }}>{font.label}</span>
-              </SelectItem>
+    <PopoverContent
+      forceMount
+      side="top"
+      align="start"
+      className={cn(
+        '-editor-settings-',
+        'w-64 !bg-transparent !shadow-none !ring-0 !p-0',
+        'data-[state=open]:animate-none data-[state=closed]:animate-none',
+      )}
+    >
+      <WaterRippleFade
+        open={open}
+        className={cn(
+          'space-y-4 ',
+          'bg-popover rounded-lg ',
+          'p-2.5 ring-1 ring-accent/50',
+          'text-sm text-popover-foreground ',
+        )}
+      >
+        <div className="space-y-2">
+          <Label className="text-xs font-medium">Font Size</Label>
+          <div className="flex gap-1 flex-wrap">
+            {FONT_SIZES.map((size) => (
+              <Button
+                key={size}
+                variant={fontSize === size ? 'default' : 'outline'}
+                size="sm"
+                className="w-10 h-8 text-xs"
+                onClick={() => setFontSize(size)}
+              >
+                {size}
+              </Button>
             ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="space-y-2">
-        <Label className="text-xs font-medium">Theme</Label>
-        <div className="flex gap-1">
-          {THEME_OPTIONS.map((themeOption) => (
-            <Button
-              key={themeOption.value}
-              variant={theme === themeOption.value ? 'default' : 'outline'}
-              size="sm"
-              className="flex-1 h-8 text-xs"
-              onClick={() => setTheme(themeOption.value)}
-            >
-              {themeOption.label}
-            </Button>
-          ))}
+          </div>
         </div>
-      </div>
+
+        <div className="space-y-2">
+          <Label className="text-xs font-medium">Font</Label>
+          <Select value={fontFamily} onValueChange={(v) => v && setFontFamily(v)}>
+            <SelectTrigger className="h-8 text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {FONT_OPTIONS.map((font) => (
+                <SelectItem key={font.value} value={font.value}>
+                  <span style={{ fontFamily: font.value }}>{font.label}</span>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
+          <Label className="text-xs font-medium">Theme</Label>
+          <div className="flex gap-1">
+            {THEME_OPTIONS.map((themeOption) => (
+              <Button
+                key={themeOption.value}
+                variant={theme === themeOption.value ? 'default' : 'outline'}
+                size="sm"
+                className="flex-1 h-8 text-xs"
+                onClick={() => setTheme(themeOption.value)}
+              >
+                {themeOption.label}
+              </Button>
+            ))}
+          </div>
+        </div>
+      </WaterRippleFade>
     </PopoverContent>
   );
 };

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { editorStoreSnapshot, useEditorStore } from '~store/useEditorStore';
 import { useUpsertDocumentMutation } from '~lib/mutations/story';
+import { cn } from '~utils/merge-css-classes';
 
 export function Editor() {
   const { title, body, fontSize, fontFamily, setTitle, setBody, markSaved } = useEditorStore();
@@ -46,7 +47,14 @@ export function Editor() {
 
   return (
     <div
-      className="flex-1 flex flex-col w-full h-full bg-background text-foreground transition-colors duration-300 mx-auto max-w-4xl"
+      className={cn(
+        '-editor- ',
+        'flex-1 flex flex-col',
+        ' w-[50%] h-full',
+        'bg-background text-foreground',
+        'mx-auto max-w-4xl',
+        'transition-colors duration-300',
+      )}
     >
       <input
         type="text"

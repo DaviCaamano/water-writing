@@ -11,6 +11,7 @@ import { EditorSettingsPopover } from '~components/home/editor/EditorSettingsPop
 import { NavButton } from '~components/home/NavButton';
 import { HomeView } from '~components/home/HomeView';
 import { useToggleSettings } from '~hooks/components/home/useToggleSettings';
+import styles from '~styles/home/home.module.css';
 
 export default function Home() {
   const [authOpen, setAuthOpen] = useState(false);
@@ -32,7 +33,9 @@ export default function Home() {
   }, [documentData, editorDocumentId, loadDocument]);
 
   return (
-    <div className="-home- h-screen overflow-hidden bg-slate-950">
+    <div
+      className={`-home- h-screen overflow-hidden bg-primary-background ${styles.animatedBackground}`}
+    >
       <div className="-home-nav- absolute left-0 right-0 top-0 z-40 flex items-center justify-between px-4 py-3 pointer-events-none">
         <NavButton navigateUp={navigateUp} showBackButton={currentView !== 'legacy'} />
         <UserMenu onOpenAuth={() => setAuthOpen(true)} onOpenSettings={handleOpenSettings} />

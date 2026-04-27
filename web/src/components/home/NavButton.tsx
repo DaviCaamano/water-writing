@@ -7,16 +7,16 @@ export interface NavButtonProps {
 }
 export const NavButton = ({ navigateUp, showBackButton }: NavButtonProps) => {
   return (
-    <WaterRipple className="rounded-full">
-      <div className="-home-nav-button- pointer-events-auto cursor-pointer">
+    <WaterRipple className="rounded-full cursor-pointer">
+      <div className="-home-nav-button- pointer-events-auto">
         {showBackButton && (
           <button onClick={navigateUp} className="p-2 rounded-full" aria-label="Navigate up">
             <Image
               src="/expand-scope.svg"
               alt=""
-              width={24}
-              height={24}
-              className="w-6 h-6 dark:invert"
+              width={28}
+              height={28}
+              className="dark:invert"
             />
           </button>
         )}

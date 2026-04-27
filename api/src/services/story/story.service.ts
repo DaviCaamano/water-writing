@@ -24,9 +24,9 @@ export const fetchStoryWithDocuments = async (storyId: string): Promise<StoryRow
   return withQuery<StoryRowWithDocuments>(async (client) => {
     const result = await client.query<StoryRowWithDocuments>(
       `SELECT
-      s.*
+      s.*,
       COALESCE(
-        json_agg(ORDER BY d.created_at) FILTER (WHERE d.document_id IS NOT NULL),
+        json_agg(d ORDER BY d.created_at) FILTER (WHERE d.document_id IS NOT NULL),
         '[]'
       ) AS documents
       FROM stories s
