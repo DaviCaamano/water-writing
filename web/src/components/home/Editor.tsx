@@ -5,8 +5,7 @@ import { editorStoreSnapshot, useEditorStore } from '~store/useEditorStore';
 import { useUpsertDocumentMutation } from '~lib/mutations/story';
 
 export function Editor() {
-  const { title, body, fontSize, fontFamily, theme, setTitle, setBody, isDirty, markSaved } =
-    useEditorStore();
+  const { title, body, fontSize, fontFamily, setTitle, setBody, markSaved } = useEditorStore();
   const bodyRef = useRef<HTMLTextAreaElement>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const upsertDocument = useUpsertDocumentMutation();
@@ -45,18 +44,9 @@ export function Editor() {
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [handleSave]);
 
-  // Reference isDirty so re-renders keep handleSave snapshot fresh; saving uses store snapshot directly.
-  void isDirty;
-
-  const themeClasses = {
-    light: 'bg-white text-gray-900',
-    dark: 'bg-gray-900 text-gray-100',
-    sepia: 'bg-amber-50 text-amber-950',
-  };
-
   return (
     <div
-      className={`flex-1 flex flex-col w-full h-full ${themeClasses[theme]} transition-colors duration-300 mx-auto max-w-4xl`}
+      className="flex-1 flex flex-col w-full h-full bg-background text-foreground transition-colors duration-300 mx-auto max-w-4xl"
     >
       <input
         type="text"

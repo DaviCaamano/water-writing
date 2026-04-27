@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { Store, useStore } from '@tanstack/react-store';
 import { EditorActions, EditorState, EditorStore } from '~types/state/editor-state';
+import { DocumentResponse } from '#types/shared/response';
 
 function createInitialEditorState(): EditorState {
   return {
@@ -12,7 +13,6 @@ function createInitialEditorState(): EditorState {
     lastSaved: null,
     fontSize: 18,
     fontFamily: 'Georgia, serif',
-    theme: 'light',
   };
 }
 
@@ -29,14 +29,14 @@ const editorActions: EditorActions = {
     editorStore.setState((state) => ({ ...state, body, isDirty: true }));
   },
 
-  loadDocument: (doc) => {
+  loadDocument: (doc: Pick<DocumentResponse, 'body' | 'documentId' | 'storyId' | 'title'>) => {
     editorStore.setState((state) => ({
       ...state,
-      documentId: doc.id,
+      body: doc.body,
+      documentId: doc.documentId,
+      isDirty: false,
       storyId: doc.storyId,
       title: doc.title,
-      body: doc.body,
-      isDirty: false,
     }));
   },
 
@@ -50,10 +50,6 @@ const editorActions: EditorActions = {
 
   setFontFamily: (fontFamily) => {
     editorStore.setState((state) => ({ ...state, fontFamily }));
-  },
-
-  setTheme: (theme) => {
-    editorStore.setState((state) => ({ ...state, theme }));
   },
 
   resetEditor: () => {

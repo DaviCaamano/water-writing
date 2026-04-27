@@ -7,36 +7,29 @@ import { useDocumentQuery } from '~lib/queries/story';
 import { UserMenu } from '~components/home/UserMenu';
 import { AuthDialog } from '~components/home/AuthDialog';
 import { SettingsModal } from '~components/home/SettingsModal';
-import { EditorSettings } from '~components/home/EditorSettings';
+import { EditorSettingsPopover } from '~components/home/editor/EditorSettingsPopover';
 import { NavButton } from '~components/home/NavButton';
 import { HomeView } from '~components/home/HomeView';
-import { SettingsSection } from '~types/components/settings-modal';
+import { useToggleSettings } from '~hooks/components/home/useToggleSettings';
 
 export default function Home() {
   const [authOpen, setAuthOpen] = useState(false);
-  const [settingsOpen, setSettingsOpen] = useState(false);
-  const [settingsSection, setSettingsSection] = useState<SettingsSection>(SettingsSection.general);
+  const { handleOpenSettings, settingsOpen, setSettingsOpen, settingsSection } =
+    useToggleSettings();
 
   const { documentId: editorDocumentId, loadDocument } = useEditorStore();
   const { currentView, currentDocumentId, navigateUp } = useNavigationStore();
   const shouldFetchDocument =
-    currentView === 'editor' && currentDocumentId !== null && currentDocumentId !== editorDocumentId;
+    currentView === 'editor' &&
+    currentDocumentId !== null &&
+    currentDocumentId !== editorDocumentId;
   const { data: documentData } = useDocumentQuery(shouldFetchDocument ? currentDocumentId : null);
 
+  // Sync editor context state to currently selected document
   useEffect(() => {
     if (!documentData || editorDocumentId === documentData.documentId) return;
-    loadDocument({
-      id: documentData.documentId,
-      title: documentData.title,
-      body: documentData.body,
-      storyId: documentData.storyId,
-    });
+    loadDocument(documentData);
   }, [documentData, editorDocumentId, loadDocument]);
-
-  const handleOpenSettings = (section: SettingsSection = SettingsSection.general) => {
-    setSettingsSection(section);
-    setSettingsOpen(true);
-  };
 
   return (
     <div className="-home- h-screen overflow-hidden bg-slate-950">
@@ -44,7 +37,7 @@ export default function Home() {
         <NavButton navigateUp={navigateUp} showBackButton={currentView !== 'legacy'} />
         <UserMenu onOpenAuth={() => setAuthOpen(true)} onOpenSettings={handleOpenSettings} />
       </div>
-      {currentView === 'editor' && <EditorSettings />}
+      {currentView === 'editor' && <EditorSettingsPopover />}
       <HomeView currentView={currentView} />
       <AuthDialog open={authOpen} onOpenChange={setAuthOpen} />
       <SettingsModal

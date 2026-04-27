@@ -22,7 +22,7 @@ export function UserMenu({ onOpenAuth, onOpenSettings }: UserMenuProps) {
 
   const handleLogout = async () => {
     try {
-      await logout();
+      void logout();
     } catch (e) {
       console.error('Logout failed:', e);
     }
@@ -30,8 +30,8 @@ export function UserMenu({ onOpenAuth, onOpenSettings }: UserMenuProps) {
 
   if (!isLoggedIn) {
     return (
-      <WaterRipple className="rounded-full">
-        <div className="-home-user-menu- pointer-events-auto cursor-pointer">
+      <WaterRipple className="-home-user-menu- rounded-full">
+        <div className="pointer-events-auto cursor-pointer">
           <button onClick={onOpenAuth} className="p-2 rounded-full" aria-label="Sign in">
             <Image src="/profile.svg" alt="" width={24} height={24} className="w-6 h-6" />
           </button>

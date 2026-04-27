@@ -1,12 +1,6 @@
 'use client';
 
-import {
-  EllipsisVertical,
-  FileText,
-  ImagePlus,
-  PencilLine,
-  Trash2,
-} from 'lucide-react';
+import { EllipsisVertical, FileText, ImagePlus, PencilLine, Trash2 } from 'lucide-react';
 import { CatalogCard } from '~components/home/CatalogCard';
 import { CatalogShell } from '~components/home/CatalogShell';
 import { Button } from '~components/ui/button';
@@ -21,10 +15,7 @@ import {
 import { useEditorStore } from '~store/useEditorStore';
 import { useNavigationStore } from '~store/useNavigationStore';
 import { useStoryQuery, useWorldQuery } from '~lib/queries/story';
-import {
-  useDeleteDocumentMutation,
-  useUpsertDocumentMutation,
-} from '~lib/mutations/story';
+import { useDeleteDocumentMutation, useUpsertDocumentMutation } from '~lib/mutations/story';
 
 function summarizeDocument(body: string): string {
   const trimmed = body.trim();
@@ -81,12 +72,7 @@ export function StoryView() {
     const document = documents.find((entry) => entry.documentId === documentId);
     if (!document) return;
 
-    loadDocument({
-      id: document.documentId,
-      title: document.title,
-      body: document.body,
-      storyId: document.storyId,
-    });
+    loadDocument(document);
     navigateToEditor(document.documentId, document.storyId, currentWorldId);
   };
 
