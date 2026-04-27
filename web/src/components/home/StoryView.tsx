@@ -1,6 +1,6 @@
 'use client';
 
-import { EllipsisVertical, FileText, ImagePlus, PencilLine, Trash2 } from 'lucide-react';
+import { EllipsisVertical, ImagePlus, PencilLine, Trash2 } from 'lucide-react';
 import { CatalogCard } from '~components/home/CatalogCard';
 import { CatalogShell } from '~components/home/CatalogShell';
 import { Button } from '~components/ui/button';
@@ -16,6 +16,7 @@ import { useEditorStore } from '~store/useEditorStore';
 import { useNavigationStore } from '~store/useNavigationStore';
 import { useStoryQuery, useWorldQuery } from '~lib/queries/story';
 import { useDeleteDocumentMutation, useUpsertDocumentMutation } from '~lib/mutations/story';
+import Image from 'next/image';
 
 function summarizeDocument(body: string): string {
   const trimmed = body.trim();
@@ -118,7 +119,7 @@ export function StoryView() {
               badgeText="Document"
               coverImage={null}
               accentClassName="from-cyan-500 via-sky-500 to-indigo-500"
-              Icon={FileText}
+              Icon={<Image src="/file.svg" alt="Document" width={48} height={48} />}
               onOpen={() => handleOpenDocument(document.documentId)}
               onUploadCover={() => {}}
               menuContent={({ openCoverPicker }) => (
@@ -137,7 +138,7 @@ export function StoryView() {
                   <DropdownMenuContent align="end" className="w-60">
                     <DropdownMenuLabel>{document.title}</DropdownMenuLabel>
                     <DropdownMenuItem onClick={() => handleOpenDocument(document.documentId)}>
-                      <FileText />
+                      <Image src="/file.svg" alt="Document" width={48} height={48} />
                       Open document
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />

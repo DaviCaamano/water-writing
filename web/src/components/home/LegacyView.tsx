@@ -1,6 +1,7 @@
 'use client';
 
-import { EllipsisVertical, Globe2, ImagePlus, PencilLine, Trash2 } from 'lucide-react';
+import Image from 'next/image';
+import { EllipsisVertical, ImagePlus, PencilLine, Trash2 } from 'lucide-react';
 import { CatalogCard } from '~components/home/CatalogCard';
 import { CatalogShell } from '~components/home/CatalogShell';
 import { Button } from '~components/ui/button';
@@ -20,6 +21,8 @@ import {
   useUpsertWorldMutation,
 } from '~lib/mutations/story';
 
+const legacyViewDescription = "This is the top-level catalog for the user. Click a world card to dive into its " +
+  "stories, or use the ellipsis menu to rename, delete, or change its cover.";
 function summarizeWorld(storyCount: number, documentCount: number): string {
   if (storyCount === 0) {
     return 'An empty world waiting for its first story.';
@@ -82,7 +85,7 @@ export function LegacyView() {
     <CatalogShell
       eyebrow="Legacy view"
       title="Your worlds"
-      description="This is the top-level catalog for the user. Click a world card to dive into its stories, or use the ellipsis menu to rename, delete, or change its cover."
+      description={legacyViewDescription}
       metrics={[
         `${worlds.length} world${worlds.length === 1 ? '' : 's'}`,
         `${totalStories} stor${totalStories === 1 ? 'y' : 'ies'}`,
@@ -109,7 +112,7 @@ export function LegacyView() {
                 badgeText="World"
                 coverImage={null}
                 accentClassName="from-sky-600 via-teal-500 to-emerald-500"
-                Icon={Globe2}
+                Icon={<Image src="/planet.svg" alt={'world'} width={48} height={48} />}
                 onOpen={() => navigateToWorld(world.worldId)}
                 onUploadCover={() => {}}
                 menuContent={({ openCoverPicker }) => (
@@ -128,7 +131,7 @@ export function LegacyView() {
                     <DropdownMenuContent align="end" className="w-60">
                       <DropdownMenuLabel>{world.title}</DropdownMenuLabel>
                       <DropdownMenuItem onClick={() => navigateToWorld(world.worldId)}>
-                        <Globe2 />
+                        <Image src="/planet.svg" alt={'world'} width={48} height={48} />
                         Open world
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />

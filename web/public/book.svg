@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
+  <defs>
+    <style>
+      .cls-1, .cls-2 {
+        fill: none;
+        stroke: #555;
+      }
+
+      .cls-1 {
+        stroke-width: 4px;
+      }
+
+      .cls-1, .cls-2, .cls-3 {
+        fill-rule: evenodd;
+      }
+
+      .cls-2 {
+        stroke-width: 3px;
+      }
+
+      .cls-3 {
+        fill: #555;
+      }
+    </style>
+  </defs>
+  <path class="cls-1" d="M12,4H36c1.483,0,4,2.532,4,4V39.984C40,41.517,37.5,44,36,44H12.013A3.69,3.69,0,0,1,8,40V8C8,6.56,10.564,4,12,4Z"/>
+  <path class="cls-2" d="M40,34H13a5,5,0,0,0,0,10"/>
+  <path class="cls-3" d="M22,4V22a12.111,12.111,0,0,1,4,3c1.3,1.512,1.885,3,3,3s1.7-1.488,3-3a12.111,12.111,0,0,1,4-3c0.025-6.113,0-11,0-18H33V19c-1.834.309-4.014,3.337-4,4-0.02-.672-1.827-4.026-4-4V4H22Z"/>
+  <path id="Line_1" data-name="Line 1" class="cls-3" d="M13,41V40H25v1H13Z"/>
+  <path id="Line_2" data-name="Line 2" class="cls-3" d="M24,38V37H35v1H24Z"/>
+</svg>

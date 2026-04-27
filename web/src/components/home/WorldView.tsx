@@ -1,13 +1,6 @@
 'use client';
 
-import {
-  ArrowRightLeft,
-  BookMarked,
-  EllipsisVertical,
-  ImagePlus,
-  PencilLine,
-  Trash2,
-} from 'lucide-react';
+import { ArrowRightLeft, EllipsisVertical, ImagePlus, PencilLine, Trash2 } from 'lucide-react';
 import { CatalogCard } from '~components/home/CatalogCard';
 import { CatalogShell } from '~components/home/CatalogShell';
 import { Button } from '~components/ui/button';
@@ -25,10 +18,8 @@ import {
 import { useNavigationStore } from '~store/useNavigationStore';
 import { useUserStore } from '~store/useUserStore';
 import { useLegacyQuery, useWorldQuery } from '~lib/queries/story';
-import {
-  useDeleteStoryMutation,
-  useUpsertStoryMutation,
-} from '~lib/mutations/story';
+import { useDeleteStoryMutation, useUpsertStoryMutation } from '~lib/mutations/story';
+import Image from 'next/image';
 
 function summarizeStory(documentCount: number): string {
   if (documentCount === 0) {
@@ -67,10 +58,7 @@ export function WorldView() {
   const deleteStory = useDeleteStoryMutation();
 
   const stories = currentWorld?.stories ?? [];
-  const totalDocuments = stories.reduce(
-    (sum, story) => sum + (story.documents?.length ?? 0),
-    0,
-  );
+  const totalDocuments = stories.reduce((sum, story) => sum + (story.documents?.length ?? 0), 0);
 
   const handleAddStory = () => {
     if (!currentWorld) return;
@@ -126,7 +114,7 @@ export function WorldView() {
                 badgeText="Story"
                 coverImage={null}
                 accentClassName="from-amber-500 via-orange-400 to-rose-500"
-                Icon={BookMarked}
+                Icon={<Image src="/book.svg" alt="Story" width={48} height={48} />}
                 onOpen={() => navigateToStory(story.storyId, story.worldId)}
                 onUploadCover={() => {}}
                 menuContent={({ openCoverPicker }) => (
@@ -147,7 +135,7 @@ export function WorldView() {
                       <DropdownMenuItem
                         onClick={() => navigateToStory(story.storyId, story.worldId)}
                       >
-                        <BookMarked />
+                        <Image src="/book.svg" alt="Story" width={48} height={48} />
                         Open story
                       </DropdownMenuItem>
                       <DropdownMenuSub>

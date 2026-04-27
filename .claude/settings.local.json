@@ -10,7 +10,12 @@
       "Bash(npx tsc *)",
       "Bash(bun x *)",
       "Bash(taskkill //PID 31136 //F)",
-      "Bash(bun tsc *)"
+      "Bash(bun tsc *)",
+      "WebFetch(domain:api.anthropic.com)",
+      "Bash(cp \"/c/Users/davit/.claude/projects/C--Users-davit-Projects-water-writing/01aac303-45d0-491f-9e00-26668e2263fa/tool-results/webfetch-1777303989418-rx23gw.bin\" /tmp/design.tar.gz)",
+      "Bash(mkdir -p /tmp/design-pkg)",
+      "Bash(tar -xzf /tmp/design.tar.gz -C /tmp/design-pkg)",
+      "Read(//tmp/**)"
     ]
   }
 }

@@ -3,7 +3,6 @@
 import Image from 'next/image';
 import type { ChangeEvent, KeyboardEvent, ReactNode } from 'react';
 import { useId } from 'react';
-import type { LucideIcon } from 'lucide-react';
 import { Badge } from '~components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '~components/ui/card';
 import { cn } from '~utils/merge-css-classes';
@@ -16,7 +15,7 @@ interface CatalogCardProps {
   badgeText: string;
   coverImage: string | null;
   accentClassName: string;
-  Icon: LucideIcon;
+  Icon: ReactNode;
   onOpen: () => void;
   onUploadCover: (coverImage: string) => void;
   menuContent: (helpers: { openCoverPicker: () => void }) => ReactNode;
@@ -100,7 +99,7 @@ export function CatalogCard({
         onClick={onOpen}
         onKeyDown={handleKeyDown}
       >
-        <div className="relative aspect-[4/3] overflow-hidden">
+        <div className="relative aspect-4/3 overflow-hidden">
           {coverImage ? (
             <Image
               src={coverImage}
@@ -113,19 +112,19 @@ export function CatalogCard({
           ) : (
             <div
               className={cn(
-                'flex h-full w-full items-end justify-between bg-gradient-to-br p-5 text-white',
+                'flex h-full w-full items-end justify-between bg-linear-to-br p-5 text-white',
                 accentClassName,
               )}
             >
               <div className="space-y-2">
                 <p className="text-[11px] uppercase tracking-[0.35em] text-white/70">{itemLabel}</p>
-                <div className="max-w-[14rem] text-xl font-semibold leading-tight">{title}</div>
+                <div className="max-w-56 text-xl font-semibold leading-tight">{title}</div>
               </div>
-              <Icon className="h-12 w-12 text-white/85" />
+              {Icon}
             </div>
           )}
 
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-slate-950/20 to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-t from-slate-950/70 via-slate-950/20 to-transparent" />
           <div className="absolute inset-x-4 top-4 z-20 flex items-start justify-between gap-3">
             <Badge className="bg-white/90 text-slate-900 shadow-sm">{badgeText}</Badge>
             <div
@@ -141,7 +140,7 @@ export function CatalogCard({
         <CardHeader className="space-y-3">
           <div className="space-y-2">
             <CardTitle className="line-clamp-2 text-lg">{title}</CardTitle>
-            <p className="min-h-[3rem] text-sm leading-6 text-slate-600">{description}</p>
+            <p className="min-h-12 text-sm leading-6 text-slate-600">{description}</p>
           </div>
         </CardHeader>
 

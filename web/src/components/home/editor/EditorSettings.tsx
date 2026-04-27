@@ -49,9 +49,9 @@ export const EditorSettings = ({ open }: { open: boolean }) => {
         open={open}
         className={cn(
           'space-y-4 ',
-          'bg-popover rounded-lg ',
+          'bg-card rounded-lg ',
           'p-2.5 ring-1 ring-accent/50',
-          'text-sm text-popover-foreground ',
+          'text-sm text-card-foreground ',
         )}
       >
         <div className="space-y-2">

@@ -54,9 +54,9 @@ export function UserMenu({ onOpenAuth, onOpenSettings }: UserMenuProps) {
             open={isLoggedIn && menuOpen}
             className={cn(
               'space-y-4 ',
-              'bg-popover rounded-lg ',
+              'bg-card rounded-lg ',
               'p-2.5 ring-1 ring-accent/50',
-              'text-sm text-popover-foreground ',
+              'text-sm text-card-foreground ',
             )}
           >
             <DropdownMenuItem onClick={() => onOpenSettings(SettingsSection.general)}>
