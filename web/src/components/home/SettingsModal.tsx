@@ -53,7 +53,7 @@ function SettingsModalContent({ initialSection }: { initialSection: SettingsSect
             key={s.key}
             onClick={() => setActiveSection(s.key)}
             className={`text-left px-3 py-2 rounded-md text-sm transition-colors ${
-              activeSection === s.key ? 'font-bold bg-accent' : 'hover:bg-accent/50'
+              activeSection === s.key ? 'font-bold bg-temp' : 'hover:bg-temp/50'
             }`}
           >
             {s.label}
@@ -108,11 +108,11 @@ function GeneralSection() {
               <>
                 <div className="flex gap-2 flex-1">
                   <div className="space-y-1 flex-1">
-                    <Label className="text-xs text-muted-foreground">First Name</Label>
+                    <Label className="text-xs text-black">First Name</Label>
                     <Input value={editFirst} onChange={(e) => setEditFirst(e.target.value)} />
                   </div>
                   <div className="space-y-1 flex-1">
-                    <Label className="text-xs text-muted-foreground">Last Name</Label>
+                    <Label className="text-xs text-black">Last Name</Label>
                     <Input value={editLast} onChange={(e) => setEditLast(e.target.value)} />
                   </div>
                 </div>
@@ -138,7 +138,7 @@ function GeneralSection() {
           </div>
 
           <div>
-            <Label className="text-xs text-muted-foreground">Email</Label>
+            <Label className="text-xs text-black">Email</Label>
             <p className="text-sm">{email}</p>
           </div>
         </div>
@@ -177,7 +177,7 @@ function SubscriptionSection() {
     return (
       <div className="flex flex-col items-center justify-center h-full gap-4 text-center">
         <h3 className="text-lg font-semibold">Account Deletion Requested</h3>
-        <p className="text-muted-foreground max-w-sm">
+        <p className="text-black max-w-sm">
           Your request has been received. Your account will be deleted within 3-5 business days.
         </p>
         <Button variant="outline" onClick={() => setShowDeleteConfirm(false)}>
@@ -192,9 +192,9 @@ function SubscriptionSection() {
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold">Plans</h3>
         <div className="flex items-center gap-2 text-sm">
-          <span className={!yearly ? 'font-semibold' : 'text-muted-foreground'}>Monthly</span>
+          <span className={!yearly ? 'font-semibold' : 'text-black'}>Monthly</span>
           <Switch checked={yearly} onCheckedChange={setYearly} />
-          <span className={yearly ? 'font-semibold' : 'text-muted-foreground'}>Yearly</span>
+          <span className={yearly ? 'font-semibold' : 'text-black'}>Yearly</span>
         </div>
       </div>
 
@@ -202,25 +202,25 @@ function SubscriptionSection() {
         {/* Pro Plan */}
         <div className="relative border rounded-lg p-5 space-y-4">
           {plan === Plan.pro && (
-            <div className="absolute -top-3 left-4 bg-primary text-primary-foreground text-xs font-semibold px-3 py-1 rounded-full">
+            <div className="absolute -top-3 left-4 bg-temp text-black text-xs font-semibold px-3 py-1 rounded-full">
               Your Current Plan
             </div>
           )}
           <div>
             <h4 className="font-semibold text-base">Pro Plan</h4>
-            <p className="text-muted-foreground text-sm mt-1">30 notes from solace per day</p>
+            <p className="text-black text-sm mt-1">30 notes from solace per day</p>
           </div>
           {yearly ? (
             <div>
               <div className="text-3xl font-bold">
-                $100<span className="text-sm font-normal text-muted-foreground">/year</span>
+                $100<span className="text-sm font-normal text-black">/year</span>
               </div>
               <p className="text-sm text-green-600 font-medium mt-1">2 months free</p>
             </div>
           ) : (
             <div>
               <div className="text-3xl font-bold">
-                $5<span className="text-sm font-normal text-muted-foreground">/month</span>
+                $5<span className="text-sm font-normal text-black">/month</span>
               </div>
               <p className="text-sm text-green-600 font-medium mt-1">
                 50% off for 3 months, then $10/month
@@ -233,25 +233,25 @@ function SubscriptionSection() {
         {/* Max Plan */}
         <div className="relative border rounded-lg p-5 space-y-4">
           {plan === Plan.max && (
-            <div className="absolute -top-3 left-4 bg-primary text-primary-foreground text-xs font-semibold px-3 py-1 rounded-full">
+            <div className="absolute -top-3 left-4 bg-temp text-black text-xs font-semibold px-3 py-1 rounded-full">
               Your Current Plan
             </div>
           )}
           <div>
             <h4 className="font-semibold text-base">Max Plan</h4>
-            <p className="text-muted-foreground text-sm mt-1">100 notes from solace per day</p>
+            <p className="text-black text-sm mt-1">100 notes from solace per day</p>
           </div>
           {yearly ? (
             <div>
               <div className="text-3xl font-bold">
-                $300<span className="text-sm font-normal text-muted-foreground">/year</span>
+                $300<span className="text-sm font-normal text-black">/year</span>
               </div>
               <p className="text-sm text-green-600 font-medium mt-1">2 months free</p>
             </div>
           ) : (
             <div>
               <div className="text-3xl font-bold">
-                $20<span className="text-sm font-normal text-muted-foreground">/month</span>
+                $20<span className="text-sm font-normal text-black">/month</span>
               </div>
             </div>
           )}
@@ -274,7 +274,7 @@ function SubscriptionSection() {
               <span className="inline-block w-full">
                 <Button
                   variant="outline"
-                  className="w-full bg-muted text-muted-foreground"
+                  className="w-full bg-temp text-black"
                   disabled
                 >
                   Delete Account
@@ -325,7 +325,7 @@ function BillingSection() {
     <div className="space-y-6">
       <div>
         <h3 className="text-lg font-semibold mb-3">Card on File</h3>
-        <p className="text-sm text-muted-foreground">No card on file</p>
+        <p className="text-sm text-black">No card on file</p>
       </div>
 
       <Separator />
@@ -334,7 +334,7 @@ function BillingSection() {
         <h3 className="text-lg font-semibold mb-3">Payment History</h3>
         {history.length > 0 ? (
           <div className="space-y-2">
-            <div className="grid grid-cols-3 text-xs font-medium text-muted-foreground px-2">
+            <div className="grid grid-cols-3 text-xs font-medium text-black px-2">
               <span>Date</span>
               <span>Plan</span>
               <span>Amount</span>
@@ -342,7 +342,7 @@ function BillingSection() {
             {history.map((entry) => (
               <div
                 key={entry.billingId}
-                className="grid grid-cols-3 items-center text-sm px-2 py-2 rounded hover:bg-accent/50"
+                className="grid grid-cols-3 items-center text-sm px-2 py-2 rounded hover:bg-temp/50"
               >
                 <span>{new Date(entry.billedAt).toLocaleDateString()}</span>
                 <span>
@@ -354,7 +354,7 @@ function BillingSection() {
             ))}
           </div>
         ) : (
-          <p className="text-sm text-muted-foreground">No payment history</p>
+          <p className="text-sm text-black">No payment history</p>
         )}
       </div>
     </div>

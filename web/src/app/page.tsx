@@ -5,7 +5,7 @@ import { useNavigationStore } from '~store/useNavigationStore';
 import { useEditorStore } from '~store/useEditorStore';
 import { useDocumentQuery } from '~lib/queries/story';
 import { UserMenu } from '~components/home/UserMenu';
-import { AuthDialog } from '~components/home/AuthDialog';
+import { AuthDialog } from '~components/home/login/AuthDialog';
 import { SettingsModal } from '~components/home/SettingsModal';
 import { EditorSettingsPopover } from '~components/home/editor/EditorSettingsPopover';
 import { NavButton } from '~components/home/NavButton';
@@ -34,7 +34,7 @@ export default function Home() {
 
     return (
         <div
-            className='-home- h-screen overflow-hidden bg-background'
+            className='-home- h-screen overflow-hidden bg-temp'
         >
             <div
                 className={cn(

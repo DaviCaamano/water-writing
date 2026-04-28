@@ -41,7 +41,7 @@ export const EditorSettings = ({ open }: { open: boolean }) => {
       align="start"
       className={cn(
         '-editor-settings-',
-        'w-64 !bg-transparent !shadow-none !ring-0 !p-0',
+        'w-64 !bg-temp !shadow-none !ring-0 !p-0',
         'data-[state=open]:animate-none data-[state=closed]:animate-none',
       )}
     >
@@ -49,9 +49,9 @@ export const EditorSettings = ({ open }: { open: boolean }) => {
         open={open}
         className={cn(
           'space-y-4 ',
-          'bg-card rounded-lg ',
-          'p-2.5 ring-1 ring-accent/50',
-          'text-sm text-card-foreground ',
+          'bg-temp rounded-lg ',
+          'p-2.5 ring-1 ring-black/50',
+          'text-sm text-black ',
         )}
       >
         <div className="space-y-2">

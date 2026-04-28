@@ -124,7 +124,7 @@ export function WorldView() {
                         type="button"
                         size="icon-sm"
                         variant="secondary"
-                        className="bg-slate-950/75 text-white hover:bg-slate-950"
+                        className="bg-temp/75 text-black hover:bg-temp"
                         aria-label={`Story actions for ${story.title}`}
                       >
                         <EllipsisVertical />
@@ -186,12 +186,12 @@ export function WorldView() {
           })}
         </section>
       ) : (
-        <section className="rounded-[28px] border border-dashed border-slate-300 bg-white/70 px-6 py-12 text-center shadow-[0_15px_45px_-35px_rgba(15,23,42,0.45)]">
+        <section className="rounded-[28px] border border-temp border-temp bg-temp/70 px-6 py-12 text-center shadow-[0_15px_45px_-35px_rgba(15,23,42,0.45)]">
           <div className="mx-auto max-w-2xl space-y-3">
-            <h2 className="text-2xl font-semibold text-slate-900">
+            <h2 className="text-2xl font-semibold text-black">
               This world needs its first story
             </h2>
-            <p className="text-sm leading-6 text-slate-600 sm:text-base">
+            <p className="text-sm leading-6 text-black sm:text-base">
               Story cards live here as a full-screen catalog. Add one and it will be ready to open
               into the story view.
             </p>

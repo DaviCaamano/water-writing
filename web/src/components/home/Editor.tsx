@@ -51,9 +51,9 @@ export function Editor() {
                 '-editor- ',
                 'flex-1 flex flex-col',
                 'w-full h-[calc(100vh-2rem)] max-w-[65ch] mx-auto',
-                'my-2 border-2 border-border rounded-lg',
-                'bg-card shadow-background shadow-2xl',
-                'text-foreground',
+                'my-2 border-2 border-temp rounded-lg',
+                'bg-temp shadow-background shadow-2xl',
+                'text-black',
             )}
         >
             <input
@@ -61,7 +61,7 @@ export function Editor() {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder='Untitled Document'
-                className='w-full bg-transparent border-none outline-none px-12 pt-16 pb-2'
+                className='w-full bg-temp border-none outline-none px-12 pt-16 pb-2'
                 style={{
                     fontSize: fontSize * 1.8,
                     lineHeight: 1.4,
@@ -75,7 +75,7 @@ export function Editor() {
                 value={body}
                 onChange={(e) => setBody(e.target.value)}
                 placeholder='Start writing...'
-                className='flex-1 w-full bg-transparent border-none outline-none resize-none px-12 py-4'
+                className='flex-1 w-full bg-temp border-none outline-none resize-none px-12 py-4'
                 style={{
                     fontSize,
                     lineHeight: 1.8,
