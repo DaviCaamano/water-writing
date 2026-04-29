@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { useRef, useState } from 'react';
 import { Popover, PopoverTrigger } from '~components/ui/popover';
 import { WaterRipple } from '~components/visual-effects/WaterRipple';
-import { EditorSettings } from '~components/home/editor/EditorSettings';
+import { EditorSettingsContent } from '~components/home/editor/EditorSettingsContent';
 
 const WATER_RIPPLE_FADE_DURATION_MS = 600;
 
@@ -38,7 +38,7 @@ export function EditorSettingsPopover() {
             <Image src="/theme.svg" alt="" width={28} height={28}/>
           </PopoverTrigger>
         </WaterRipple>
-        <EditorSettings open={waterOpen} />
+        <EditorSettingsContent open={waterOpen} />
       </Popover>
     </div>
   );

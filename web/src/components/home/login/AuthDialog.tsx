@@ -111,7 +111,7 @@ export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
                 className="text-[11px] mt-0.5 tracking-[0.04em]"
                 style={{ color: mutedColor }}
               >
-                Where words begin to flow
+                Your Story, in Full Flow
               </div>
             </div>
 

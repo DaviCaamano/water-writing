@@ -7,41 +7,46 @@
 
 /* Map Tailwind Properties to current theme */
 @theme inline {
+    /* background: the main page/app background */
     --color-background: var(--background);
+    /* foreground: the default text/icon color on background */
     --color-foreground: var(--foreground);
+    /* card: surface for cards, panels, containers */
+    --color-card: var(--card);
+    /* card-foreground: text/icon color on card */
+    --color-card-foreground: var(--card-foreground);
+    /* primary: the main brand or highest-emphasis action color */
+    --color-primary: var(--primary);
+    /* primary-foreground: readable text/icon color on primary */
+    --color-primary-foreground: var(--primary-foreground);
+    /* secondary: lower-emphasis supporting action/surface color */
+    --color-secondary: var(--secondary);
+    /* secondary-foreground: readable text/icon color on secondary */
+    --color-secondary-foreground: var(--secondary-foreground);
+    /* accent: interactive highlight color or highlighted surface */
+    --color-accent: var(--accent);
+    /* accent-foreground: readable text/icon color on accent */
+    --color-accent-foreground: var(--accent-foreground);
+    /* muted: subdued background or less-emphasized surface */
+    --color-muted: var(--muted);
+    /* muted-foreground: subdued text color for secondary information */
+    --color-muted-foreground: var(--muted-foreground);
+    /* destructive: dangerous actions, destructive buttons, errors */
+    --color-destructive: var(--destructive);
+    /* destructive-foreground: readable content on destructive surfaces */
+    --color-destructive-foreground: var(--destructive-foreground);
+    /* border: default border colo r */
+    --color-border: var(--border);
+    /* input: input border/background-related tone */
+    --color-input: var(--input);
+    /* ring: focus ring color */
+    --color-ring: var(--ring);
+    /* shadow: box shadows */
+    --color-shadow: var(--shadow);
+
     --font-sans: var(--font-geist-sans);
     --font-mono: var(--font-geist-mono);
     --font-heading: var(--font-sans);
-    --color-sidebar-ring: var(--sidebar-ring);
-    --color-sidebar-border: var(--sidebar-border);
-    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-    --color-sidebar-accent: var(--sidebar-accent);
-    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-    --color-sidebar-primary: var(--sidebar-primary);
-    --color-sidebar-foreground: var(--sidebar-foreground);
-    --color-sidebar: var(--sidebar);
-    --color-chart-5: var(--chart-5);
-    --color-chart-4: var(--chart-4);
-    --color-chart-3: var(--chart-3);
-    --color-chart-2: var(--chart-2);
-    --color-chart-1: var(--chart-1);
-    --color-ring: var(--ring);
-    --color-input: var(--input);
-    --color-border: var(--border);
-    --color-destructive: var(--destructive);
-    --color-accent-foreground: var(--accent-foreground);
-    --color-accent: var(--accent);
-    --color-muted-foreground: var(--muted-foreground);
-    --color-muted: var(--muted);
-    --color-secondary-foreground: var(--secondary-foreground);
-    --color-secondary: var(--secondary);
-    --color-primary-foreground: var(--primary-foreground);
-    --color-primary-background: var(--primary-background);
-    --color-primary: var(--primary);
-    --color-popover-foreground: var(--popover-foreground);
-    --color-popover: var(--popover);
-    --color-card-foreground: var(--card-foreground);
-    --color-card: var(--card);
     --radius-sm: calc(var(--radius) * 0.6);
     --radius-md: calc(var(--radius) * 0.8);
     --radius-lg: var(--radius);
@@ -49,105 +54,126 @@
     --radius-2xl: calc(var(--radius) * 1.8);
     --radius-3xl: calc(var(--radius) * 2.2);
     --radius-4xl: calc(var(--radius) * 2.6);
+    --radius: 0.625rem;
+    --radius-kg: 2rem;
 }
 
 :root {
-    --primary: oklch(0.883 0.037 250.772);
+    /* background: the main page/app background */
     --background: oklch(0.874 0.034 263.561);
-    --foreground: #ffffff;
+    /* foreground: the default text/icon color on background */
+    --foreground: #131e23;
+    /* card: surface for cards, panels, containers */
+    --card: #e9f0f4;
+    /* card-foreground: text/icon color on card */
+    --card-foreground: #282a2b;
+    /* primary: the main brand or highest-emphasis action color */
+    --primary: #012a4a;
+    /* primary-foreground: readable text/icon color on primary */
+    --primary-foreground: #bacada;
+    /* secondary: lower-emphasis supporting action/surface color */
+    --secondary: #28454a;
+    /* secondary-foreground: readable text/icon color on secondary */
+    --secondary-foreground: #81f0ff;
+    /* accent: interactive highlight color or highlighted surface */
+    --accent: #115078;
+    /* accent-foreground: readable text/icon color on accent */
+    --accent-foreground: #88d1f8;
+    /* muted: subdued background or less-emphasized surface */
+    --muted: #98b5bc;
+    /* muted-foreground: subdued text color for secondary information */
+    --muted-foreground: #505e61;
+    /* destructive: dangerous actions, destructive buttons, errors */
+    --destructive: #602a2a;
+    /* destructive-foreground: readable content on destructive surfaces */
+    --destructive-foreground: #f89e9e;
+    /* border: default border colo r */
     --border: #ffffff;
-    --shadow: oklch(0.717 0.041 257.926 / 0.55);
-    --shadow-foreground: oklch(0.934 0.012 286.164);
-    --shadow-background: oklch(0.934 0.012 286.164 / 0.33);
-
-    --primary-foreground: red;
-    --primary-background: red;
-    --card: red;
-    --card-foreground: red;
-    --secondary: red;
-    --secondary-foreground: red;
-    --muted: red;
-    --muted-foreground: red;
-    --accent: red;
-    --accent-foreground: red;
-    --destructive: red;
+    /* input: input border/background-related tone */
     --input: red;
+    /* ring: focus ring color */
     --ring: red;
-    --chart-1: red;
-    --chart-2: red;
-    --chart-3: red;
-    --chart-4: red;
-    --chart-5: red;
-    --radius: 0.625rem;
-    --sidebar: red;
-    --sidebar-foreground: red;
-    --sidebar-primary: red;
-    --sidebar-primary-foreground: red;
-    --sidebar-accent: red;
-    --sidebar-accent-foreground: red;
-    --sidebar-border: red;
-    --sidebar-ring: red;
+    /* shadow: box shadows */
+    --shadow: oklch(0.717 0.041 257.926 / 0.55);
+    /* border radius */
 }
 
 .dark {
+    /* background: the main page/app background */
     --background: oklch(0.145 0 0);
+    /* foreground: the default text/icon color on background */
     --foreground: oklch(0.985 0 0);
+    /* card: surface for cards, panels, containers */
     --card: oklch(0.205 0 0);
+    /* card-foreground: text/icon color on card */
     --card-foreground: oklch(0.985 0 0);
+    /* primary: the main brand or highest-emphasis action color */
     --primary: oklch(0.922 0 0);
+    /* primary-foreground: readable text/icon color on primary */
     --primary-foreground: oklch(0.205 0 0);
-    --primary-background: oklch(0.96 0.02 247.87);
+    /* secondary: lower-emphasis supporting action/surface color */
     --secondary: oklch(0.269 0 0);
+    /* secondary-foreground: readable text/icon color on secondary */
     --secondary-foreground: oklch(0.985 0 0);
-    --muted: oklch(0.269 0 0);
-    --muted-foreground: oklch(0.708 0 0);
+    /* accent: interactive highlight color or highlighted surface */
     --accent: oklch(0.269 0 0);
+    /* accent-foreground: readable text/icon color on accent */
     --accent-foreground: oklch(0.985 0 0);
+    /* muted: subdued background or less-emphasized surface */
+    --muted: oklch(0.269 0 0);
+    /* muted-foreground: subdued text color for secondary information */
+    --muted-foreground: oklch(0.708 0 0);
+    /* destructive: dangerous actions, destructive buttons, errors */
     --destructive: oklch(0.704 0.191 22.216);
+    /* destructive-foreground: readable content on destructive surfaces */
+    --destructive-foreground: red;
+    /* border: default border colo r */
     --border: oklch(1 0 0 / 10%);
+    /* input: input border/background-related tone */
     --input: oklch(1 0 0 / 15%);
+    /* ring: focus ring color */
     --ring: oklch(0.556 0 0);
-    --chart-1: oklch(0.87 0 0);
-    --chart-2: oklch(0.556 0 0);
-    --chart-3: oklch(0.439 0 0);
-    --chart-4: oklch(0.371 0 0);
-    --chart-5: oklch(0.269 0 0);
-    --sidebar: oklch(0.205 0 0);
-    --sidebar-foreground: oklch(0.985 0 0);
-    --sidebar-primary: oklch(0.488 0.243 264.376);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.269 0 0);
-    --sidebar-accent-foreground: oklch(0.985 0 0);
-    --sidebar-border: oklch(1 0 0 / 10%);
-    --sidebar-ring: oklch(0.556 0 0);
+    /* shadow: box shadows */
+    --shadow: oklch(0.717 0.041 257.926 / 0.55);
 }
 
 .sepia {
+    /* background: the main page/app background */
     --background: oklch(0.96 0.04 85);
+    /* foreground: the default text/icon color on background */
     --foreground: oklch(0.27 0.05 50);
+    /* card: surface for cards, panels, containers */
     --card: oklch(0.96 0.04 85);
+    /* card-foreground: text/icon color on card */
     --card-foreground: oklch(0.27 0.05 50);
+    /* primary: the main brand or highest-emphasis action color */
     --primary: oklch(0.35 0.06 50);
+    /* primary-foreground: readable text/icon color on primary */
     --primary-foreground: oklch(0.96 0.04 85);
-    --primary-background: oklch(0.96 0.02 247.87);
+    /* secondary: lower-emphasis supporting action/surface color */
     --secondary: oklch(0.9 0.05 80);
+    /* secondary-foreground: readable text/icon color on secondary */
     --secondary-foreground: oklch(0.27 0.05 50);
-    --muted: oklch(0.9 0.05 80);
-    --muted-foreground: oklch(0.5 0.05 60);
+    /* accent: interactive highlight color or highlighted surface */
     --accent: oklch(0.9 0.05 80);
+    /* accent-foreground: readable text/icon color on accent */
     --accent-foreground: oklch(0.27 0.05 50);
+    /* muted: subdued background or less-emphasized surface */
+    --muted: oklch(0.9 0.05 80);
+    /* muted-foreground: subdued text color for secondary information */
+    --muted-foreground: oklch(0.5 0.05 60);
+    /* destructive: dangerous actions, destructive buttons, errors */
     --destructive: oklch(0.577 0.245 27.325);
+    /* destructive-foreground: readable content on destructive surfaces */
+    --destructive-foreground: red;
+    /* border: default border colo r */
     --border: oklch(0.85 0.05 75);
+    /* input: input border/background-related tone */
     --input: oklch(0.85 0.05 75);
+    /* ring: focus ring color */
     --ring: oklch(0.6 0.05 60);
-    --sidebar: oklch(0.94 0.04 85);
-    --sidebar-foreground: oklch(0.27 0.05 50);
-    --sidebar-primary: oklch(0.35 0.06 50);
-    --sidebar-primary-foreground: oklch(0.96 0.04 85);
-    --sidebar-accent: oklch(0.9 0.05 80);
-    --sidebar-accent-foreground: oklch(0.27 0.05 50);
-    --sidebar-border: oklch(0.85 0.05 75);
-    --sidebar-ring: oklch(0.6 0.05 60);
+    /* shadow: box shadows */
+    --shadow: oklch(0.717 0.041 257.926 / 0.55);
 }
 
 @layer base {
@@ -155,19 +181,20 @@
         @apply border-border outline-ring/50;
     }
     body {
-        @apply bg-linear-to-br from-white via-background to-background text-black;
+        background-image: linear-gradient(
+            to bottom right,
+            white,
+            var(--background),
+            var(--background)
+        );
+        color: black;
     }
     html {
         @apply font-sans;
     }
 
     .embossed {
-        box-shadow:
-            2px 2px 2px var(--shadow-background),
-            -2px -2px 2px var(--shadow-background),
-            inset 2px 2px 2px var(--shadow-background),
-            inset -2px -2px 2px var(--shadow-background);
-        @apply border-5 border-border;
+        @apply shadow-[inset_5px_5px_11px_var(--shadow),inset_-5px_-5px_11px_var(--shadow)]!;
     }
     .debossed {
         box-shadow:

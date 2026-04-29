@@ -50,7 +50,7 @@ export function CatalogShell({
                     className={cn(
                         '-catalog-shell-header- debossed',
                         'relative overflow-hidden bg-linear-to-r from-primary to-primary/50',
-                        'rounded-[32px] border border-temp',
+                        'rounded-[32px] border border-border',
                         'px-6 py-8 sm:px-8',
                         'text-black',
                     )}

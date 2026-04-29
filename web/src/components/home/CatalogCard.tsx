@@ -83,7 +83,7 @@ export function CatalogCard({
   };
 
   return (
-      <Card className='h-full overflow-hidden border border-temp/80 bg-temp/85 shadow-[0_24px_65px_-36px_rgba(15,23,42,0.55)] backdrop-blur transition-transform duration-300 hover:-translate-y-1'>
+      <Card className='h-full overflow-hidden border border-border/80 bg-temp/85 shadow-[0_24px_65px_-36px_rgba(15,23,42,0.55)] backdrop-blur transition-transform duration-300 hover:-translate-y-1'>
           <input
               id={coverInputId}
               type='file'
@@ -149,7 +149,7 @@ export function CatalogCard({
               </CardHeader>
 
               <CardContent className='mt-auto pt-0'>
-                  <div className='rounded-2xl border border-temp bg-temp px-3 py-2 text-xs font-medium uppercase tracking-[0.22em] text-black'>
+                  <div className='rounded-2xl border border-border bg-temp px-3 py-2 text-xs font-medium uppercase tracking-[0.22em] text-black'>
                       {meta}
                   </div>
               </CardContent>

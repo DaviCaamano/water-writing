@@ -166,7 +166,7 @@ export function StoryView() {
           ))}
         </section>
       ) : (
-        <section className="rounded-[28px] border border-temp border-temp bg-temp/70 px-6 py-12 text-center shadow-[0_15px_45px_-35px_rgba(15,23,42,0.45)]">
+        <section className="rounded-[28px] border border-border border-border bg-temp/70 px-6 py-12 text-center shadow-[0_15px_45px_-35px_rgba(15,23,42,0.45)]">
           <div className="mx-auto max-w-2xl space-y-3">
             <h2 className="text-2xl font-semibold text-black">
               Start this story with a new document

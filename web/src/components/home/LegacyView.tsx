@@ -172,7 +172,7 @@ export function LegacyView() {
                 <section
                     className={cn(
                         '-legacy-view-create-world-section- debossed dip-on-click',
-                        'rounded-[28px] border border-temp border-temp',
+                        'rounded-[28px] border border-border border-border',
                         'bg-linear-to-r from-background to-background/50',
                         'px-6 py-12 text-center cursor-pointer',
                     )}
