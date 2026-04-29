@@ -262,8 +262,8 @@ async function cancelSubscription(
     cancelAtPeriodEnd: subscription.cancel_at_period_end,
     planType: getStoredPlanType(existingPlan),
     renewDate: getSubscriptionDate(subscription.current_period_end),
-      subscriptionStatus: toStripeSubscriptionStatus(subscription.status),
-      yearPlan: existingPlan.is_year_plan,
+    subscriptionStatus: toStripeSubscriptionStatus(subscription.status),
+    yearPlan: existingPlan.is_year_plan,
   };
 }
 
@@ -281,10 +281,9 @@ async function createOrUpdateSubscription(args: {
     );
 
     if (
-      [
-        StripeSubscriptionStatus.canceled,
-        StripeSubscriptionStatus.incompleteExpired,
-      ].includes(toStripeSubscriptionStatus(existingSubscription.status))
+      [StripeSubscriptionStatus.canceled, StripeSubscriptionStatus.incompleteExpired].includes(
+        toStripeSubscriptionStatus(existingSubscription.status),
+      )
     ) {
       return stripe.subscriptions.create({
         customer: stripeCustomerId,

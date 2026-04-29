@@ -5,7 +5,7 @@
 
 // gradient for view background
 export const twGradientBackground =
-    'bg-[image:radial-gradient(circle_at_top_left,rgba(14,165,233,0.18),transparent_35%),radial-gradient(circle_at_top_right,rgba(251,146,60,0.16),transparent_30%),linear-gradient(180deg,var(--temp),var(--temp))]';
+  'bg-[image:radial-gradient(circle_at_top_left,rgba(14,165,233,0.18),transparent_35%),radial-gradient(circle_at_top_right,rgba(251,146,60,0.16),transparent_30%),linear-gradient(180deg,var(--temp),var(--temp))]';
 
 export const twForegroundGlow =
   'bg-[image:radial-gradient(circle_at_top_left,rgba(56,189,248,0.35),transparent_35%),radial-gradient(circle_at_bottom_right,rgba(251,146,60,0.25),transparent_30%)]';

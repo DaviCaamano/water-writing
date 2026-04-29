@@ -23,10 +23,7 @@ import { EmailTakenError, StripePaymentFailed } from '#constants/error/custom-er
 import { PoolClient } from 'pg';
 import { withTransaction } from '#utils/database/with-transaction';
 import stripe from '#config/stripe';
-import {
-  mockStripCustomer,
-  mockStripeSubscription,
-} from '#__tests__/constants/mock-stripe';
+import { mockStripCustomer, mockStripeSubscription } from '#__tests__/constants/mock-stripe';
 import { mockClear } from '#__tests__/utils/test-wrappers';
 
 const mockWithTransaction = withTransaction as jest.MockedFunction<typeof withTransaction>;

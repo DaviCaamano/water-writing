@@ -31,11 +31,11 @@ export function EditorSettingsPopover() {
   };
 
   return (
-    <div className="-editor-settings-popover- absolute bottom-4 left-4 z-30">
+    <div className='-editor-settings-popover- absolute bottom-4 left-4 z-30'>
       <Popover open={open} onOpenChange={handleOpenChange}>
-        <WaterRipple className="rounded-full">
-          <PopoverTrigger className="p-2 rounded-full cursor-pointer" aria-label="Text settings">
-            <Image src="/theme.svg" alt="" width={28} height={28}/>
+        <WaterRipple className='rounded-full'>
+          <PopoverTrigger className='p-2 rounded-full cursor-pointer' aria-label='Text settings'>
+            <Image src='/theme.svg' alt='' width={28} height={28} />
           </PopoverTrigger>
         </WaterRipple>
         <EditorSettingsContent open={waterOpen} />

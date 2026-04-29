@@ -13,13 +13,9 @@ function Tabs({
 }: React.ComponentProps<typeof TabsPrimitive.Root>) {
   return (
     <TabsPrimitive.Root
-      data-slot="tabs"
+      data-slot='tabs'
       orientation={orientation}
-      className={cn(
-        'group/tabs flex gap-2',
-        'data-[orientation=horizontal]:flex-col',
-        className,
-      )}
+      className={cn('group/tabs flex gap-2', 'data-[orientation=horizontal]:flex-col', className)}
       {...props}
     />
   );
@@ -53,7 +49,7 @@ function TabsList({
 }: React.ComponentProps<typeof TabsPrimitive.List> & VariantProps<typeof tabsListVariants>) {
   return (
     <TabsPrimitive.List
-      data-slot="tabs-list"
+      data-slot='tabs-list'
       data-variant={variant}
       className={cn(tabsListVariants({ variant }), className)}
       {...props}
@@ -64,7 +60,7 @@ function TabsList({
 function TabsTrigger({ className, ...props }: React.ComponentProps<typeof TabsPrimitive.Trigger>) {
   return (
     <TabsPrimitive.Trigger
-      data-slot="tabs-trigger"
+      data-slot='tabs-trigger'
       className={cn(
         'relative inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5',
         'rounded-md border border-transparent px-1.5 py-0.5 text-sm font-medium whitespace-nowrap',
@@ -106,7 +102,7 @@ function TabsTrigger({ className, ...props }: React.ComponentProps<typeof TabsPr
 function TabsContent({ className, ...props }: React.ComponentProps<typeof TabsPrimitive.Content>) {
   return (
     <TabsPrimitive.Content
-      data-slot="tabs-content"
+      data-slot='tabs-content'
       className={cn('flex-1 text-sm outline-none', className)}
       {...props}
     />

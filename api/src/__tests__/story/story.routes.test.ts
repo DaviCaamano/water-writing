@@ -28,7 +28,9 @@ const mockUpsertStory = storyService.upsertStory as jest.Mock;
 const mockFetchUserStories = storyService.fetchUserStories as jest.Mock;
 const mockFetchStoryWithDocuments = storyService.fetchStoryWithDocuments as jest.Mock;
 const mockDeleteStory = storyService.deleteStory as jest.Mock;
-const mockAddGenres = storyService.upsertGenre as jest.MockedFunction<typeof storyService.upsertGenre>;
+const mockAddGenres = storyService.upsertGenre as jest.MockedFunction<
+  typeof storyService.upsertGenre
+>;
 const mockUpsertWorld = worldService.upsertWorld as jest.Mock;
 const mockFetchWorld = worldService.fetchWorld as jest.Mock;
 const mockFetchLegacy = worldService.fetchLegacy as jest.Mock;
@@ -324,9 +326,7 @@ describe(
     it('returns 200 on success', async () => {
       mockDeleteWorld.mockResolvedValueOnce(undefined);
 
-      const res = await request(app)
-        .delete(`/story/world/${MOCK_WORLD_ID}`)
-        .set(mockAuthHeaders());
+      const res = await request(app).delete(`/story/world/${MOCK_WORLD_ID}`).set(mockAuthHeaders());
 
       expect(res.status).toBe(200);
       expect(res.body).toEqual({ status: 'ok' });
@@ -336,9 +336,7 @@ describe(
     it('returns 404 when the world is not found', async () => {
       mockDeleteWorld.mockRejectedValueOnce(new WorldNotFoundError());
 
-      const res = await request(app)
-        .delete(`/story/world/${MOCK_WORLD_ID}`)
-        .set(mockAuthHeaders());
+      const res = await request(app).delete(`/story/world/${MOCK_WORLD_ID}`).set(mockAuthHeaders());
 
       expect(res.status).toBe(404);
       expect(res.body.error).toBe('World not found');
@@ -363,9 +361,7 @@ describe(
     it('returns 200 on success', async () => {
       mockDeleteStory.mockResolvedValueOnce(undefined);
 
-      const res = await request(app)
-        .delete(`/story/story/${MOCK_STORY_ID}`)
-        .set(mockAuthHeaders());
+      const res = await request(app).delete(`/story/story/${MOCK_STORY_ID}`).set(mockAuthHeaders());
 
       expect(res.status).toBe(200);
       expect(res.body).toEqual({ status: 'ok' });
@@ -375,9 +371,7 @@ describe(
     it('returns 404 when the story is not found', async () => {
       mockDeleteStory.mockRejectedValueOnce(new StoryNotFoundError());
 
-      const res = await request(app)
-        .delete(`/story/story/${MOCK_STORY_ID}`)
-        .set(mockAuthHeaders());
+      const res = await request(app).delete(`/story/story/${MOCK_STORY_ID}`).set(mockAuthHeaders());
 
       expect(res.status).toBe(404);
       expect(res.body.error).toBe('Story not found');

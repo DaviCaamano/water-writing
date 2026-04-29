@@ -151,10 +151,10 @@ describe(
       mockPool.query.mockResolvedValueOnce({ rowCount: 1 });
 
       await expect(deleteStory(MOCK_USER_ID, MOCK_STORY_ID)).resolves.toBeUndefined();
-      expect(mockPool.query).toHaveBeenCalledWith(
-        expect.stringContaining('DELETE FROM stories'),
-        [MOCK_STORY_ID, MOCK_USER_ID],
-      );
+      expect(mockPool.query).toHaveBeenCalledWith(expect.stringContaining('DELETE FROM stories'), [
+        MOCK_STORY_ID,
+        MOCK_USER_ID,
+      ]);
     });
 
     it('throws StoryNotFoundError when no row is deleted', async () => {
@@ -175,28 +175,29 @@ describe(
 
       const result = await storyService.fetchUserStories(MOCK_USER_ID);
 
-      expect(result).toEqual([{ ...MOCK_STORY_RESPONSE, documents: [
+      expect(result).toEqual([
         {
-          documentId: MOCK_DOC.document_id,
-          storyId: MOCK_DOC.story_id,
-          title: MOCK_DOC.title,
-          body: MOCK_DOC.body,
-          predecessorId: MOCK_DOC.predecessor_id,
-          successorId: MOCK_DOC.successor_id,
-          createdAt: MOCK_DOC.created_at,
-          updatedAt: MOCK_DOC.updated_at,
+          ...MOCK_STORY_RESPONSE,
+          documents: [
+            {
+              documentId: MOCK_DOC.document_id,
+              storyId: MOCK_DOC.story_id,
+              title: MOCK_DOC.title,
+              body: MOCK_DOC.body,
+              predecessorId: MOCK_DOC.predecessor_id,
+              successorId: MOCK_DOC.successor_id,
+              createdAt: MOCK_DOC.created_at,
+              updatedAt: MOCK_DOC.updated_at,
+            },
+          ],
         },
-      ] }]);
-      expect(mockPool.query).toHaveBeenNthCalledWith(
-        1,
-        expect.stringContaining('FROM stories'),
-        [MOCK_USER_ID],
-      );
-      expect(mockPool.query).toHaveBeenNthCalledWith(
-        2,
-        expect.stringContaining('FROM documents'),
-        [[MOCK_STORY_ID]],
-      );
+      ]);
+      expect(mockPool.query).toHaveBeenNthCalledWith(1, expect.stringContaining('FROM stories'), [
+        MOCK_USER_ID,
+      ]);
+      expect(mockPool.query).toHaveBeenNthCalledWith(2, expect.stringContaining('FROM documents'), [
+        [MOCK_STORY_ID],
+      ]);
     });
 
     it('returns an empty array when the user has no stories', async () => {

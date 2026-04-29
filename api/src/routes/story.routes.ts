@@ -37,12 +37,7 @@ import {
   StoryNotFoundError,
   WorldNotFoundError,
 } from '#constants/error/custom-errors';
-import {
-  deleteWorld,
-  fetchLegacy,
-  fetchWorld,
-  upsertWorld,
-} from '#services/story/world.service';
+import { deleteWorld, fetchLegacy, fetchWorld, upsertWorld } from '#services/story/world.service';
 import { waterWrite } from '#services/story/editor.service';
 import {
   DocumentResponse,
@@ -131,8 +126,8 @@ router.get(
   authMiddleware,
   generalLimiter,
   async (req: AuthRequest, res: RouteResponse<WorldResponse[]>): Promise<void> => {
-      const world = await fetchLegacy(req.userId!);
-      res.json(world);
+    const world = await fetchLegacy(req.userId!);
+    res.json(world);
   },
 );
 

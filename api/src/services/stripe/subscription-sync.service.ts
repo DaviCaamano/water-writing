@@ -156,12 +156,14 @@ export function inferYearPlanFromSubscription(subscription: Stripe.Subscription)
 export function isAccessibleSubscriptionStatus(
   status: StripeSubscriptionStatus | null | undefined,
 ): boolean {
-  return !!status &&
+  return (
+    !!status &&
     [
       StripeSubscriptionStatus.active,
       StripeSubscriptionStatus.trialing,
       StripeSubscriptionStatus.past_due,
-    ].includes(status);
+    ].includes(status)
+  );
 }
 
 export function getStoredPlanType(plan: PlanRow | null): Plan {

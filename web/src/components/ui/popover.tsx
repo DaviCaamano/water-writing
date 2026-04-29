@@ -6,11 +6,11 @@ import * as PopoverPrimitive from '@radix-ui/react-popover';
 import { cn } from '~utils/merge-css-classes';
 
 function Popover({ ...props }: React.ComponentProps<typeof PopoverPrimitive.Root>) {
-  return <PopoverPrimitive.Root data-slot="popover" {...props} />;
+  return <PopoverPrimitive.Root data-slot='popover' {...props} />;
 }
 
 function PopoverTrigger({ ...props }: React.ComponentProps<typeof PopoverPrimitive.Trigger>) {
-  return <PopoverPrimitive.Trigger data-slot="popover-trigger" {...props} />;
+  return <PopoverPrimitive.Trigger data-slot='popover-trigger' {...props} />;
 }
 
 function PopoverContent({
@@ -24,7 +24,7 @@ function PopoverContent({
   return (
     <PopoverPrimitive.Portal>
       <PopoverPrimitive.Content
-        data-slot="popover-content"
+        data-slot='popover-content'
         align={align}
         alignOffset={alignOffset}
         side={side}
@@ -49,7 +49,7 @@ function PopoverContent({
 function PopoverHeader({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div
-      data-slot="popover-header"
+      data-slot='popover-header'
       className={cn('flex flex-col gap-0.5 text-sm', className)}
       {...props}
     />
@@ -59,7 +59,7 @@ function PopoverHeader({ className, ...props }: React.ComponentProps<'div'>) {
 function PopoverTitle({ className, ...props }: React.ComponentProps<'h2'>) {
   return (
     <h2
-      data-slot="popover-title"
+      data-slot='popover-title'
       className={cn('font-heading font-medium', className)}
       {...props}
     />
@@ -67,13 +67,7 @@ function PopoverTitle({ className, ...props }: React.ComponentProps<'h2'>) {
 }
 
 function PopoverDescription({ className, ...props }: React.ComponentProps<'p'>) {
-  return (
-    <p
-      data-slot="popover-description"
-      className={cn('text-black', className)}
-      {...props}
-    />
-  );
+  return <p data-slot='popover-description' className={cn('text-black', className)} {...props} />;
 }
 
 export { Popover, PopoverContent, PopoverDescription, PopoverHeader, PopoverTitle, PopoverTrigger };

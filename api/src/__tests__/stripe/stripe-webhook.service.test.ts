@@ -54,7 +54,9 @@ describe(
     describe('customer.subscription.* events', () => {
       it('syncs the plan snapshot for the matched user', async () => {
         const mockClient = createMockClient();
-        mockClient.query.mockResolvedValueOnce({ rows: [MOCK_PLAN] }).mockResolvedValueOnce(undefined);
+        mockClient.query
+          .mockResolvedValueOnce({ rows: [MOCK_PLAN] })
+          .mockResolvedValueOnce(undefined);
         mockPool.query.mockResolvedValueOnce({ rows: [MOCK_USER] });
         mockWithTransaction.mockImplementation((callback) => callback(mockClient as PoolClient));
 
@@ -208,7 +210,9 @@ describe(
 
       it('syncs the plan snapshot without writing billing', async () => {
         const mockClient = createMockClient();
-        mockClient.query.mockResolvedValueOnce({ rows: [MOCK_PLAN] }).mockResolvedValueOnce(undefined);
+        mockClient.query
+          .mockResolvedValueOnce({ rows: [MOCK_PLAN] })
+          .mockResolvedValueOnce(undefined);
         mockPool.query.mockResolvedValueOnce({ rows: [MOCK_USER] });
         mockRetrieveSubscription.mockResolvedValueOnce(mockStripeSubscription);
         mockWithTransaction.mockImplementation((callback) => callback(mockClient as PoolClient));
@@ -221,7 +225,9 @@ describe(
           expand: ['latest_invoice.payment_intent'],
         });
         expect(mockClient.query).toHaveBeenCalledTimes(2);
-        expect(mockClient.query.mock.calls[1][0]).toEqual(expect.stringContaining('INSERT INTO plans'));
+        expect(mockClient.query.mock.calls[1][0]).toEqual(
+          expect.stringContaining('INSERT INTO plans'),
+        );
       });
     });
   }),

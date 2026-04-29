@@ -17,12 +17,7 @@ import {
   SubscribeSchema,
   SubscribeBody,
 } from '#schemas/user.schemas';
-import {
-  createUser,
-  updateUser,
-  deleteUser,
-  subscribe,
-} from '#services/user/user.service';
+import { createUser, updateUser, deleteUser, subscribe } from '#services/user/user.service';
 import { AuthRequest } from '#types/request';
 import { getSession, login, logout } from '#services/user/login.service';
 import {
@@ -120,10 +115,14 @@ router.post(
 );
 
 // Delete account
-router.delete('/deleteme', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
-  await deleteUser(req.userId!);
-  res.json({ status: 'ok' });
-});
+router.delete(
+  '/deleteme',
+  authMiddleware,
+  async (req: AuthRequest, res: Response): Promise<void> => {
+    await deleteUser(req.userId!);
+    res.json({ status: 'ok' });
+  },
+);
 
 // Subscribe
 router.post(

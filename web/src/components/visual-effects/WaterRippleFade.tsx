@@ -49,7 +49,6 @@ export function WaterRippleFade({
   useEffect(() => {
     if (animRafRef.current !== null) cancelAnimationFrame(animRafRef.current);
 
-
     const startTime = performance.now();
     const startScale = scale;
     const startOpacity = opacity;
@@ -113,24 +112,24 @@ export function WaterRippleFade({
       <svg
         width={0}
         height={0}
-        aria-hidden="true"
+        aria-hidden='true'
         style={{ position: 'absolute', overflow: 'hidden' }}
       >
         <defs>
-          <filter id={filterId} x="-20%" y="-20%" width="140%" height="140%">
+          <filter id={filterId} x='-20%' y='-20%' width='140%' height='140%'>
             <feTurbulence
-              type="turbulence"
+              type='turbulence'
               baseFrequency={`${baseFreqX} ${baseFreqY}`}
               numOctaves={3}
               seed={4}
-              result="noise"
+              result='noise'
             />
             <feDisplacementMap
-              in="SourceGraphic"
-              in2="noise"
+              in='SourceGraphic'
+              in2='noise'
               scale={displayScale}
-              xChannelSelector="R"
-              yChannelSelector="G"
+              xChannelSelector='R'
+              yChannelSelector='G'
             />
           </filter>
         </defs>

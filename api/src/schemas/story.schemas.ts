@@ -32,10 +32,6 @@ export const EditorSchema = z
     path: ['selection'],
   });
 
-
-
-
-
 export const DocumentParamsSchema = z.object({
   documentId: z.uuid('documentId must be a valid UUID'),
 });

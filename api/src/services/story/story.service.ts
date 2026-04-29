@@ -111,7 +111,6 @@ export async function upsertStory(userId: string, data: UpsertStoryBody): Promis
   });
 }
 
-
 export async function deleteStory(userId: string, storyId: string): Promise<void> {
   const result = await pool.query(
     `DELETE FROM stories

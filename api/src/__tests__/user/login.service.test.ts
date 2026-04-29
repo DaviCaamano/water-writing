@@ -83,11 +83,9 @@ describe(
     it('returns the current authenticated session payload', async () => {
       const mockClient = createMockClient();
       mockWithQuery.mockImplementation((callback) => callback(mockClient as PoolClient));
-      mockClient.query
-        .mockResolvedValueOnce({ rows: [MOCK_USER] })
-        .mockResolvedValueOnce({
-          rows: [{ plan_type: Plan.pro, subscription_status: StripeSubscriptionStatus.active }],
-        });
+      mockClient.query.mockResolvedValueOnce({ rows: [MOCK_USER] }).mockResolvedValueOnce({
+        rows: [{ plan_type: Plan.pro, subscription_status: StripeSubscriptionStatus.active }],
+      });
       mockFetchLegacy.mockImplementation(async () => mockLegacyResponse());
 
       const response = await getSession(MOCK_USER.user_id, MOCK_LOGIN_TOKEN);
@@ -108,11 +106,9 @@ describe(
     it('propagates downstream fetchLegacy failures', async () => {
       const mockClient = createMockClient();
       mockWithQuery.mockImplementation((callback) => callback(mockClient as PoolClient));
-      mockClient.query
-        .mockResolvedValueOnce({ rows: [MOCK_USER] })
-        .mockResolvedValueOnce({
-          rows: [{ plan_type: Plan.pro, subscription_status: StripeSubscriptionStatus.active }],
-        });
+      mockClient.query.mockResolvedValueOnce({ rows: [MOCK_USER] }).mockResolvedValueOnce({
+        rows: [{ plan_type: Plan.pro, subscription_status: StripeSubscriptionStatus.active }],
+      });
       mockFetchLegacy.mockRejectedValueOnce(new Error('legacy failed'));
 
       await expect(getSession(MOCK_USER.user_id, MOCK_LOGIN_TOKEN)).rejects.toThrow(

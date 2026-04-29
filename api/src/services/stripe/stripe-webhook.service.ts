@@ -52,7 +52,10 @@ async function syncFromSubscriptionEvent(subscription: Stripe.Subscription): Pro
     });
   });
 
-  logger.info({ userId: user.user_id, event: 'customer.subscription' }, 'Synced subscription snapshot from Stripe');
+  logger.info(
+    { userId: user.user_id, event: 'customer.subscription' },
+    'Synced subscription snapshot from Stripe',
+  );
 }
 
 async function handleInvoicePaid(invoice: Stripe.Invoice): Promise<void> {
@@ -156,12 +159,19 @@ async function findUserByStripeCustomerId(customerId: string | null): Promise<Us
   return result.rows[0] ?? null;
 }
 
-async function getExistingPlan(client: { query: PoolClient['query'] }, userId: string): Promise<PlanRow | null> {
-  const result = await client.query<PlanRow>('SELECT * FROM plans WHERE user_id = $1 LIMIT 1', [userId]);
+async function getExistingPlan(
+  client: { query: PoolClient['query'] },
+  userId: string,
+): Promise<PlanRow | null> {
+  const result = await client.query<PlanRow>('SELECT * FROM plans WHERE user_id = $1 LIMIT 1', [
+    userId,
+  ]);
   return result.rows[0] ?? null;
 }
 
-function getCustomerId(customer: string | Stripe.Customer | Stripe.DeletedCustomer | null): string | null {
+function getCustomerId(
+  customer: string | Stripe.Customer | Stripe.DeletedCustomer | null,
+): string | null {
   if (!customer) return null;
   return typeof customer === 'string' ? customer : customer.id;
 }

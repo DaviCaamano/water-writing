@@ -6,10 +6,10 @@ import { DocumentRow, StoryRow, StoryRowWithDocuments, WorldRow } from '#types/d
 import { mapWorldResponse } from '#utils/story/map-story';
 
 export const deleteWorld = async (userId: string, worldId: string): Promise<void> => {
-  const result = await pool.query(
-    'DELETE FROM worlds WHERE world_id = $1 AND user_id = $2',
-    [worldId, userId],
-  );
+  const result = await pool.query('DELETE FROM worlds WHERE world_id = $1 AND user_id = $2', [
+    worldId,
+    userId,
+  ]);
   if (result.rowCount === 0) {
     throw new WorldNotFoundError();
   }

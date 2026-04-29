@@ -41,7 +41,10 @@ describe(
     it('returns 404 when document is not found', async () => {
       mockEditText.mockRejectedValueOnce(new DocumentNotFoundError());
 
-      const res = await request(app).post('/story/water-write').set(mockAuthHeaders()).send(validBody);
+      const res = await request(app)
+        .post('/story/water-write')
+        .set(mockAuthHeaders())
+        .send(validBody);
 
       expect(res.status).toBe(404);
       expect(res.body.error).toBe('Document not found');
@@ -50,7 +53,10 @@ describe(
     it('returns 400 when selection range is invalid', async () => {
       mockEditText.mockRejectedValueOnce(new InvalidSelectionError());
 
-      const res = await request(app).post('/story/water-write').set(mockAuthHeaders()).send(validBody);
+      const res = await request(app)
+        .post('/story/water-write')
+        .set(mockAuthHeaders())
+        .send(validBody);
 
       expect(res.status).toBe(400);
       expect(res.body.error).toBe('Invalid selection range');
@@ -63,7 +69,10 @@ describe(
         res.end();
       });
 
-      const res = await request(app).post('/story/water-write').set(mockAuthHeaders()).send(validBody);
+      const res = await request(app)
+        .post('/story/water-write')
+        .set(mockAuthHeaders())
+        .send(validBody);
 
       expect(res.status).toBe(200);
       expect(mockEditText).toHaveBeenCalledWith(

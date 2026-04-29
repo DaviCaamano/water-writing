@@ -32,4 +32,3 @@ export const mapWorldState = (response: WorldResponse): World => {
     stories: orderLinkedDocs(response.stories, (doc) => doc.storyId).map(mapStoryState),
   };
 };
-

@@ -5,7 +5,7 @@ import { cn } from '~utils/merge-css-classes';
 function Textarea({ className, ...props }: React.ComponentProps<'textarea'>) {
   return (
     <textarea
-      data-slot="textarea"
+      data-slot='textarea'
       className={cn(
         'flex field-sizing-content min-h-16 w-full rounded-lg border border-border bg-temp',
         'px-2.5 py-2 text-base transition-colors outline-none placeholder:text-black md:text-sm',

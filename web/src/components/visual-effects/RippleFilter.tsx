@@ -117,25 +117,25 @@ export function RippleFilter({
   return (
     <>
       <svg
-        width="0"
-        height="0"
-        aria-hidden="true"
+        width='0'
+        height='0'
+        aria-hidden='true'
         style={{ position: 'absolute', pointerEvents: 'none' }}
       >
         <defs>
-          <filter id={filterId} x="-20%" y="-20%" width="140%" height="140%">
-            <feImage ref={feImageRef} x="50" y="50" width="0%" height="0%" result="rippleImage" />
+          <filter id={filterId} x='-20%' y='-20%' width='140%' height='140%'>
+            <feImage ref={feImageRef} x='50' y='50' width='0%' height='0%' result='rippleImage' />
             <feDisplacementMap
               ref={displacementRef}
               id={displacementId}
-              in="SourceGraphic"
-              in2="rippleImage"
-              xChannelSelector="R"
-              yChannelSelector="G"
-              colorInterpolationFilters="sRGB"
-              scale="0"
+              in='SourceGraphic'
+              in2='rippleImage'
+              xChannelSelector='R'
+              yChannelSelector='G'
+              colorInterpolationFilters='sRGB'
+              scale='0'
             />
-            <feComposite operator="in" in2="rippleImage" />
+            <feComposite operator='in' in2='rippleImage' />
           </filter>
         </defs>
       </svg>

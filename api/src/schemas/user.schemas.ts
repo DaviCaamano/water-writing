@@ -35,7 +35,6 @@ export const UpdateUserSchema = z
     message: 'At least one field must be provided',
   });
 
-
 export const BillingHistoryParamsSchema = z.object({
   userId: z.uuid('userId must be a valid UUID'),
 });

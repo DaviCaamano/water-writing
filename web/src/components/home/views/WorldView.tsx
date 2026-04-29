@@ -85,7 +85,7 @@ export function WorldView() {
 
   return (
     <CatalogShell
-      eyebrow="World view"
+      eyebrow='World view'
       title={currentWorld?.title ?? 'World stories'}
       description={
         currentWorld
@@ -96,46 +96,46 @@ export function WorldView() {
         `${stories.length} stor${stories.length === 1 ? 'y' : 'ies'}`,
         `${totalDocuments} document${totalDocuments === 1 ? '' : 's'}`,
       ]}
-      addLabel="Add story"
+      addLabel='Add story'
       onAdd={handleAddStory}
     >
       {stories.length > 0 ? (
-        <section className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+        <section className='grid gap-6 md:grid-cols-2 xl:grid-cols-3'>
           {stories.map((story) => {
             const worldTargets = worlds.filter((world) => world.worldId !== story.worldId);
 
             return (
               <CatalogCard
                 key={story.storyId}
-                itemLabel="Story"
+                itemLabel='Story'
                 title={story.title}
                 description={summarizeStory(story.documents?.length ?? 0)}
                 meta={`${story.documents?.length ?? 0} document${(story.documents?.length ?? 0) === 1 ? '' : 's'}`}
-                badgeText="Story"
+                badgeText='Story'
                 coverImage={null}
-                accentClassName="from-amber-500 via-orange-400 to-rose-500"
-                Icon={<Image src="/book.svg" alt="Story" width={48} height={48} />}
+                accentClassName='from-amber-500 via-orange-400 to-rose-500'
+                Icon={<Image src='/book.svg' alt='Story' width={48} height={48} />}
                 onOpen={() => navigateToStory(story.storyId, story.worldId)}
                 onUploadCover={() => {}}
                 menuContent={({ openCoverPicker }) => (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button
-                        type="button"
-                        size="icon-sm"
-                        variant="secondary"
-                        className="bg-temp/75 text-black hover:bg-temp"
+                        type='button'
+                        size='icon-sm'
+                        variant='secondary'
+                        className='bg-temp/75 text-black hover:bg-temp'
                         aria-label={`Story actions for ${story.title}`}
                       >
                         <EllipsisVertical />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-60">
+                    <DropdownMenuContent align='end' className='w-60'>
                       <DropdownMenuLabel>{story.title}</DropdownMenuLabel>
                       <DropdownMenuItem
                         onClick={() => navigateToStory(story.storyId, story.worldId)}
                       >
-                        <Image src="/book.svg" alt="Story" width={48} height={48} />
+                        <Image src='/book.svg' alt='Story' width={48} height={48} />
                         Open story
                       </DropdownMenuItem>
                       <DropdownMenuSub>
@@ -143,7 +143,7 @@ export function WorldView() {
                           <ArrowRightLeft />
                           Change world
                         </DropdownMenuSubTrigger>
-                        <DropdownMenuSubContent className="w-56">
+                        <DropdownMenuSubContent className='w-56'>
                           {worldTargets.length > 0 ? (
                             worldTargets.map((world) => (
                               <DropdownMenuItem
@@ -172,7 +172,7 @@ export function WorldView() {
                         Upload cover image
                       </DropdownMenuItem>
                       <DropdownMenuItem
-                        variant="destructive"
+                        variant='destructive'
                         onClick={() => handleDeleteStory(story.storyId, story.title)}
                       >
                         <Trash2 />
@@ -186,16 +186,14 @@ export function WorldView() {
           })}
         </section>
       ) : (
-        <section className="rounded-[28px] border border-border border-border bg-temp/70 px-6 py-12 text-center shadow-[0_15px_45px_-35px_rgba(15,23,42,0.45)]">
-          <div className="mx-auto max-w-2xl space-y-3">
-            <h2 className="text-2xl font-semibold text-black">
-              This world needs its first story
-            </h2>
-            <p className="text-sm leading-6 text-black sm:text-base">
+        <section className='rounded-[28px] border border-border border-border bg-temp/70 px-6 py-12 text-center shadow-[0_15px_45px_-35px_rgba(15,23,42,0.45)]'>
+          <div className='mx-auto max-w-2xl space-y-3'>
+            <h2 className='text-2xl font-semibold text-black'>This world needs its first story</h2>
+            <p className='text-sm leading-6 text-black sm:text-base'>
               Story cards live here as a full-screen catalog. Add one and it will be ready to open
               into the story view.
             </p>
-            <Button type="button" size="lg" onClick={handleAddStory}>
+            <Button type='button' size='lg' onClick={handleAddStory}>
               Create the first story
             </Button>
           </div>

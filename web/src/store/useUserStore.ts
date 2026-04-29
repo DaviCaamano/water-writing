@@ -33,7 +33,12 @@ function applyLoginResponse(data: LoginResponse, queryClient: ReturnType<typeof 
 
 export interface UserActions {
   login: (email: string, password: string) => Promise<void>;
-  signup: (data: { email: string; password: string; firstName: string; lastName: string }) => Promise<void>;
+  signup: (data: {
+    email: string;
+    password: string;
+    firstName: string;
+    lastName: string;
+  }) => Promise<void>;
   logout: () => Promise<void>;
   updateName: (firstName: string, lastName: string) => Promise<void>;
   deleteAccount: () => Promise<void>;
@@ -48,7 +53,9 @@ export function useUserStore() {
   const actions = useMemo<UserActions>(
     () => ({
       login: async (email, password) => {
-        const data = await queryApi<LoginResponse>(apiRoutes.user.login(), { body: { email, password } });
+        const data = await queryApi<LoginResponse>(apiRoutes.user.login(), {
+          body: { email, password },
+        });
         applyLoginResponse(data, queryClient);
       },
 

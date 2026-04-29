@@ -12,7 +12,8 @@
     "api:dev": "bun --filter water-writing-api dev",
     "web:build": "bun --filter water-writing build",
     "api:build": "bun --filter water-writing-api build",
-    "lint": "bun --filter '*' lint"
+    "lint": "bun --filter '*' lint",
+    "format": "bun --filter '*' format"
   },
   "devDependencies": {
     "@next/bundle-analyzer": "^16.2.4"

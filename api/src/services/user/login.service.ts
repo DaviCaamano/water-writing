@@ -57,7 +57,8 @@ export const login = async (data: LoginBody): Promise<LoginResponse> => {
       email: user.email,
       userId: user.user_id,
       plan:
-        planResult.rows.length > 0 && isAccessibleSubscriptionStatus(planResult.rows[0].subscription_status)
+        planResult.rows.length > 0 &&
+        isAccessibleSubscriptionStatus(planResult.rows[0].subscription_status)
           ? planResult.rows[0].plan_type
           : null,
       firstName: user.first_name,

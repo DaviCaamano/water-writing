@@ -3,3 +3,9 @@ export enum SettingsSection {
   plan = 'plan',
   billing = 'billing',
 }
+
+export type SettingsColorMap = {
+  default: string;
+  destructive: string;
+  ghost: string;
+};

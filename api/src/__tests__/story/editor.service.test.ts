@@ -90,7 +90,9 @@ describe(
       );
 
       const args = mockStream.mock.calls[0][0];
-      expect(args.messages[0].content).toContain('<startSelectionIndex>\n6\n</startSelectionIndex>');
+      expect(args.messages[0].content).toContain(
+        '<startSelectionIndex>\n6\n</startSelectionIndex>',
+      );
       expect(args.messages[0].content).toContain('<endSelectionindex>\n11\n</endSelectionindex>');
       expect(args.messages[0].content).toContain('<instructions>\nmake it louder\n</instructions>');
     });

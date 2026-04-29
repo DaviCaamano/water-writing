@@ -7,242 +7,375 @@
 
 /* Map Tailwind Properties to current theme */
 @theme inline {
-    /* background: the main page/app background */
-    --color-background: var(--background);
-    /* foreground: the default text/icon color on background */
-    --color-foreground: var(--foreground);
-    /* card: surface for cards, panels, containers */
-    --color-card: var(--card);
-    /* card-foreground: text/icon color on card */
-    --color-card-foreground: var(--card-foreground);
-    /* primary: the main brand or highest-emphasis action color */
-    --color-primary: var(--primary);
-    /* primary-foreground: readable text/icon color on primary */
-    --color-primary-foreground: var(--primary-foreground);
-    /* secondary: lower-emphasis supporting action/surface color */
-    --color-secondary: var(--secondary);
-    /* secondary-foreground: readable text/icon color on secondary */
-    --color-secondary-foreground: var(--secondary-foreground);
-    /* accent: interactive highlight color or highlighted surface */
-    --color-accent: var(--accent);
-    /* accent-foreground: readable text/icon color on accent */
-    --color-accent-foreground: var(--accent-foreground);
-    /* muted: subdued background or less-emphasized surface */
-    --color-muted: var(--muted);
-    /* muted-foreground: subdued text color for secondary information */
-    --color-muted-foreground: var(--muted-foreground);
-    /* destructive: dangerous actions, destructive buttons, errors */
-    --color-destructive: var(--destructive);
-    /* destructive-foreground: readable content on destructive surfaces */
-    --color-destructive-foreground: var(--destructive-foreground);
-    /* border: default border colo r */
-    --color-border: var(--border);
-    /* input: input border/background-related tone */
-    --color-input: var(--input);
-    /* ring: focus ring color */
-    --color-ring: var(--ring);
-    /* shadow: box shadows */
-    --color-shadow: var(--shadow);
+  /* background: the main page/app background */
+  --color-background: var(--background);
+  /* foreground: the default text/icon color on background */
+  --color-foreground: var(--foreground);
+  /* card: surface for cards, panels, containers */
+  --color-card: var(--card);
+  /* card-foreground: text/icon color on card */
+  --color-card-foreground: var(--card-foreground);
+  /* primary: the main brand or highest-emphasis action color */
+  --color-primary: var(--primary);
+  /* primary-foreground: readable text/icon color on primary */
+  --color-primary-foreground: var(--primary-foreground);
+  /* secondary: lower-emphasis supporting action/surface color */
+  --color-secondary: var(--secondary);
+  /* secondary-foreground: readable text/icon color on secondary */
+  --color-secondary-foreground: var(--secondary-foreground);
+  /* accent: interactive highlight color or highlighted surface */
+  --color-accent: var(--accent);
+  /* accent-foreground: readable text/icon color on accent */
+  --color-accent-foreground: var(--accent-foreground);
+  /* muted: subdued background or less-emphasized surface */
+  --color-muted: var(--muted);
+  /* muted-foreground: subdued text color for secondary information */
+  --color-muted-foreground: var(--muted-foreground);
+  /* destructive: dangerous actions, destructive buttons, errors */
+  --color-destructive: var(--destructive);
+  /* destructive-foreground: readable content on destructive surfaces */
+  --color-destructive-foreground: var(--destructive-foreground);
+  /* success: positive actions, success messages */
+  --color-success: var(--success-foreground);
+  /* success-foreground: readable content on success surfaces */
+  --color-success-foreground: var(--success-foreground);
+  /* border: default border colo r */
+  --color-border: var(--border);
+  /* input: input border/background-related tone */
+  --color-input: var(--input);
+  /* ring: focus ring color */
+  --color-ring: var(--ring);
+  /* shadow: box shadows */
+  --color-shadow: var(--shadow);
 
-    --font-sans: var(--font-geist-sans);
-    --font-mono: var(--font-geist-mono);
-    --font-heading: var(--font-sans);
-    --radius-sm: calc(var(--radius) * 0.6);
-    --radius-md: calc(var(--radius) * 0.8);
-    --radius-lg: var(--radius);
-    --radius-xl: calc(var(--radius) * 1.4);
-    --radius-2xl: calc(var(--radius) * 1.8);
-    --radius-3xl: calc(var(--radius) * 2.2);
-    --radius-4xl: calc(var(--radius) * 2.6);
-    --radius: 0.625rem;
-    --radius-kg: 2rem;
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-heading: var(--font-sans);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+  --radius: 0.625rem;
+  --radius-kg: 2rem;
 }
 
 :root {
-    /* background: the main page/app background */
-    --background: oklch(0.874 0.034 263.561);
-    /* foreground: the default text/icon color on background */
-    --foreground: #131e23;
-    /* card: surface for cards, panels, containers */
-    --card: #e9f0f4;
-    /* card-foreground: text/icon color on card */
-    --card-foreground: #282a2b;
-    /* primary: the main brand or highest-emphasis action color */
-    --primary: #012a4a;
-    /* primary-foreground: readable text/icon color on primary */
-    --primary-foreground: #bacada;
-    /* secondary: lower-emphasis supporting action/surface color */
-    --secondary: #28454a;
-    /* secondary-foreground: readable text/icon color on secondary */
-    --secondary-foreground: #81f0ff;
-    /* accent: interactive highlight color or highlighted surface */
-    --accent: #115078;
-    /* accent-foreground: readable text/icon color on accent */
-    --accent-foreground: #88d1f8;
-    /* muted: subdued background or less-emphasized surface */
-    --muted: #98b5bc;
-    /* muted-foreground: subdued text color for secondary information */
-    --muted-foreground: #505e61;
-    /* destructive: dangerous actions, destructive buttons, errors */
-    --destructive: #602a2a;
-    /* destructive-foreground: readable content on destructive surfaces */
-    --destructive-foreground: #f89e9e;
-    /* border: default border colo r */
-    --border: #ffffff;
-    /* input: input border/background-related tone */
-    --input: red;
-    /* ring: focus ring color */
-    --ring: red;
-    /* shadow: box shadows */
-    --shadow: oklch(0.717 0.041 257.926 / 0.55);
-    /* border radius */
+  /* background: the main page/app background */
+  --background: oklch(0.874 0.034 263.561);
+  /* foreground: the default text/icon color on background */
+  --foreground: #131e23;
+  /* card: surface for cards, panels, containers */
+  --card: #e9f0f4;
+  /* card-foreground: text/icon color on card */
+  --card-foreground: #282a2b;
+  /* primary: the main brand or highest-emphasis action color */
+  --primary: #012a4a;
+  /* primary-foreground: readable text/icon color on primary */
+  --primary-foreground: #bacada;
+  /* secondary: lower-emphasis supporting action/surface color */
+  --secondary: #28454a;
+  /* secondary-foreground: readable text/icon color on secondary */
+  --secondary-foreground: #81f0ff;
+  /* accent: interactive highlight color or highlighted surface */
+  --accent: #115078;
+  /* accent-foreground: readable text/icon color on accent */
+  --accent-foreground: #88d1f8;
+  /* muted: subdued background or less-emphasized surface */
+  --muted: #98b5bc;
+  /* muted-foreground: subdued text color for secondary information */
+  --muted-foreground: #505e61;
+  /* destructive: dangerous actions, destructive buttons, errors */
+  --destructive: #602a2a;
+  /* destructive-foreground: readable content on destructive surfaces */
+  --destructive-foreground: #f89e9e;
+  /* success: positive actions, success messages */
+  --success: oklch(0.55 0.14 150);
+  /* success-foreground: readable content on success surfaces */
+  --success-foreground: oklch(0.905 0.093 156.784);
+  /* border: default border colo r */
+  --border: #ffffff;
+  /* input: input border/background-related tone */
+  --input: red;
+  /* ring: focus ring color */
+  --ring: red;
+  /* shadow: box shadows */
+  --shadow: oklch(0.717 0.041 257.926 / 0.55);
 }
 
 .dark {
-    /* background: the main page/app background */
-    --background: oklch(0.145 0 0);
-    /* foreground: the default text/icon color on background */
-    --foreground: oklch(0.985 0 0);
-    /* card: surface for cards, panels, containers */
-    --card: oklch(0.205 0 0);
-    /* card-foreground: text/icon color on card */
-    --card-foreground: oklch(0.985 0 0);
-    /* primary: the main brand or highest-emphasis action color */
-    --primary: oklch(0.922 0 0);
-    /* primary-foreground: readable text/icon color on primary */
-    --primary-foreground: oklch(0.205 0 0);
-    /* secondary: lower-emphasis supporting action/surface color */
-    --secondary: oklch(0.269 0 0);
-    /* secondary-foreground: readable text/icon color on secondary */
-    --secondary-foreground: oklch(0.985 0 0);
-    /* accent: interactive highlight color or highlighted surface */
-    --accent: oklch(0.269 0 0);
-    /* accent-foreground: readable text/icon color on accent */
-    --accent-foreground: oklch(0.985 0 0);
-    /* muted: subdued background or less-emphasized surface */
-    --muted: oklch(0.269 0 0);
-    /* muted-foreground: subdued text color for secondary information */
-    --muted-foreground: oklch(0.708 0 0);
-    /* destructive: dangerous actions, destructive buttons, errors */
-    --destructive: oklch(0.704 0.191 22.216);
-    /* destructive-foreground: readable content on destructive surfaces */
-    --destructive-foreground: red;
-    /* border: default border colo r */
-    --border: oklch(1 0 0 / 10%);
-    /* input: input border/background-related tone */
-    --input: oklch(1 0 0 / 15%);
-    /* ring: focus ring color */
-    --ring: oklch(0.556 0 0);
-    /* shadow: box shadows */
-    --shadow: oklch(0.717 0.041 257.926 / 0.55);
+  /* background: the main page/app background */
+  --background: oklch(0.145 0 0);
+  /* foreground: the default text/icon color on background */
+  --foreground: oklch(0.985 0 0);
+  /* card: surface for cards, panels, containers */
+  --card: oklch(0.205 0 0);
+  /* card-foreground: text/icon color on card */
+  --card-foreground: oklch(0.985 0 0);
+  /* primary: the main brand or highest-emphasis action color */
+  --primary: oklch(0.922 0 0);
+  /* primary-foreground: readable text/icon color on primary */
+  --primary-foreground: oklch(0.205 0 0);
+  /* secondary: lower-emphasis supporting action/surface color */
+  --secondary: oklch(0.269 0 0);
+  /* secondary-foreground: readable text/icon color on secondary */
+  --secondary-foreground: oklch(0.985 0 0);
+  /* accent: interactive highlight color or highlighted surface */
+  --accent: oklch(0.269 0 0);
+  /* accent-foreground: readable text/icon color on accent */
+  --accent-foreground: oklch(0.985 0 0);
+  /* muted: subdued background or less-emphasized surface */
+  --muted: oklch(0.269 0 0);
+  /* muted-foreground: subdued text color for secondary information */
+  --muted-foreground: oklch(0.708 0 0);
+  /* destructive: dangerous actions, destructive buttons, errors */
+  --destructive: oklch(0.704 0.191 22.216);
+  /* destructive-foreground: readable content on destructive surfaces */
+  --destructive-foreground: red;
+  /* success: positive actions, success messages */
+  --success: oklch(0.55 0.14 150);
+  /* success-foreground: readable content on success surfaces */
+  --success-foreground: oklch(0.905 0.093 156.784);
+  /* border: default border colo r */
+  --border: oklch(1 0 0 / 10%);
+  /* input: input border/background-related tone */
+  --input: oklch(1 0 0 / 15%);
+  /* ring: focus ring color */
+  --ring: oklch(0.556 0 0);
+  /* shadow: box shadows */
+  --shadow: oklch(0.717 0.041 257.926 / 0.55);
 }
 
 .sepia {
-    /* background: the main page/app background */
-    --background: oklch(0.96 0.04 85);
-    /* foreground: the default text/icon color on background */
-    --foreground: oklch(0.27 0.05 50);
-    /* card: surface for cards, panels, containers */
-    --card: oklch(0.96 0.04 85);
-    /* card-foreground: text/icon color on card */
-    --card-foreground: oklch(0.27 0.05 50);
-    /* primary: the main brand or highest-emphasis action color */
-    --primary: oklch(0.35 0.06 50);
-    /* primary-foreground: readable text/icon color on primary */
-    --primary-foreground: oklch(0.96 0.04 85);
-    /* secondary: lower-emphasis supporting action/surface color */
-    --secondary: oklch(0.9 0.05 80);
-    /* secondary-foreground: readable text/icon color on secondary */
-    --secondary-foreground: oklch(0.27 0.05 50);
-    /* accent: interactive highlight color or highlighted surface */
-    --accent: oklch(0.9 0.05 80);
-    /* accent-foreground: readable text/icon color on accent */
-    --accent-foreground: oklch(0.27 0.05 50);
-    /* muted: subdued background or less-emphasized surface */
-    --muted: oklch(0.9 0.05 80);
-    /* muted-foreground: subdued text color for secondary information */
-    --muted-foreground: oklch(0.5 0.05 60);
-    /* destructive: dangerous actions, destructive buttons, errors */
-    --destructive: oklch(0.577 0.245 27.325);
-    /* destructive-foreground: readable content on destructive surfaces */
-    --destructive-foreground: red;
-    /* border: default border colo r */
-    --border: oklch(0.85 0.05 75);
-    /* input: input border/background-related tone */
-    --input: oklch(0.85 0.05 75);
-    /* ring: focus ring color */
-    --ring: oklch(0.6 0.05 60);
-    /* shadow: box shadows */
-    --shadow: oklch(0.717 0.041 257.926 / 0.55);
+  /* background: the main page/app background */
+  --background: oklch(0.96 0.04 85);
+  /* foreground: the default text/icon color on background */
+  --foreground: oklch(0.27 0.05 50);
+  /* card: surface for cards, panels, containers */
+  --card: oklch(0.96 0.04 85);
+  /* card-foreground: text/icon color on card */
+  --card-foreground: oklch(0.27 0.05 50);
+  /* primary: the main brand or highest-emphasis action color */
+  --primary: oklch(0.35 0.06 50);
+  /* primary-foreground: readable text/icon color on primary */
+  --primary-foreground: oklch(0.96 0.04 85);
+  /* secondary: lower-emphasis supporting action/surface color */
+  --secondary: oklch(0.9 0.05 80);
+  /* secondary-foreground: readable text/icon color on secondary */
+  --secondary-foreground: oklch(0.27 0.05 50);
+  /* accent: interactive highlight color or highlighted surface */
+  --accent: oklch(0.9 0.05 80);
+  /* accent-foreground: readable text/icon color on accent */
+  --accent-foreground: oklch(0.27 0.05 50);
+  /* muted: subdued background or less-emphasized surface */
+  --muted: oklch(0.9 0.05 80);
+  /* muted-foreground: subdued text color for secondary information */
+  --muted-foreground: oklch(0.5 0.05 60);
+  /* destructive: dangerous actions, destructive buttons, errors */
+  --destructive: oklch(0.577 0.245 27.325);
+  /* destructive-foreground: readable content on destructive surfaces */
+  --destructive-foreground: red;
+  /* success: positive actions, success messages */
+  --success: oklch(0.55 0.14 150);
+  /* success-foreground: readable content on success surfaces */
+  --success-foreground: oklch(0.905 0.093 156.784);
+  /* border: default border colo r */
+  --border: oklch(0.85 0.05 75);
+  /* input: input border/background-related tone */
+  --input: oklch(0.85 0.05 75);
+  /* ring: focus ring color */
+  --ring: oklch(0.6 0.05 60);
+  /* shadow: box shadows */
+  --shadow: oklch(0.717 0.041 257.926 / 0.55);
 }
 
 @layer base {
-    * {
-        @apply border-border outline-ring/50;
-    }
-    body {
-        background-image: linear-gradient(
-            to bottom right,
-            white,
-            var(--background),
-            var(--background)
-        );
-        color: black;
-    }
-    html {
-        @apply font-sans;
-    }
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    background-image: linear-gradient(to bottom right, white, var(--background), var(--background));
+    color: black;
+  }
+  html {
+    @apply font-sans;
+  }
 
-    .embossed {
-        @apply shadow-[inset_5px_5px_11px_var(--shadow),inset_-5px_-5px_11px_var(--shadow)]!;
-    }
-    .debossed {
-        box-shadow:
-            12px 12px 28px var(--shadow),
-            -12px -12px 28px rgba(255, 255, 255, 0.5);
-        @apply border-2 border-transparent;
-    }
+  .embossed {
+    @apply shadow-[inset_5px_5px_11px_var(--shadow),inset_-5px_-5px_11px_var(--shadow)]!;
+  }
+  .debossed {
+    box-shadow:
+      12px 12px 28px var(--shadow),
+      -12px -12px 28px rgba(255, 255, 255, 0.5);
+    @apply border-2 border-transparent;
+  }
 
-    .dip-on-click {
-        @apply transition-all active:translate-y-0.5;
-    }
+  .dip-on-click {
+    @apply transition-all active:translate-y-0.5;
+  }
 }
 
 /* ─── Water Writing Design System tokens ─────────────────── */
 :root {
-    --ww-bg-gradient: linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
-    --ww-catalog-glow-a: rgba(56, 189, 248, 0.35);
-    --ww-catalog-glow-b: rgba(251, 146, 60, 0.25);
+  --ww-bg-gradient: linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
+  --ww-catalog-glow-a: rgba(56, 189, 248, 0.35);
+  --ww-catalog-glow-b: rgba(251, 146, 60, 0.25);
 
-    --ww-accent-world: linear-gradient(135deg, #0284c7, #14b8a6, #10b981);
-    --ww-accent-story: linear-gradient(135deg, #f59e0b, #fb923c, #f43f5e);
-    --ww-accent-document: linear-gradient(135deg, #06b6d4, #0ea5e9, #6366f1);
+  --ww-accent-world: linear-gradient(135deg, #0284c7, #14b8a6, #10b981);
+  --ww-accent-story: linear-gradient(135deg, #f59e0b, #fb923c, #f43f5e);
+  --ww-accent-document: linear-gradient(135deg, #06b6d4, #0ea5e9, #6366f1);
 
-    --ww-shadow-card: 0 24px 65px -36px rgba(15, 23, 42, 0.55);
-    --ww-shadow-empty: 0 15px 45px -35px rgba(15, 23, 42, 0.45);
-    --ww-shadow-surface: 0 25px 80px -28px rgba(15, 23, 42, 0.6);
+  --ww-shadow-card: 0 24px 65px -36px rgba(15, 23, 42, 0.55);
+  --ww-shadow-empty: 0 15px 45px -35px rgba(15, 23, 42, 0.45);
+  --ww-shadow-surface: 0 25px 80px -28px rgba(15, 23, 42, 0.6);
 
-    --ww-radius-card: 1.75rem;
-    --ww-radius-shell: 2rem;
+  --ww-radius-card: 1.75rem;
+  --ww-radius-shell: 2rem;
 
-    --ww-tracking-eyebrow: 0.35em;
-    --ww-tracking-meta: 0.22em;
+  --ww-tracking-eyebrow: 0.35em;
+  --ww-tracking-meta: 0.22em;
 
-    --ww-ripple-color: 74, 144, 226;
+  --ww-ripple-color: 74, 144, 226;
 }
 
 .ww-eyebrow {
-    font-size: 0.75rem;
-    font-weight: 600;
-    letter-spacing: var(--ww-tracking-eyebrow);
-    text-transform: uppercase;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: var(--ww-tracking-eyebrow);
+  text-transform: uppercase;
 }
 
 .ww-meta-chip {
-    font-size: 0.75rem;
-    font-weight: 500;
-    letter-spacing: var(--ww-tracking-meta);
-    text-transform: uppercase;
-    border-radius: 1.125rem;
-    padding: 0.375rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: var(--ww-tracking-meta);
+  text-transform: uppercase;
+  border-radius: 1.125rem;
+  padding: 0.375rem 0.75rem;
+}
+
+/* Tiptap editor content styling */
+.tiptap-body {
+  min-height: 100%;
+}
+.tiptap-body h1[data-title] {
+  font-size: 1.8em;
+  font-weight: 700;
+  line-height: 1.4;
+  margin: 0.125em 0;
+}
+.tiptap-body p {
+  margin: 0 0 0.75em 0;
+}
+.tiptap-body p:last-child {
+  margin-bottom: 0;
+}
+.tiptap-body h1 {
+  font-size: 1.6em;
+  font-weight: 700;
+  margin: 1em 0 0.4em;
+  line-height: 1.25;
+}
+.tiptap-body h2 {
+  font-size: 1.35em;
+  font-weight: 700;
+  margin: 0.9em 0 0.35em;
+  line-height: 1.3;
+}
+.tiptap-body h3 {
+  font-size: 1.15em;
+  font-weight: 700;
+  margin: 0.8em 0 0.3em;
+  line-height: 1.35;
+}
+.tiptap-body strong {
+  font-weight: 700;
+}
+.tiptap-body em {
+  font-style: italic;
+}
+.tiptap-body s {
+  text-decoration: line-through;
+}
+.tiptap-body a {
+  color: #2a6ed4;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+.tiptap-body code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.9em;
+  background: rgba(15, 23, 42, 0.08);
+  padding: 0.1em 0.35em;
+  border-radius: 3px;
+}
+.tiptap-body pre {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.9em;
+  background: rgba(15, 23, 42, 0.08);
+  padding: 0.75em 1em;
+  border-radius: 6px;
+  margin: 0.75em 0;
+  overflow-x: auto;
+}
+.tiptap-body pre code {
+  background: transparent;
+  padding: 0;
+}
+.tiptap-body blockquote {
+  border-left: 3px solid rgba(15, 23, 42, 0.25);
+  padding-left: 1em;
+  margin: 0.75em 0;
+  color: rgba(15, 23, 42, 0.7);
+  font-style: italic;
+}
+.tiptap-body ul,
+.tiptap-body ol {
+  padding-left: 1.5em;
+  margin: 0.5em 0 0.75em;
+}
+.tiptap-body ul {
+  list-style: disc;
+}
+.tiptap-body ol {
+  list-style: decimal;
+}
+.tiptap-body li {
+  margin: 0.15em 0;
+}
+.tiptap-body li > p {
+  margin: 0;
+}
+.tiptap-body ul[data-type='taskList'] {
+  list-style: none;
+  padding-left: 0.25em;
+}
+.tiptap-body ul[data-type='taskList'] li {
+  display: flex;
+  gap: 0.5em;
+  align-items: flex-start;
+}
+.tiptap-body ul[data-type='taskList'] li > label {
+  flex: 0 0 auto;
+  margin-top: 0.35em;
+  user-select: none;
+}
+.tiptap-body ul[data-type='taskList'] li > div {
+  flex: 1 1 auto;
+}
+.tiptap-body hr {
+  border: none;
+  border-top: 1px solid rgba(15, 23, 42, 0.15);
+  margin: 1em 0;
+}
+.tiptap-body p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: rgba(15, 23, 42, 0.35);
+  pointer-events: none;
+  height: 0;
 }

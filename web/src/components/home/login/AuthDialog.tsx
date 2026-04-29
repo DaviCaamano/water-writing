@@ -18,7 +18,8 @@ const neuCard: React.CSSProperties = {
 };
 const neuInputStyle: React.CSSProperties = {
   background: NEU_BG,
-  boxShadow: 'inset 5px 5px 11px rgba(148,165,190,0.55), inset -5px -5px 11px rgba(255,255,255,0.88)',
+  boxShadow:
+    'inset 5px 5px 11px rgba(148,165,190,0.55), inset -5px -5px 11px rgba(255,255,255,0.88)',
 };
 const neuBtnStyle: React.CSSProperties = {
   background: NEU_BG,
@@ -81,7 +82,9 @@ export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
       resetForm();
       onOpenChange(false);
     } catch (err) {
-      setError(err instanceof Error ? err.message : mode === 'login' ? 'Login failed' : 'Signup failed');
+      setError(
+        err instanceof Error ? err.message : mode === 'login' ? 'Login failed' : 'Signup failed',
+      );
     } finally {
       setLoading(false);
     }
@@ -93,38 +96,30 @@ export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
         <DialogOverlay />
         <DialogPrimitive.Content
           aria-describedby={undefined}
-          className="fixed left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2 outline-none data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95"
+          className='fixed left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2 outline-none data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95'
         >
-          <div
-            className="w-85 rounded-[32px] px-9 py-11 flex flex-col gap-6"
-            style={neuCard}
-          >
+          <div className='w-85 rounded-[32px] px-9 py-11 flex flex-col gap-6' style={neuCard}>
             {/* Wordmark */}
-            <div className="text-center -mb-2">
-              <div
-                className="text-[28px] font-bold tracking-tight"
-                style={{ color: textColor }}
-              >
+            <div className='text-center -mb-2'>
+              <div className='text-[28px] font-bold tracking-tight' style={{ color: textColor }}>
                 Water Writing
               </div>
-              <div
-                className="text-[11px] mt-0.5 tracking-[0.04em]"
-                style={{ color: mutedColor }}
-              >
+              <div className='text-[11px] mt-0.5 tracking-[0.04em]' style={{ color: mutedColor }}>
                 Your Story, in Full Flow
               </div>
             </div>
 
             {/* Tab toggle */}
-            <div className="flex rounded-full p-1 gap-1" style={neuTrackStyle}>
+            <div className='flex rounded-full p-1 gap-1' style={neuTrackStyle}>
               {(['login', 'signup'] as const).map((tab) => (
                 <button
                   key={tab}
-                  type="button"
-                  className="flex-1 rounded-full py-2 text-[13px] font-medium transition-all duration-200 cursor-pointer"
-                  style={mode === tab
-                    ? { ...neuTabActiveStyle, color: textColor, fontWeight: 600 }
-                    : { background: 'transparent', color: mutedColor }
+                  type='button'
+                  className='flex-1 rounded-full py-2 text-[13px] font-medium transition-all duration-200 cursor-pointer'
+                  style={
+                    mode === tab
+                      ? { ...neuTabActiveStyle, color: textColor, fontWeight: 600 }
+                      : { background: 'transparent', color: mutedColor }
                   }
                   onClick={() => switchMode(tab)}
                 >
@@ -134,108 +129,109 @@ export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
             </div>
 
             {/* Error */}
-            {error && (
-              <div className="text-black text-sm text-center -my-2">{error}</div>
-            )}
+            {error && <div className='text-black text-sm text-center -my-2'>{error}</div>}
 
             {/* Fields */}
-            <form onSubmit={handleSubmit} className="flex flex-col gap-4.5">
+            <form onSubmit={handleSubmit} className='flex flex-col gap-4.5'>
               {mode === 'signup' && (
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="flex flex-col gap-2">
-                    <label className="text-[15px] font-semibold pl-1" style={{ color: textColor }}>
+                <div className='grid grid-cols-2 gap-3'>
+                  <div className='flex flex-col gap-2'>
+                    <label className='text-[15px] font-semibold pl-1' style={{ color: textColor }}>
                       First name
                     </label>
                     <input
-                      type="text"
+                      type='text'
                       value={firstName}
                       onChange={(e) => setFirstName(e.target.value)}
-                      placeholder="Jane"
+                      placeholder='Jane'
                       required
-                      className="rounded-full px-5 py-3.5 text-[15px] border-none outline-none w-full"
+                      className='rounded-full px-5 py-3.5 text-[15px] border-none outline-none w-full'
                       style={{ ...neuInputStyle, color: textColor, fontFamily: 'inherit' }}
                     />
                   </div>
-                  <div className="flex flex-col gap-2">
-                    <label className="text-[15px] font-semibold pl-1" style={{ color: textColor }}>
+                  <div className='flex flex-col gap-2'>
+                    <label className='text-[15px] font-semibold pl-1' style={{ color: textColor }}>
                       Last name
                     </label>
                     <input
-                      type="text"
+                      type='text'
                       value={lastName}
                       onChange={(e) => setLastName(e.target.value)}
-                      placeholder="Doe"
+                      placeholder='Doe'
                       required
-                      className="rounded-full px-5 py-3.5 text-[15px] border-none outline-none w-full"
+                      className='rounded-full px-5 py-3.5 text-[15px] border-none outline-none w-full'
                       style={{ ...neuInputStyle, color: textColor, fontFamily: 'inherit' }}
                     />
                   </div>
                 </div>
               )}
 
-              <div className="flex flex-col gap-2">
-                <label className="text-[15px] font-semibold pl-1" style={{ color: textColor }}>
+              <div className='flex flex-col gap-2'>
+                <label className='text-[15px] font-semibold pl-1' style={{ color: textColor }}>
                   Email
                 </label>
                 <input
-                  type="email"
+                  type='email'
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@example.com"
-                  autoComplete="email"
+                  placeholder='you@example.com'
+                  autoComplete='email'
                   required
-                  className="rounded-full px-[22px] py-3.5 text-[15px] border-none outline-none w-full"
+                  className='rounded-full px-[22px] py-3.5 text-[15px] border-none outline-none w-full'
                   style={{ ...neuInputStyle, color: textColor, fontFamily: 'inherit' }}
                 />
               </div>
 
-              <div className="flex flex-col gap-2">
-                <label className="text-[15px] font-semibold pl-1" style={{ color: textColor }}>
+              <div className='flex flex-col gap-2'>
+                <label className='text-[15px] font-semibold pl-1' style={{ color: textColor }}>
                   Password
                 </label>
                 <input
-                  type="password"
+                  type='password'
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••••"
+                  placeholder='••••••••••'
                   autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
                   required
-                  className="rounded-full px-[22px] py-3.5 text-[15px] border-none outline-none w-full"
+                  className='rounded-full px-[22px] py-3.5 text-[15px] border-none outline-none w-full'
                   style={{ ...neuInputStyle, color: textColor, fontFamily: 'inherit' }}
                 />
               </div>
 
               {mode === 'signup' && (
-                <div className="flex flex-col gap-2">
-                  <label className="text-[15px] font-semibold pl-1" style={{ color: textColor }}>
+                <div className='flex flex-col gap-2'>
+                  <label className='text-[15px] font-semibold pl-1' style={{ color: textColor }}>
                     Confirm password
                   </label>
                   <input
-                    type="password"
+                    type='password'
                     value={confirm}
                     onChange={(e) => setConfirm(e.target.value)}
-                    placeholder="••••••••••"
-                    autoComplete="new-password"
+                    placeholder='••••••••••'
+                    autoComplete='new-password'
                     required
-                    className="rounded-full px-[22px] py-3.5 text-[15px] border-none outline-none w-full"
+                    className='rounded-full px-[22px] py-3.5 text-[15px] border-none outline-none w-full'
                     style={{ ...neuInputStyle, color: textColor, fontFamily: 'inherit' }}
                   />
                 </div>
               )}
 
               {/* Submit button */}
-              <div className="flex justify-center mt-1">
-                <WaterRipple className="rounded-full">
+              <div className='flex justify-center mt-1'>
+                <WaterRipple className='rounded-full'>
                   <button
-                    type="submit"
+                    type='submit'
                     disabled={loading}
-                    className="rounded-full px-12 py-3.5 text-[16px] font-semibold tracking-[-0.01em] cursor-pointer border-none disabled:opacity-60"
+                    className='rounded-full px-12 py-3.5 text-[16px] font-semibold tracking-[-0.01em] cursor-pointer border-none disabled:opacity-60'
                     style={{ ...neuBtnStyle, color: textColor, fontFamily: 'inherit' }}
                   >
                     {loading
-                      ? mode === 'login' ? 'Logging in…' : 'Creating account…'
-                      : mode === 'login' ? 'Log In' : 'Create Account'
-                    }
+                      ? mode === 'login'
+                        ? 'Logging in…'
+                        : 'Creating account…'
+                      : mode === 'login'
+                        ? 'Log In'
+                        : 'Create Account'}
                   </button>
                 </WaterRipple>
               </div>
@@ -243,10 +239,10 @@ export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
 
             {/* Forgot password */}
             {mode === 'login' && (
-              <div className="flex justify-end -mt-2">
+              <div className='flex justify-end -mt-2'>
                 <button
-                  type="button"
-                  className="text-[13px] cursor-pointer bg-transparent border-none transition-colors duration-150"
+                  type='button'
+                  className='text-[13px] cursor-pointer bg-transparent border-none transition-colors duration-150'
                   style={{ color: mutedColor }}
                   onMouseEnter={(e) => (e.currentTarget.style.color = 'oklch(0.45 0.06 240)')}
                   onMouseLeave={(e) => (e.currentTarget.style.color = mutedColor)}

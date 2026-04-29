@@ -92,7 +92,7 @@ export function StoryView() {
 
   return (
     <CatalogShell
-      eyebrow="Story view"
+      eyebrow='Story view'
       title={currentStory?.title ?? 'Story documents'}
       description={
         currentStory
@@ -104,41 +104,41 @@ export function StoryView() {
         `${documents.length} document${documents.length === 1 ? '' : 's'}`,
         `${totalCharacters.toLocaleString()} characters`,
       ]}
-      addLabel="Add document"
+      addLabel='Add document'
       onAdd={handleAddDocument}
     >
       {documents.length > 0 ? (
-        <section className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+        <section className='grid gap-6 md:grid-cols-2 xl:grid-cols-3'>
           {documents.map((document, index) => (
             <CatalogCard
               key={document.documentId}
-              itemLabel="Document"
+              itemLabel='Document'
               title={document.title}
               description={summarizeDocument(document.body)}
               meta={`#${index + 1} in story · ${document.body.length.toLocaleString()} characters`}
-              badgeText="Document"
+              badgeText='Document'
               coverImage={null}
-              accentClassName="from-cyan-500 via-sky-500 to-indigo-500"
-              Icon={<Image src="/file.svg" alt="Document" width={48} height={48} />}
+              accentClassName='from-cyan-500 via-sky-500 to-indigo-500'
+              Icon={<Image src='/file.svg' alt='Document' width={48} height={48} />}
               onOpen={() => handleOpenDocument(document.documentId)}
               onUploadCover={() => {}}
               menuContent={({ openCoverPicker }) => (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
-                      type="button"
-                      size="icon-sm"
-                      variant="secondary"
-                      className="bg-temp/75 text-black hover:bg-temp"
+                      type='button'
+                      size='icon-sm'
+                      variant='secondary'
+                      className='bg-temp/75 text-black hover:bg-temp'
                       aria-label={`Document actions for ${document.title}`}
                     >
                       <EllipsisVertical />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-60">
+                  <DropdownMenuContent align='end' className='w-60'>
                     <DropdownMenuLabel>{document.title}</DropdownMenuLabel>
                     <DropdownMenuItem onClick={() => handleOpenDocument(document.documentId)}>
-                      <Image src="/file.svg" alt="Document" width={48} height={48} />
+                      <Image src='/file.svg' alt='Document' width={48} height={48} />
                       Open document
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
@@ -153,7 +153,7 @@ export function StoryView() {
                       Upload cover image
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      variant="destructive"
+                      variant='destructive'
                       onClick={() => handleDeleteDocument(document.documentId, document.title)}
                     >
                       <Trash2 />
@@ -166,16 +166,16 @@ export function StoryView() {
           ))}
         </section>
       ) : (
-        <section className="rounded-[28px] border border-border border-border bg-temp/70 px-6 py-12 text-center shadow-[0_15px_45px_-35px_rgba(15,23,42,0.45)]">
-          <div className="mx-auto max-w-2xl space-y-3">
-            <h2 className="text-2xl font-semibold text-black">
+        <section className='rounded-[28px] border border-border border-border bg-temp/70 px-6 py-12 text-center shadow-[0_15px_45px_-35px_rgba(15,23,42,0.45)]'>
+          <div className='mx-auto max-w-2xl space-y-3'>
+            <h2 className='text-2xl font-semibold text-black'>
               Start this story with a new document
             </h2>
-            <p className="text-sm leading-6 text-black sm:text-base">
+            <p className='text-sm leading-6 text-black sm:text-base'>
               Every document lives here as a card. Click any card to open it in the editor, or add a
               first draft to get started.
             </p>
-            <Button type="button" size="lg" onClick={handleAddDocument}>
+            <Button type='button' size='lg' onClick={handleAddDocument}>
               Create the first document
             </Button>
           </div>

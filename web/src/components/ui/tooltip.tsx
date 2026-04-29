@@ -11,7 +11,7 @@ function TooltipProvider({
 }: React.ComponentProps<typeof TooltipPrimitive.Provider>) {
   return (
     <TooltipPrimitive.Provider
-      data-slot="tooltip-provider"
+      data-slot='tooltip-provider'
       delayDuration={delayDuration}
       {...props}
     />
@@ -21,13 +21,13 @@ function TooltipProvider({
 function Tooltip({ ...props }: React.ComponentProps<typeof TooltipPrimitive.Root>) {
   return (
     <TooltipProvider>
-      <TooltipPrimitive.Root data-slot="tooltip" {...props} />
+      <TooltipPrimitive.Root data-slot='tooltip' {...props} />
     </TooltipProvider>
   );
 }
 
 function TooltipTrigger({ ...props }: React.ComponentProps<typeof TooltipPrimitive.Trigger>) {
-  return <TooltipPrimitive.Trigger data-slot="tooltip-trigger" {...props} />;
+  return <TooltipPrimitive.Trigger data-slot='tooltip-trigger' {...props} />;
 }
 
 function TooltipContent({
@@ -42,7 +42,7 @@ function TooltipContent({
   return (
     <TooltipPrimitive.Portal>
       <TooltipPrimitive.Content
-        data-slot="tooltip-content"
+        data-slot='tooltip-content'
         side={side}
         sideOffset={sideOffset}
         align={align}
@@ -50,7 +50,7 @@ function TooltipContent({
         className={cn(
           'z-50 inline-flex w-fit max-w-xs',
           'origin-(--radix-tooltip-content-transform-origin)',
-          'items-center gap-1.5 rounded-md bg-temp px-3 py-1.5 text-xs text-background',
+          'items-center gap-1.5 rounded-md bg-card px-3 py-1.5 text-xs text-card-foreground',
           'has-data-[slot=kbd]:pr-1.5',
           'data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2',
           'data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2',
@@ -65,7 +65,7 @@ function TooltipContent({
         {...props}
       >
         {children}
-        <TooltipPrimitive.Arrow className="z-50 size-2.5 fill-foreground" />
+        <TooltipPrimitive.Arrow className='z-50 size-2.5 fill-foreground' />
       </TooltipPrimitive.Content>
     </TooltipPrimitive.Portal>
   );
