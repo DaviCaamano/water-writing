@@ -13,15 +13,15 @@
   <path id="Rim" class="cls-1" d="M7.938,7C4.241,11.081,1,18.049,1,23.989a23,23,0,0,0,23,23c5.232,0,10.078-1.043,13.942-3.986,0-.211,1.98-1.032,3-3h-3A21.234,21.234,0,0,1,2.809,23.989,20.932,20.932,0,0,1,7.938,10V7Z"/>
   <g id="Bubbles">
     <circle class="cls-2" cx="42.5" cy="36.5" r="1.5"/>
-    <circle id="Ellipse_2_copy" data-name="Ellipse 2 copy" class="cls-2" cx="44.5" cy="31.5" r="1.5"/>
-    <circle id="Ellipse_2_copy_2" data-name="Ellipse 2 copy 2" class="cls-2" cx="45.5" cy="25.5" r="1.5"/>
-    <circle id="Ellipse_2_copy_3" data-name="Ellipse 2 copy 3" class="cls-2" cx="11.5" cy="5.5" r="1.5"/>
-    <circle id="Ellipse_2_copy_4" data-name="Ellipse 2 copy 4" class="cls-2" cx="16.5" cy="3.5" r="1.5"/>
-    <circle id="Ellipse_2_copy_5" data-name="Ellipse 2 copy 5" class="cls-2" cx="22.5" cy="2.5" r="1.5"/>
+    <circle id="Ellipse_2_copy" class="cls-2" cx="44.5" cy="31.5" r="1.5"/>
+    <circle id="Ellipse_2_copy_2" class="cls-2" cx="45.5" cy="25.5" r="1.5"/>
+    <circle id="Ellipse_2_copy_3" class="cls-2" cx="11.5" cy="5.5" r="1.5"/>
+    <circle id="Ellipse_2_copy_4" class="cls-2" cx="16.5" cy="3.5" r="1.5"/>
+    <circle id="Ellipse_2_copy_5" class="cls-2" cx="22.5" cy="2.5" r="1.5"/>
   </g>
   <g id="Icon">
-    <path id="Ellipse_3_copy_3" data-name="Ellipse 3 copy 3" class="cls-1" d="M36,35c0-4.842-4.962-11-12-11-7.888,0-12,6.064-12,11,0,1.747,5.124,6,12,6C29.961,41,36,36.983,36,35Z"/>
-    <circle id="Ellipse_3_copy_2" data-name="Ellipse 3 copy 2" class="cls-2" cx="24.297" cy="15.734" r="6.078"/>
+    <path id="Ellipse_3_copy_3" class="cls-1" d="M36,35c0-4.842-4.962-11-12-11-7.888,0-12,6.064-12,11,0,1.747,5.124,6,12,6C29.961,41,36,36.983,36,35Z"/>
+    <circle id="Ellipse_3_copy_2" class="cls-2" cx="24.297" cy="15.734" r="6.078"/>
   </g>
   <path class="cls-1" d="M32,7.2h2.2V6.1H33.1V3.9h1.1V2.8h2.2V3.9h1.1V1.7h3.3V3.9h1.1V2.8h2.2V3.9h1.1V6.1H44.1V7.2h2.2v3.3H44.1v1.1c0.361,0,.854-0.015,1.1-0.015V13.8H44.1v1.1H41.9V13.8H40.8V16H37.5V13.8H36.4c0,0.454,0,.905,0,1.1H34.2V13.8H33.1V11.6h1.1V10.5H32V7.2Zm7.149-.264a1.913,1.913,0,1,1-1.913,1.913A1.913,1.913,0,0,1,39.149,6.938Z"/>
 </svg>
