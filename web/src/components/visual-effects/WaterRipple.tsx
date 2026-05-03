@@ -33,7 +33,7 @@ export function WaterRipple({
   contentClassName,
   disabled = false,
   effectColor = '74, 144, 226',
-  maxTilt = 10,
+  maxTilt = 20,
 }: WaterRippleProps) {
   const reactId = useId();
   const instanceId = useMemo(() => reactId.replace(/:/g, ''), [reactId]);

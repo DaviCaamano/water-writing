@@ -11,19 +11,25 @@ import { Plan } from '#types/shared/enum/plan';
 import { SettingsSection } from '~types/components/settings-modal';
 import { WaterRipple } from '~components/visual-effects/WaterRipple';
 import { WaterRippleFade } from '~components/visual-effects/WaterRippleFade';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useSticky } from '~hooks/useSticky';
 import { cn } from '~utils/merge-css-classes';
+
+const WATER_RIPPLE_FADE_DURATION_MS = 600;
 
 interface UserMenuProps {
   onOpenAuth: () => void;
   onOpenSettings: (section?: SettingsSection) => void;
 }
 
+type MenuItemAction = 'settings' | 'gallery' | 'upgrade' | 'logout' | 'sign-in';
+
 export function UserMenu({ onOpenAuth, onOpenSettings }: UserMenuProps) {
   const { isLoggedIn, plan, logout, firstName, lastName, email } = useUserStore();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [waterOpen, setWaterOpen] = useState(false);
   const [activeItem, setActiveItem] = useState<string | null>(null);
+  const closeTimeoutRef = useRef<number | null>(null);
 
   useSticky(menuOpen, (stickyOpen) => {
     if (stickyOpen && !isLoggedIn) onOpenAuth();
@@ -37,7 +43,24 @@ export function UserMenu({ onOpenAuth, onOpenSettings }: UserMenuProps) {
     }
   };
 
-  const closeMenu = () => setMenuOpen(false);
+  const handleOpenChange = (next: boolean) => {
+    if (closeTimeoutRef.current) {
+      clearTimeout(closeTimeoutRef.current);
+      closeTimeoutRef.current = null;
+    }
+    if (next) {
+      setMenuOpen(true);
+      setWaterOpen(true);
+    } else {
+      setWaterOpen(false);
+      closeTimeoutRef.current = window.setTimeout(
+        () => setMenuOpen(false),
+        WATER_RIPPLE_FADE_DURATION_MS,
+      );
+    }
+  };
+
+  const closeMenu = () => handleOpenChange(false);
 
   const handleOpenSettings = (section?: SettingsSection) => {
     closeMenu();
@@ -49,42 +72,60 @@ export function UserMenu({ onOpenAuth, onOpenSettings }: UserMenuProps) {
     onOpenAuth();
   };
 
+  const handleMenuItemSelect = (action: MenuItemAction) => {
+    switch (action) {
+      case 'settings':
+        handleOpenSettings(SettingsSection.general);
+        return;
+      case 'gallery':
+        closeMenu();
+        return;
+      case 'upgrade':
+        handleOpenSettings(SettingsSection.plan);
+        return;
+      case 'logout':
+        closeMenu();
+        void handleLogout();
+        return;
+      case 'sign-in':
+        handleOpenAuth();
+        return;
+    }
+  };
+
   const menuItems = isLoggedIn
     ? [
         {
           label: 'Settings',
-          onSelect: () => handleOpenSettings(SettingsSection.general),
+          action: 'settings' as const,
         },
         {
           label: 'Gallery',
-          onSelect: closeMenu,
+          action: 'gallery' as const,
         },
         ...(plan !== Plan.max
           ? [
               {
                 label: 'Upgrade',
-                onSelect: () => handleOpenSettings(SettingsSection.plan),
+                action: 'upgrade' as const,
               },
             ]
           : []),
         {
           label: 'Log Out',
-          onSelect: () => {
-            closeMenu();
-            void handleLogout();
-          },
+          action: 'logout' as const,
         },
       ]
     : [
         {
           label: 'Sign In',
-          onSelect: handleOpenAuth,
+          action: 'sign-in' as const,
         },
       ];
 
   return (
     <div className='-home-user-menu- pointer-events-auto'>
-      <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
+      <DropdownMenu open={menuOpen} onOpenChange={handleOpenChange}>
         <WaterRipple className='rounded-full' disabled={menuOpen}>
           <DropdownMenuTrigger
             className='-home-user-menu-trigger- p-2 rounded-full cursor-pointer'
@@ -95,13 +136,13 @@ export function UserMenu({ onOpenAuth, onOpenSettings }: UserMenuProps) {
         </WaterRipple>
 
         <DropdownMenuContent
-          className='-home-user-menu-content- w-52 border-none! bg-transparent! p-0! shadow-none!'
+          className='-home-user-menu-content- w-60 border-none! bg-transparent! p-0! shadow-none!'
           align='end'
         >
-          <WaterRippleFade open={menuOpen} className='border-0' maxScale={28}>
+          <WaterRippleFade open={waterOpen} className='border-0' maxScale={28}>
             <div className='flex flex-col gap-1 rounded p-1.5 w-full embossed border-border border'>
               {isLoggedIn && (
-                <div className='-home-user-menu-header- flex items-center gap-2.5 px-2 py-2 mb-1 border-b border-border/40'>
+                <div className='-home-user-menu-header- flex items-center gap-2.5 px-3 py-3 mb-1 border-b border-border/40'>
                   <div
                     aria-hidden='true'
                     className='size-9 shrink-0 rounded-full flex items-center justify-center text-[14px] font-semibold uppercase bg-accent/30 text-accent-foreground'
@@ -121,11 +162,11 @@ export function UserMenu({ onOpenAuth, onOpenSettings }: UserMenuProps) {
                   <div
                     role='button'
                     tabIndex={0}
-                    onClick={item.onSelect}
+                    onClick={() => handleMenuItemSelect(item.action)}
                     onKeyDown={(event) => {
                       if (event.key === 'Enter' || event.key === ' ') {
                         event.preventDefault();
-                        item.onSelect();
+                        handleMenuItemSelect(item.action);
                       }
                     }}
                     onMouseEnter={() => setActiveItem(item.label)}
