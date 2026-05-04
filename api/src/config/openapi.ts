@@ -13,7 +13,7 @@ import {
   GenresSchema,
   UpsertDocumentSchema,
   UpsertStorySchema,
-  UpsertWorldSchema,
+  UpsertCannonSchema,
 } from '#schemas/story.schemas';
 import { Plan } from '#types/shared/enum/plan';
 
@@ -52,7 +52,7 @@ const StorySchema = registry.register(
   'Story',
   z.object({
     storyId: z.uuid(),
-    worldId: z.uuid(),
+    cannonId: z.uuid(),
     title: z.string(),
     documents: z.array(DocumentSchema),
     createdAt: z.iso.datetime(),
@@ -60,10 +60,10 @@ const StorySchema = registry.register(
   }),
 );
 
-const WorldSchema = registry.register(
-  'World',
+const CannonSchema = registry.register(
+  'Cannon',
   z.object({
-    worldId: z.uuid(),
+    cannonId: z.uuid(),
     userId: z.uuid(),
     title: z.string(),
     stories: z.array(StorySchema),
@@ -80,7 +80,7 @@ const LoginResponseSchema = registry.register(
     plan: z.enum(Plan).nullable(),
     firstName: z.string(),
     lastName: z.string(),
-    legacy: z.array(WorldSchema),
+    legacy: z.array(CannonSchema),
     token: z.string(),
   }),
 );
@@ -94,7 +94,7 @@ const SubscribeRequest = registry.register('SubscribeRequest', SubscribeSchema);
 const UpsertDocumentRequest = registry.register('UpsertDocumentRequest', UpsertDocumentSchema);
 const UpsertStoryRequest = registry.register('UpsertStoryRequest', UpsertStorySchema);
 const UpdateUserRequest = registry.register('UpdateUserRequest', UpdateUserSchema);
-const UpsertWorldRequest = registry.register('UpsertWorldRequest', UpsertWorldSchema);
+const UpsertCannonRequest = registry.register('UpsertCannonRequest', UpsertCannonSchema);
 
 const json = (schema: z.ZodTypeAny) => ({ content: { 'application/json': { schema } } });
 const secured = [{ bearerAuth: [] }];
@@ -239,7 +239,7 @@ registry.registerPath({
   security: secured,
   request: { body: json(UpsertDocumentRequest) },
   responses: {
-    200: { description: 'World containing the document', ...json(WorldSchema) },
+    200: { description: 'Cannon containing the document', ...json(CannonSchema) },
     400: err400,
     401: err401,
     404: err404,
@@ -255,7 +255,7 @@ registry.registerPath({
   security: secured,
   request: { body: json(UpsertStoryRequest) },
   responses: {
-    200: { description: 'World containing the story', ...json(WorldSchema) },
+    200: { description: 'Cannon containing the story', ...json(CannonSchema) },
     400: err400,
     401: err401,
     404: err404,
@@ -265,13 +265,13 @@ registry.registerPath({
 
 registry.registerPath({
   method: 'post',
-  path: '/story/world',
+  path: '/story/cannon',
   tags: ['Story'],
-  summary: 'Create or update a world',
+  summary: 'Create or update a cannon',
   security: secured,
-  request: { body: json(UpsertWorldRequest) },
+  request: { body: json(UpsertCannonRequest) },
   responses: {
-    200: { description: 'The world', ...json(WorldSchema) },
+    200: { description: 'The cannon', ...json(CannonSchema) },
     400: err400,
     401: err401,
     500: err500,
@@ -302,7 +302,7 @@ export function generateOpenApiDocument(): ReturnType<OpenApiGeneratorV31['gener
     info: {
       title: 'Writers Bot API',
       version: '1.0.0',
-      description: 'Writing management platform Ã¢â‚¬â€ documents, stories, and worlds.',
+      description: 'Writing management platform — documents, stories, and cannons.',
     },
     servers: [{ url: process.env.API_URL ?? 'http://localhost:3001' }],
   };

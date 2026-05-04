@@ -2,10 +2,10 @@ export const queryKeys = {
   user: {
     session: ['user', 'session'] as const,
   },
-  worlds: {
-    all: ['worlds'] as const,
-    legacy: (userId: string) => ['worlds', 'legacy', userId] as const,
-    detail: (worldId: string) => ['worlds', 'detail', worldId] as const,
+  cannons: {
+    all: ['cannons'] as const,
+    legacy: (userId: string) => ['cannons', 'legacy', userId] as const,
+    detail: (cannonId: string) => ['cannons', 'detail', cannonId] as const,
   },
   stories: {
     all: ['stories'] as const,

@@ -3,12 +3,12 @@ import { UpsertDocumentBody } from '#schemas/story.schemas';
 import { withTransaction } from '#utils/database/with-transaction';
 import { DocumentNotFoundError, StoryNotFoundError } from '#constants/error/custom-errors';
 import { DocumentResponse } from '#types/shared/response';
-import { fetchWorld } from '#services/story/world.service';
+import { fetchCannon } from '#services/story/cannon.service';
 import pool from '#config/database';
 
 export async function fetchDocument(documentId: string): Promise<DocumentResponse> {
   const result = await pool.query<DocumentRow>(
-    `SELECT d.*, s.world_id FROM documents d
+    `SELECT d.*, s.cannon_id FROM documents d
      JOIN stories s ON s.story_id = d.story_id
      WHERE d.document_id = $1`,
     [documentId],
@@ -37,7 +37,7 @@ export async function fetchUserDocument(
     `SELECT d.*
      FROM documents d
      JOIN stories s ON s.story_id = d.story_id
-     JOIN worlds w ON w.world_id = s.world_id
+     JOIN cannons w ON w.cannon_id = s.cannon_id
      WHERE d.document_id = $1 AND w.user_id = $2`,
     [documentId, userId],
   );
@@ -62,7 +62,7 @@ export async function deleteDocument(userId: string, documentId: string): Promis
     const existing = await client.query<DocumentRow>(
       `SELECT d.* FROM documents d
        JOIN stories s ON s.story_id = d.story_id
-       JOIN worlds w ON w.world_id = s.world_id
+       JOIN cannons w ON w.cannon_id = s.cannon_id
        WHERE d.document_id = $1 AND w.user_id = $2
        FOR UPDATE`,
       [documentId, userId],
@@ -100,16 +100,16 @@ export async function deleteDocument(userId: string, documentId: string): Promis
 export async function upsertDocument(userId: string, data: UpsertDocumentBody) {
   const { documentId, title, body, storyId } = data;
 
-  return withTransaction(async (client) => {
+  const cannonId = await withTransaction(async (client) => {
     let targetStoryId = storyId;
-    let worldId: string;
+    let persistedCannonId: string;
 
     // If documentId is provided, update the existing document
     if (documentId) {
-      const existingDoc = await client.query<DocumentRow & { user_id: string; world_id: string }>(
-        `SELECT d.*, w.user_id, s.world_id FROM documents d
-         JOIN stories s ON s.story_id = d.story_id 
-         JOIN (SELECT w2.world_id, w2.user_id FROM worlds w2 WHERE w2.user_id = $1) w ON w.world_id = s.world_id
+      const existingDoc = await client.query<DocumentRow & { user_id: string; cannon_id: string }>(
+        `SELECT d.*, w.user_id, s.cannon_id FROM documents d
+         JOIN stories s ON s.story_id = d.story_id
+         JOIN (SELECT w2.cannon_id, w2.user_id FROM cannons w2 WHERE w2.user_id = $1) w ON w.cannon_id = s.cannon_id
          WHERE d.document_id = $2`,
         [userId, documentId],
       );
@@ -123,33 +123,33 @@ export async function upsertDocument(userId: string, data: UpsertDocumentBody) {
         [title, body ?? existingDoc.rows[0].body, documentId],
       );
 
-      worldId = existingDoc.rows[0].world_id;
-      return fetchWorld(worldId);
+      persistedCannonId = existingDoc.rows[0].cannon_id;
+      return persistedCannonId;
     }
 
     // Create a new document: determine or create the story
     if (!targetStoryId) {
-      const worldResult = await client.query(
-        'INSERT INTO worlds (user_id, title) VALUES ($1, $2) RETURNING world_id',
-        [userId, 'Untitled World'],
+      const cannonResult = await client.query(
+        'INSERT INTO cannons (user_id, title) VALUES ($1, $2) RETURNING cannon_id',
+        [userId, 'Untitled Cannon'],
       );
-      worldId = worldResult.rows[0].world_id;
+      persistedCannonId = cannonResult.rows[0].cannon_id;
       const storyResult = await client.query(
-        'INSERT INTO stories (world_id, title) VALUES ($1, $2) RETURNING story_id',
-        [worldId, 'Untitled Story'],
+        'INSERT INTO stories (cannon_id, title) VALUES ($1, $2) RETURNING story_id',
+        [persistedCannonId, 'Untitled Story'],
       );
       targetStoryId = storyResult.rows[0].story_id;
     } else {
       const storyResult = await client.query<StoryRow>(
         `SELECT s.* FROM stories s
-         JOIN worlds w ON w.world_id = s.world_id
+         JOIN cannons w ON w.cannon_id = s.cannon_id
          WHERE s.story_id = $1 AND w.user_id = $2`,
         [targetStoryId, userId],
       );
       if (storyResult.rows.length === 0) {
         throw new StoryNotFoundError();
       }
-      worldId = storyResult.rows[0].world_id;
+      persistedCannonId = storyResult.rows[0].cannon_id;
     }
 
     // Get the last document in the chain with row-level locking to prevent race conditions
@@ -176,6 +176,8 @@ export async function upsertDocument(userId: string, data: UpsertDocumentBody) {
       );
     }
 
-    return fetchWorld(worldId);
+    return persistedCannonId;
   });
+
+  return fetchCannon(cannonId);
 }

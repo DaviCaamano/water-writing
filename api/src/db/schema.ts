@@ -55,11 +55,11 @@ export const authentication = pgTable(
   ],
 );
 
-// Worlds
-export const worlds = pgTable(
-  'worlds',
+// Cannons
+export const cannons = pgTable(
+  'cannons',
   {
-    worldId: uuid('world_id').primaryKey().defaultRandom(),
+    cannonId: uuid('cannon_id').primaryKey().defaultRandom(),
     userId: uuid('user_id')
       .notNull()
       .references(() => users.userId, { onDelete: 'cascade' }),
@@ -67,7 +67,7 @@ export const worlds = pgTable(
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
-  (t) => [index('idx_worlds_user_id').on(t.userId)],
+  (t) => [index('idx_cannons_user_id').on(t.userId)],
 );
 
 // Stories
@@ -75,9 +75,9 @@ export const stories = pgTable(
   'stories',
   {
     storyId: uuid('story_id').primaryKey().defaultRandom(),
-    worldId: uuid('world_id')
+    cannonId: uuid('cannon_id')
       .notNull()
-      .references(() => worlds.worldId, { onDelete: 'cascade' }),
+      .references(() => cannons.cannonId, { onDelete: 'cascade' }),
     title: varchar('title', { length: 500 }).notNull(),
     predecessorId: uuid('predecessor_id').references((): PgColumn => stories.storyId, {
       onDelete: 'set null',
@@ -89,7 +89,7 @@ export const stories = pgTable(
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [
-    index('idx_stories_world_id').on(t.worldId),
+    index('idx_stories_cannon_id').on(t.cannonId),
     index('idx_stories_predecessor_id').on(t.predecessorId),
     index('idx_stories_successor_id').on(t.successorId),
     check('chk_story_no_self_predecessor', sql`${t.predecessorId} <> ${t.storyId}`),

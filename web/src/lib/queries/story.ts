@@ -1,22 +1,22 @@
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import { apiRoutes } from '#types/shared/api-route';
-import { DocumentResponse, StoryResponse, WorldResponse } from '#types/shared/response';
+import { DocumentResponse, StoryResponse, CannonResponse } from '#types/shared/response';
 import { queryApi } from '~lib/api';
 import { queryKeys } from '~types/lib/tanstack-query/query-keys';
 
 export function useLegacyQuery(userId: string | null | undefined) {
   return useQuery({
-    queryKey: userId ? queryKeys.worlds.legacy(userId) : queryKeys.worlds.all,
-    queryFn: () => queryApi<WorldResponse[]>(apiRoutes.story.fetchLegacy()),
+    queryKey: userId ? queryKeys.cannons.legacy(userId) : queryKeys.cannons.all,
+    queryFn: () => queryApi<CannonResponse[]>(apiRoutes.story.fetchLegacy()),
     enabled: !!userId,
   });
 }
 
-export function useWorldQuery(worldId: string | null | undefined) {
+export function useCannonQuery(cannonId: string | null | undefined) {
   return useQuery({
-    queryKey: worldId ? queryKeys.worlds.detail(worldId) : queryKeys.worlds.all,
-    queryFn: () => queryApi<WorldResponse>(apiRoutes.story.fetchWorld(worldId!)),
-    enabled: !!worldId,
+    queryKey: cannonId ? queryKeys.cannons.detail(cannonId) : queryKeys.cannons.all,
+    queryFn: () => queryApi<CannonResponse>(apiRoutes.story.fetchCannon(cannonId!)),
+    enabled: !!cannonId,
   });
 }
 

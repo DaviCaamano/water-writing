@@ -1,7 +1,7 @@
 import type { UpsertStoryBody } from '#schemas/story.schemas';
 import { withTransaction } from '#utils/database/with-transaction';
 import { DocumentRow, GenreRow, StoryRow, StoryRowWithDocuments } from '#types/database';
-import { StoryNotFoundError, WorldNotFoundError } from '#constants/error/custom-errors';
+import { StoryNotFoundError, CannonNotFoundError } from '#constants/error/custom-errors';
 import { withQuery } from '#utils/database/with-query';
 import { StoryResponse } from '#types/shared/response';
 import { mapStoryResponse } from '#utils/story/map-story';
@@ -42,17 +42,43 @@ export const fetchStoryWithDocuments = async (storyId: string): Promise<StoryRow
   });
 };
 
+export const fetchUserStoryWithDocuments = async (
+  userId: string,
+  storyId: string,
+): Promise<StoryRowWithDocuments> => {
+  return withQuery<StoryRowWithDocuments>(async (client) => {
+    const result = await client.query<StoryRowWithDocuments>(
+      `SELECT
+      s.*,
+      COALESCE(
+        json_agg(d ORDER BY d.created_at) FILTER (WHERE d.document_id IS NOT NULL),
+        '[]'
+      ) AS documents
+      FROM stories s
+      JOIN cannons w ON w.cannon_id = s.cannon_id
+      LEFT JOIN documents d ON d.story_id = s.story_id
+      WHERE s.story_id = $1 AND w.user_id = $2
+      GROUP BY s.story_id;`,
+      [storyId, userId],
+    );
+    if (result.rows.length === 0) {
+      throw new StoryNotFoundError();
+    }
+    return result.rows[0];
+  });
+};
+
 export async function upsertStory(userId: string, data: UpsertStoryBody): Promise<StoryResponse> {
-  let { worldId } = data;
+  let { cannonId } = data;
   const { storyId, title } = data;
 
-  return withTransaction(async (client) => {
-    let resultWorldId: string;
+  const persistedStoryId = await withTransaction(async (client) => {
+    let resultStoryId: string;
 
     if (storyId) {
       const existing = await client.query<StoryRow & { user_id: string }>(
         `SELECT s.*, w.user_id FROM stories s
-         JOIN worlds w ON w.world_id = s.world_id
+         JOIN cannons w ON w.cannon_id = s.cannon_id
          WHERE s.story_id = $1 AND w.user_id = $2`,
         [storyId, userId],
       );
@@ -67,55 +93,58 @@ export async function upsertStory(userId: string, data: UpsertStoryBody): Promis
           [title, storyId],
         );
       }
-      resultWorldId = existing.rows[0].world_id;
+      const existingCannonId = existing.rows[0].cannon_id;
 
-      if (worldId && worldId !== resultWorldId) {
-        const targetWorld = await client.query(
-          'SELECT 1 FROM worlds WHERE world_id = $1 AND user_id = $2',
-          [worldId, userId],
+      if (cannonId && cannonId !== existingCannonId) {
+        const targetCannon = await client.query(
+          'SELECT 1 FROM cannons WHERE cannon_id = $1 AND user_id = $2',
+          [cannonId, userId],
         );
-        if (targetWorld.rows.length === 0) {
-          throw new WorldNotFoundError();
+        if (targetCannon.rows.length === 0) {
+          throw new CannonNotFoundError();
         }
         await client.query(
-          'UPDATE stories SET world_id = $1, updated_at = NOW() WHERE story_id = $2',
-          [worldId, storyId],
+          'UPDATE stories SET cannon_id = $1, updated_at = NOW() WHERE story_id = $2',
+          [cannonId, storyId],
         );
       }
 
-      return mapStoryResponse(await fetchStory(storyId));
+      resultStoryId = storyId;
+      return resultStoryId;
     }
 
-    if (worldId) {
-      const worldCheck = await client.query(
-        'SELECT 1 FROM worlds WHERE world_id = $1 AND user_id = $2',
-        [worldId, userId],
+    if (cannonId) {
+      const cannonCheck = await client.query(
+        'SELECT 1 FROM cannons WHERE cannon_id = $1 AND user_id = $2',
+        [cannonId, userId],
       );
-      if (worldCheck.rows.length === 0) {
-        throw new WorldNotFoundError();
+      if (cannonCheck.rows.length === 0) {
+        throw new CannonNotFoundError();
       }
     } else {
-      const newWorld = await client.query(
-        'INSERT INTO worlds (user_id, title) VALUES ($1, $2) RETURNING world_id',
-        [userId, 'Untitled World'],
+      const newCannon = await client.query(
+        'INSERT INTO cannons (user_id, title) VALUES ($1, $2) RETURNING cannon_id',
+        [userId, 'Untitled Cannon'],
       );
-      worldId = newWorld.rows[0].world_id;
+      cannonId = newCannon.rows[0].cannon_id;
     }
 
     const newStory = await client.query(
-      'INSERT INTO stories (world_id, title) VALUES ($1, $2) RETURNING story_id',
-      [worldId!, title],
+      'INSERT INTO stories (cannon_id, title) VALUES ($1, $2) RETURNING story_id',
+      [cannonId!, title],
     );
-    const newStoryId = newStory.rows[0].story_id;
-    return mapStoryResponse(await fetchStory(newStoryId));
+    resultStoryId = newStory.rows[0].story_id;
+    return resultStoryId;
   });
+
+  return mapStoryResponse(await fetchStoryWithDocuments(persistedStoryId));
 }
 
 export async function deleteStory(userId: string, storyId: string): Promise<void> {
   const result = await pool.query(
     `DELETE FROM stories
      WHERE story_id = $1
-       AND world_id IN (SELECT world_id FROM worlds WHERE user_id = $2)`,
+       AND cannon_id IN (SELECT cannon_id FROM cannons WHERE user_id = $2)`,
     [storyId, userId],
   );
   if (result.rowCount === 0) {
@@ -127,7 +156,7 @@ export async function fetchUserStories(userId: string): Promise<StoryResponse[]>
   const storiesResult = await pool.query<StoryRow>(
     `SELECT s.*
      FROM stories s
-     JOIN worlds w ON w.world_id = s.world_id
+     JOIN cannons w ON w.cannon_id = s.cannon_id
      WHERE w.user_id = $1
      ORDER BY s.created_at`,
     [userId],
@@ -154,8 +183,20 @@ export async function fetchUserStories(userId: string): Promise<StoryResponse[]>
 }
 
 // Genres
-export async function upsertGenre(storyId: string, genres: string[]) {
+export async function upsertGenre(userId: string, storyId: string, genres: string[]) {
   return withQuery(async (client) => {
+    const storyResult = await client.query(
+      `SELECT 1
+       FROM stories s
+       JOIN cannons w ON w.cannon_id = s.cannon_id
+       WHERE s.story_id = $1 AND w.user_id = $2`,
+      [storyId, userId],
+    );
+
+    if (storyResult.rows.length === 0) {
+      throw new StoryNotFoundError();
+    }
+
     for (const genre of genres) {
       await client.query(
         'INSERT INTO genres (story_id, genre) VALUES ($1, $2) ON CONFLICT (story_id, genre) DO NOTHING',
@@ -164,7 +205,7 @@ export async function upsertGenre(storyId: string, genres: string[]) {
     }
 
     const result = await client.query<GenreRow>(
-      'SELECT genre FROM genres WHERE user_id = $1 ORDER BY genre',
+      'SELECT genre FROM genres WHERE story_id = $1 ORDER BY genre',
       [storyId],
     );
     return result.rows.map((r) => r.genre as string);

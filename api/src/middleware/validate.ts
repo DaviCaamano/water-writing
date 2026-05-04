@@ -7,12 +7,12 @@ import { ZodSchema, ZodError, z } from 'zod';
  * On success, replaces req.body with the parsed (coerced) data.
  */
 export const validate =
-  (schema: ZodSchema) =>
+  (schema: ZodSchema, errorMessage = 'Invalid request body') =>
   (req: Request, res: Response, next: NextFunction): void => {
     const result = schema.safeParse(req.body);
     if (!result.success) {
       res.status(400).json({
-        error: 'Invalid email or password',
+        error: errorMessage,
         details: formatErrors(result.error),
       });
       return;
@@ -38,6 +38,6 @@ export const validateParams =
     next();
   };
 
-function formatErrors(error: ZodError): Record<string, string[]> {
+function formatErrors(error: ZodError): ReturnType<typeof z.treeifyError> {
   return z.treeifyError(error);
 }

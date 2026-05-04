@@ -8,7 +8,7 @@ import { useEffect, useRef, useState } from 'react';
 
 const VIEW_DEPTH: Record<ViewMode, number> = {
   legacy: 0,
-  'world-view': 1,
+  'cannon-view': 1,
   'story-view': 2,
   editor: 3,
 };
@@ -84,7 +84,7 @@ function renderView(view: ViewMode) {
       return <Editor />;
     case ViewMode.storyView:
       return <StoryView />;
-    case ViewMode.worldView:
+    case ViewMode.cannonView:
       return <WorldView />;
     case ViewMode.legacy:
       return <LegacyView />;

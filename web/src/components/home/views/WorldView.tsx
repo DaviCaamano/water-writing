@@ -17,7 +17,7 @@ import {
 } from '~components/ui/dropdown-menu';
 import { useNavigationStore } from '~store/useNavigationStore';
 import { useUserStore } from '~store/useUserStore';
-import { useLegacyQuery, useWorldQuery } from '~lib/queries/story';
+import { useLegacyQuery, useCannonQuery } from '~lib/queries/story';
 import { useDeleteStoryMutation, useUpsertStoryMutation } from '~lib/mutations/story';
 import Image from 'next/image';
 
@@ -51,19 +51,19 @@ function generateUntitledStory(existing: string[]): string {
 
 export function WorldView() {
   const { userId } = useUserStore();
-  const { currentWorldId, navigateToStory } = useNavigationStore();
-  const { data: currentWorld } = useWorldQuery(currentWorldId);
-  const { data: worlds = [] } = useLegacyQuery(userId);
+  const { currentCannonId, navigateToStory } = useNavigationStore();
+  const { data: currentCannon } = useCannonQuery(currentCannonId);
+  const { data: cannons = [] } = useLegacyQuery(userId);
   const upsertStory = useUpsertStoryMutation();
   const deleteStory = useDeleteStoryMutation();
 
-  const stories = currentWorld?.stories ?? [];
+  const stories = currentCannon?.stories ?? [];
   const totalDocuments = stories.reduce((sum, story) => sum + (story.documents?.length ?? 0), 0);
 
   const handleAddStory = () => {
-    if (!currentWorld) return;
+    if (!currentCannon) return;
     upsertStory.mutate({
-      worldId: currentWorld.worldId,
+      cannonId: currentCannon.cannonId,
       title: generateUntitledStory(stories.map((s) => s.title)),
     });
   };
@@ -79,18 +79,18 @@ export function WorldView() {
     deleteStory.mutate(storyId);
   };
 
-  const handleMoveStoryToWorld = (storyId: string, targetWorldId: string, title: string) => {
-    upsertStory.mutate({ storyId, worldId: targetWorldId, title });
+  const handleMoveStoryToCannon = (storyId: string, targetCannonId: string, title: string) => {
+    upsertStory.mutate({ storyId, cannonId: targetCannonId, title });
   };
 
   return (
     <CatalogShell
-      eyebrow='World view'
-      title={currentWorld?.title ?? 'World stories'}
+      eyebrow='Cannon view'
+      title={currentCannon?.title ?? 'Cannon stories'}
       description={
-        currentWorld
-          ? `Each card below is a story in ${currentWorld.title}. Click a card to enter its document catalog, or open the ellipsis menu to move or manage it.`
-          : 'Choose a world to manage its story catalog.'
+        currentCannon
+          ? `Each card below is a story in ${currentCannon.title}. Click a card to enter its document catalog, or open the ellipsis menu to move or manage it.`
+          : 'Choose a cannon to manage its story catalog.'
       }
       metrics={[
         `${stories.length} stor${stories.length === 1 ? 'y' : 'ies'}`,
@@ -102,7 +102,7 @@ export function WorldView() {
       {stories.length > 0 ? (
         <section className='grid gap-6 md:grid-cols-2 xl:grid-cols-3'>
           {stories.map((story) => {
-            const worldTargets = worlds.filter((world) => world.worldId !== story.worldId);
+            const cannonTargets = cannons.filter((cannon) => cannon.cannonId !== story.cannonId);
 
             return (
               <CatalogCard
@@ -115,7 +115,7 @@ export function WorldView() {
                 coverImage={null}
                 accentClassName='from-amber-500 via-orange-400 to-rose-500'
                 Icon={<Image src='/book.svg' alt='Story' width={48} height={48} />}
-                onOpen={() => navigateToStory(story.storyId, story.worldId)}
+                onOpen={() => navigateToStory(story.storyId, story.cannonId)}
                 onUploadCover={() => {}}
                 menuContent={({ openCoverPicker }) => (
                   <DropdownMenu>
@@ -133,7 +133,7 @@ export function WorldView() {
                     <DropdownMenuContent align='end' className='w-60'>
                       <DropdownMenuLabel>{story.title}</DropdownMenuLabel>
                       <DropdownMenuItem
-                        onClick={() => navigateToStory(story.storyId, story.worldId)}
+                        onClick={() => navigateToStory(story.storyId, story.cannonId)}
                       >
                         <Image src='/book.svg' alt='Story' width={48} height={48} />
                         Open story
@@ -141,22 +141,22 @@ export function WorldView() {
                       <DropdownMenuSub>
                         <DropdownMenuSubTrigger>
                           <ArrowRightLeft />
-                          Change world
+                          Change cannon
                         </DropdownMenuSubTrigger>
                         <DropdownMenuSubContent className='w-56'>
-                          {worldTargets.length > 0 ? (
-                            worldTargets.map((world) => (
+                          {cannonTargets.length > 0 ? (
+                            cannonTargets.map((cannon) => (
                               <DropdownMenuItem
-                                key={`${story.storyId}-${world.worldId}`}
+                                key={`${story.storyId}-${cannon.cannonId}`}
                                 onClick={() =>
-                                  handleMoveStoryToWorld(story.storyId, world.worldId, story.title)
+                                  handleMoveStoryToCannon(story.storyId, cannon.cannonId, story.title)
                                 }
                               >
-                                {world.title}
+                                {cannon.title}
                               </DropdownMenuItem>
                             ))
                           ) : (
-                            <DropdownMenuItem disabled>No other worlds yet</DropdownMenuItem>
+                            <DropdownMenuItem disabled>No other cannons yet</DropdownMenuItem>
                           )}
                         </DropdownMenuSubContent>
                       </DropdownMenuSub>
@@ -188,7 +188,7 @@ export function WorldView() {
       ) : (
         <section className='rounded-[28px] border border-border border-border bg-temp/70 px-6 py-12 text-center shadow-[0_15px_45px_-35px_rgba(15,23,42,0.45)]'>
           <div className='mx-auto max-w-2xl space-y-3'>
-            <h2 className='text-2xl font-semibold text-black'>This world needs its first story</h2>
+            <h2 className='text-2xl font-semibold text-black'>This cannon needs its first story</h2>
             <p className='text-sm leading-6 text-black sm:text-base'>
               Story cards live here as a full-screen catalog. Add one and it will be ready to open
               into the story view.

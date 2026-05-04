@@ -20,21 +20,21 @@ export interface GenreRow {
   created_at: Date;
 }
 
-export interface WorldRow {
-  world_id: string;
+export interface CannonRow {
+  cannon_id: string;
   user_id: string;
   title: string;
   created_at: Date;
   updated_at: Date;
 }
 
-export interface WorldRowWithStories extends WorldRow {
+export interface CannonRowWithStories extends CannonRow {
   stories: StoryRow[];
 }
 
 export interface StoryRow {
   story_id: string;
-  world_id: string;
+  cannon_id: string;
   title: string;
   predecessor_id: string | null;
   successor_id: string | null;

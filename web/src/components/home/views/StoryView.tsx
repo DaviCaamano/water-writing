@@ -14,7 +14,7 @@ import {
 } from '~components/ui/dropdown-menu';
 import { useEditorStore } from '~store/useEditorStore';
 import { useNavigationStore } from '~store/useNavigationStore';
-import { useStoryQuery, useWorldQuery } from '~lib/queries/story';
+import { useStoryQuery, useCannonQuery } from '~lib/queries/story';
 import { useDeleteDocumentMutation, useUpsertDocumentMutation } from '~lib/mutations/story';
 import Image from 'next/image';
 
@@ -49,9 +49,9 @@ function generateUntitledDocument(existing: string[]): string {
 }
 
 export function StoryView() {
-  const { currentWorldId, currentStoryId, navigateToEditor } = useNavigationStore();
+  const { currentCannonId, currentStoryId, navigateToEditor } = useNavigationStore();
   const { data: currentStory } = useStoryQuery(currentStoryId);
-  const { data: currentWorld } = useWorldQuery(currentWorldId);
+  const { data: currentCannon } = useCannonQuery(currentCannonId);
   const { loadDocument } = useEditorStore();
   const upsertDocument = useUpsertDocumentMutation();
   const deleteDocument = useDeleteDocumentMutation();
@@ -68,13 +68,13 @@ export function StoryView() {
   };
 
   const handleOpenDocument = (documentId: string) => {
-    if (!currentStory || !currentWorldId) return;
+    if (!currentStory || !currentCannonId) return;
 
     const document = documents.find((entry) => entry.documentId === documentId);
     if (!document) return;
 
     loadDocument(document);
-    navigateToEditor(document.documentId, document.storyId, currentWorldId);
+    navigateToEditor(document.documentId, document.storyId, currentCannonId);
   };
 
   const handleRenameDocument = (documentId: string, currentTitle: string) => {
@@ -100,7 +100,7 @@ export function StoryView() {
           : 'Choose a story to manage its document catalog.'
       }
       metrics={[
-        currentWorld ? currentWorld.title : 'No world selected',
+        currentCannon ? currentCannon.title : 'No cannon selected',
         `${documents.length} document${documents.length === 1 ? '' : 's'}`,
         `${totalCharacters.toLocaleString()} characters`,
       ]}

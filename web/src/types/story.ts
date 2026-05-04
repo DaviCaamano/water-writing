@@ -2,7 +2,7 @@ import {
   DocumentResponse,
   OmitRowData,
   StoryResponse,
-  WorldResponse,
+  CannonResponse,
 } from '#types/shared/response';
 
 export interface Document extends OmitRowData<Omit<DocumentResponse, 'documentId'>> {
@@ -14,7 +14,7 @@ export interface Story extends OmitRowData<Omit<StoryResponse, 'storyId' | 'docu
   documents: Document[];
 }
 
-export interface World extends OmitRowData<Omit<WorldResponse, 'worldId' | 'stories'>> {
+export interface Cannon extends OmitRowData<Omit<CannonResponse, 'cannonId' | 'stories'>> {
   id: string;
   stories: Story[];
 }
@@ -38,7 +38,7 @@ export interface BillingResponse {
 export enum ViewMode {
   editor = 'editor',
   storyView = 'story-view',
-  worldView = 'world-view',
+  cannonView = 'cannon-view',
   legacy = 'legacy',
 }
 

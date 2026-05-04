@@ -11,7 +11,7 @@ async function fetchContextDocuments(userId: string, documentId: string): Promis
             d2.story_id, d2.created_at, d2.updated_at
      FROM documents d
      JOIN stories s ON s.story_id = d.story_id
-     JOIN worlds w ON w.world_id = s.world_id
+     JOIN cannons w ON w.cannon_id = s.cannon_id
      JOIN documents d2 ON d2.story_id = d.story_id
        AND (
          d2.document_id = d.document_id

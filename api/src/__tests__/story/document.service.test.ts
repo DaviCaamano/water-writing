@@ -1,6 +1,6 @@
 import { MOCK_USER_ID } from '#__tests__/constants/mock-user';
 
-jest.mock('#services/story/world.service');
+jest.mock('#services/story/cannon.service');
 jest.mock('#utils/database/with-transaction');
 jest.mock('#utils/database/with-query');
 
@@ -13,20 +13,20 @@ import {
   upsertDocument,
 } from '#services/story/document.service';
 import { DocumentNotFoundError, StoryNotFoundError } from '#constants/error/custom-errors';
-import { fetchWorld } from '#services/story/world.service';
+import { fetchCannon } from '#services/story/cannon.service';
 import {
   MOCK_DOC_ID,
   MOCK_STORY_ID,
-  MOCK_WORLD_ID,
+  MOCK_CANNON_ID,
   MOCK_DOC,
   MOCK_DOCK_RESPONSE,
-  MOCK_WORLD_RESPONSE,
+  MOCK_CANNON_RESPONSE,
   mockPool,
 } from '#__tests__/constants/mock-story';
 import { createMockClient } from '#__tests__/constants/mock-database';
 import { mockClear } from '#__tests__/utils/test-wrappers';
 
-const mockFetchWorld = fetchWorld as jest.MockedFunction<typeof fetchWorld>;
+const mockFetchCannon = fetchCannon as jest.MockedFunction<typeof fetchCannon>;
 const mockWithTransaction = withTransaction as jest.MockedFunction<typeof withTransaction>;
 const mockWithQuery = withQuery as jest.MockedFunction<typeof withQuery>;
 
@@ -56,7 +56,7 @@ describe(
       const result = await fetchUserDocument(MOCK_USER_ID, MOCK_DOC_ID);
 
       expect(result).toEqual(MOCK_DOCK_RESPONSE);
-      expect(mockPool.query).toHaveBeenCalledWith(expect.stringContaining('JOIN worlds w'), [
+      expect(mockPool.query).toHaveBeenCalledWith(expect.stringContaining('JOIN cannons w'), [
         MOCK_DOC_ID,
         MOCK_USER_ID,
       ]);
@@ -173,19 +173,19 @@ describe(
 describe(
   'upsertDocument',
   mockClear(() => {
-    it('should create a new document with a new world and story when no IDs are provided', async () => {
+    it('should create a new document with a new cannon and story when no IDs are provided', async () => {
       mockWithTransaction.mockImplementation((callback) => callback(mockClient));
       const mockClient = createMockClient();
-      mockClient.query.mockResolvedValueOnce({ rows: [{ world_id: MOCK_WORLD_ID }] }); // INSERT world
+      mockClient.query.mockResolvedValueOnce({ rows: [{ cannon_id: MOCK_CANNON_ID }] }); // INSERT cannon
       mockClient.query.mockResolvedValueOnce({ rows: [{ story_id: MOCK_STORY_ID }] }); // INSERT story
       mockClient.query.mockResolvedValueOnce({ rows: [] }); // SELECT predecessor
       mockClient.query.mockResolvedValueOnce({ rows: [{ document_id: MOCK_DOC_ID }] }); // INSERT document
-      mockFetchWorld.mockResolvedValueOnce(MOCK_WORLD_RESPONSE);
+      mockFetchCannon.mockResolvedValueOnce(MOCK_CANNON_RESPONSE);
 
       expect(await upsertDocument(MOCK_USER_ID, { title: 'Chapter 1', body: 'Content' })).toEqual(
-        MOCK_WORLD_RESPONSE,
+        MOCK_CANNON_RESPONSE,
       );
-      expect(mockFetchWorld).toHaveBeenCalledWith(MOCK_WORLD_ID);
+      expect(mockFetchCannon).toHaveBeenCalledWith(MOCK_CANNON_ID);
     });
 
     it('should update an existing document when documentId is provided', async () => {
@@ -197,12 +197,12 @@ describe(
             {
               ...MOCK_DOC,
               user_id: MOCK_USER_ID,
-              world_id: MOCK_WORLD_ID,
+              cannon_id: MOCK_CANNON_ID,
             },
           ],
         })
         .mockResolvedValueOnce({});
-      mockFetchWorld.mockResolvedValueOnce(MOCK_WORLD_RESPONSE);
+      mockFetchCannon.mockResolvedValueOnce(MOCK_CANNON_RESPONSE);
 
       const result = await upsertDocument(MOCK_USER_ID, {
         documentId: MOCK_DOC_ID,
@@ -210,8 +210,8 @@ describe(
         body: 'Updated content',
       });
 
-      expect(result).toEqual(MOCK_WORLD_RESPONSE);
-      expect(mockFetchWorld).toHaveBeenCalledWith(MOCK_WORLD_ID);
+      expect(result).toEqual(MOCK_CANNON_RESPONSE);
+      expect(mockFetchCannon).toHaveBeenCalledWith(MOCK_CANNON_ID);
       expect(mockClient.query).toHaveBeenCalledWith(
         'UPDATE documents SET title = $1, body = $2, updated_at = NOW() WHERE document_id = $3',
         ['Updated Chapter', 'Updated content', MOCK_DOC_ID],
@@ -221,7 +221,7 @@ describe(
     it('throw DocumentNotFoundError error if provided documentId do not exist in the database', async () => {
       mockWithTransaction.mockImplementation((callback) => callback(mockClient));
       const mockClient = createMockClient();
-      mockClient.query.mockResolvedValueOnce({ rows: [] }); // Get document, story, and world for documentId
+      mockClient.query.mockResolvedValueOnce({ rows: [] }); // Get document, story, and cannon for documentId
 
       await expect(
         upsertDocument(MOCK_USER_ID, {
@@ -241,7 +241,7 @@ describe(
         upsertDocument(MOCK_USER_ID, { title: 'Chapter 1', body: '', storyId: MOCK_STORY_ID }),
       ).rejects.toThrow(StoryNotFoundError);
 
-      expect(mockFetchWorld).not.toHaveBeenCalled();
+      expect(mockFetchCannon).not.toHaveBeenCalled();
     });
   }),
 );

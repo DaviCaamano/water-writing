@@ -23,7 +23,7 @@ export interface DocumentResponse {
 
 export interface StoryResponse {
   storyId: string;
-  worldId: string;
+  cannonId: string;
   title: string;
   predecessorId: string | null;
   successorId: string | null;
@@ -32,8 +32,8 @@ export interface StoryResponse {
   updatedAt: Date;
 }
 
-export interface WorldResponse {
-  worldId: string;
+export interface CannonResponse {
+  cannonId: string;
   userId: string;
   title: string;
   stories: StoryResponse[];
@@ -45,7 +45,7 @@ export interface LoginResponse {
   email: string;
   firstName: string;
   lastName: string;
-  legacy: WorldResponse[];
+  legacy: CannonResponse[];
   plan: Plan | null;
   token: string;
   userId: string;

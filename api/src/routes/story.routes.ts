@@ -7,20 +7,20 @@ import {
   UpsertDocumentBody,
   UpsertStorySchema,
   UpsertStoryBody,
-  UpsertWorldSchema,
-  UpsertWorldBody,
+  UpsertCannonSchema,
+  UpsertCannonBody,
   EditorSchema,
   EditorBody,
   DocumentParams,
   DocumentParamsSchema,
   StoryParamsSchema,
   StoryParams,
-  WorldParamsSchema,
-  WorldParams,
+  CannonParamsSchema,
+  CannonParams,
 } from '#schemas/story.schemas';
 import {
   deleteStory,
-  fetchStoryWithDocuments,
+  fetchUserStoryWithDocuments,
   fetchUserStories,
   upsertGenre,
   upsertStory,
@@ -35,18 +35,22 @@ import {
   DocumentNotFoundError,
   InvalidSelectionError,
   StoryNotFoundError,
-  WorldNotFoundError,
+  CannonNotFoundError,
 } from '#constants/error/custom-errors';
-import { deleteWorld, fetchLegacy, fetchWorld, upsertWorld } from '#services/story/world.service';
+import {
+  deleteCannon,
+  fetchLegacy,
+  fetchUserCannon,
+  upsertCannon,
+} from '#services/story/cannon.service';
 import { waterWrite } from '#services/story/editor.service';
 import {
   DocumentResponse,
   RouteResponse,
   StoryResponse,
-  WorldResponse,
+  CannonResponse,
 } from '#types/shared/response';
 import { GenresBody, GenresSchema } from '#schemas/story.schemas';
-import { Response } from 'express';
 import { mapStoryResponse } from '#utils/story/map-story';
 
 const router = Router();
@@ -79,7 +83,7 @@ router.get(
   async (req: AuthRequest, res: RouteResponse<StoryResponse>): Promise<void> => {
     const { storyId } = req.params as StoryParams;
     try {
-      const story = await fetchStoryWithDocuments(storyId!);
+      const story = await fetchUserStoryWithDocuments(req.userId!, storyId);
       res.json(mapStoryResponse(story));
     } catch (err) {
       if (err instanceof StoryNotFoundError) {
@@ -102,18 +106,18 @@ router.get(
 );
 
 router.get(
-  '/world/:worldId',
+  '/cannon/:cannonId',
   authMiddleware,
   generalLimiter,
-  validateParams(WorldParamsSchema),
-  async (req: AuthRequest, res: RouteResponse<WorldResponse>): Promise<void> => {
-    const { worldId } = req.params as WorldParams;
+  validateParams(CannonParamsSchema),
+  async (req: AuthRequest, res: RouteResponse<CannonResponse>): Promise<void> => {
+    const { cannonId } = req.params as CannonParams;
     try {
-      const world = await fetchWorld(worldId!);
-      res.json(world);
+      const cannon = await fetchUserCannon(req.userId!, cannonId);
+      res.json(cannon);
     } catch (err) {
-      if (err instanceof WorldNotFoundError) {
-        res.status(404).json({ error: 'Story not found' });
+      if (err instanceof CannonNotFoundError) {
+        res.status(404).json({ error: 'Cannon not found' });
         return;
       }
       throw err;
@@ -125,9 +129,9 @@ router.get(
   '/legacy',
   authMiddleware,
   generalLimiter,
-  async (req: AuthRequest, res: RouteResponse<WorldResponse[]>): Promise<void> => {
-    const world = await fetchLegacy(req.userId!);
-    res.json(world);
+  async (req: AuthRequest, res: RouteResponse<CannonResponse[]>): Promise<void> => {
+    const cannon = await fetchLegacy(req.userId!);
+    res.json(cannon);
   },
 );
 
@@ -136,10 +140,10 @@ router.post(
   authMiddleware,
   generalLimiter,
   validate(UpsertDocumentSchema),
-  async (req: AuthRequest, res: RouteResponse<WorldResponse | null>): Promise<void> => {
+  async (req: AuthRequest, res: RouteResponse<CannonResponse | null>): Promise<void> => {
     try {
-      const world = await upsertDocument(req.userId!, req.body as UpsertDocumentBody);
-      res.json(world);
+      const cannon = await upsertDocument(req.userId!, req.body as UpsertDocumentBody);
+      res.json(cannon);
     } catch (err) {
       if (err instanceof StoryNotFoundError) {
         res.status(404).json({ error: 'Story not found' });
@@ -157,11 +161,11 @@ router.post(
   validate(UpsertStorySchema),
   async (req: AuthRequest, res: RouteResponse<StoryResponse>): Promise<void> => {
     try {
-      const world = await upsertStory(req.userId!, req.body as UpsertStoryBody);
-      res.json(world);
+      const cannon = await upsertStory(req.userId!, req.body as UpsertStoryBody);
+      res.json(cannon);
     } catch (err) {
-      if (err instanceof WorldNotFoundError) {
-        res.status(404).json({ error: 'World not found' });
+      if (err instanceof CannonNotFoundError) {
+        res.status(404).json({ error: 'Cannon not found' });
         return;
       }
       throw err;
@@ -170,17 +174,17 @@ router.post(
 );
 
 router.post(
-  '/world',
+  '/cannon',
   authMiddleware,
   generalLimiter,
-  validate(UpsertWorldSchema),
-  async (req: AuthRequest, res: RouteResponse<WorldResponse | null>): Promise<void> => {
+  validate(UpsertCannonSchema),
+  async (req: AuthRequest, res: RouteResponse<CannonResponse | null>): Promise<void> => {
     try {
-      const world = await upsertWorld(req.userId!, req.body as UpsertWorldBody);
-      res.json(world);
+      const cannon = await upsertCannon(req.userId!, req.body as UpsertCannonBody);
+      res.json(cannon);
     } catch (err) {
-      if (err instanceof WorldNotFoundError) {
-        res.status(404).json({ error: 'World not found' });
+      if (err instanceof CannonNotFoundError) {
+        res.status(404).json({ error: 'Cannon not found' });
       } else {
         throw err;
       }
@@ -189,18 +193,18 @@ router.post(
 );
 
 router.delete(
-  '/world/:worldId',
+  '/cannon/:cannonId',
   authMiddleware,
   generalLimiter,
-  validateParams(WorldParamsSchema),
+  validateParams(CannonParamsSchema),
   async (req: AuthRequest, res: RouteResponse<{ status: 'ok' }>): Promise<void> => {
-    const { worldId } = req.params as WorldParams;
+    const { cannonId } = req.params as CannonParams;
     try {
-      await deleteWorld(req.userId!, worldId);
+      await deleteCannon(req.userId!, cannonId);
       res.json({ status: 'ok' });
     } catch (err) {
-      if (err instanceof WorldNotFoundError) {
-        res.status(404).json({ error: 'World not found' });
+      if (err instanceof CannonNotFoundError) {
+        res.status(404).json({ error: 'Cannon not found' });
         return;
       }
       throw err;
@@ -277,9 +281,17 @@ router.post(
   authMiddleware,
   generalLimiter,
   validate(GenresSchema),
-  async (req: AuthRequest, res: Response<{ genres: string[] }>): Promise<void> => {
-    const { genres } = req.body as GenresBody;
-    res.json({ genres: await upsertGenre(req.userId!, genres) });
+  async (req: AuthRequest, res: RouteResponse<{ genres: string[] }>): Promise<void> => {
+    try {
+      const { story_id, genres } = req.body as GenresBody;
+      res.json({ genres: await upsertGenre(req.userId!, story_id, genres) });
+    } catch (err) {
+      if (err instanceof StoryNotFoundError) {
+        res.status(404).json({ error: 'Story not found' });
+        return;
+      }
+      throw err;
+    }
   },
 );
 

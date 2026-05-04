@@ -10,11 +10,11 @@ export const UpsertDocumentSchema = z.object({
 export const UpsertStorySchema = z.object({
   storyId: z.uuid('storyId must be a valid UUID').optional(),
   title: z.string().min(1, 'Title is required').max(500),
-  worldId: z.uuid('worldId must be a valid UUID').optional(),
+  cannonId: z.uuid('cannonId must be a valid UUID').optional(),
 });
 
-export const UpsertWorldSchema = z.object({
-  worldId: z.uuid('worldId must be a valid UUID').optional(),
+export const UpsertCannonSchema = z.object({
+  cannonId: z.uuid('cannonId must be a valid UUID').optional(),
   title: z.string().min(1, 'Title is required').max(500),
 });
 
@@ -37,11 +37,11 @@ export const DocumentParamsSchema = z.object({
 });
 
 export const StoryParamsSchema = z.object({
-  storyId: z.uuid('documentId must be a valid UUID'),
+  storyId: z.uuid('storyId must be a valid UUID'),
 });
 
-export const WorldParamsSchema = z.object({
-  worldId: z.uuid('documentId must be a valid UUID'),
+export const CannonParamsSchema = z.object({
+  cannonId: z.uuid('cannonId must be a valid UUID'),
 });
 
 export const GenresSchema = z.object({
@@ -54,9 +54,9 @@ export const GenresSchema = z.object({
 
 export type UpsertDocumentBody = z.infer<typeof UpsertDocumentSchema>;
 export type UpsertStoryBody = z.infer<typeof UpsertStorySchema>;
-export type UpsertWorldBody = z.infer<typeof UpsertWorldSchema>;
+export type UpsertCannonBody = z.infer<typeof UpsertCannonSchema>;
 export type EditorBody = z.infer<typeof EditorSchema>;
 export type GenresBody = z.infer<typeof GenresSchema>;
 export type DocumentParams = z.infer<typeof DocumentParamsSchema>;
 export type StoryParams = z.infer<typeof StoryParamsSchema>;
-export type WorldParams = z.infer<typeof WorldParamsSchema>;
+export type CannonParams = z.infer<typeof CannonParamsSchema>;

@@ -5,7 +5,11 @@ import stripe from '#config/stripe';
 import logger from '#config/logger';
 import type { CreateUserBody, UpdateUserBody, SubscribeBody } from '#schemas/user.schemas';
 import { PlanRow, UserRow } from '#types/database';
-import { EmailTakenError, StripePaymentFailed } from '#constants/error/custom-errors';
+import {
+  EmailTakenError,
+  StripePaymentFailed,
+  UserNotFoundError,
+} from '#constants/error/custom-errors';
 import { SubscriptionResponse, UserResponse } from '#types/shared/response';
 import { Plan } from '#types/shared/enum/plan';
 import {
@@ -26,18 +30,29 @@ import { StripeSubscriptionStatus } from '#types/enum/stripe';
 
 const SALT_ROUNDS = 12;
 
+function isUniqueViolation(error: unknown): boolean {
+  return typeof error === 'object' && error !== null && 'code' in error && error.code === '23505';
+}
+
 // Create user
 export async function createUser(data: CreateUserBody): Promise<void> {
   const existing = await pool.query('SELECT 1 FROM users WHERE email = $1', [data.email]);
   if (existing.rows.length > 0) throw new EmailTakenError();
 
   const passwordHash = await bcrypt.hash(data.password, SALT_ROUNDS);
-  await pool.query(
-    `INSERT INTO users 
-    (first_name, last_name, email, password_hash) 
-    VALUES ($1, $2, $3, $4)`,
-    [data.firstName, data.lastName, data.email, passwordHash],
-  );
+  try {
+    await pool.query(
+      `INSERT INTO users 
+      (first_name, last_name, email, password_hash) 
+      VALUES ($1, $2, $3, $4)`,
+      [data.firstName, data.lastName, data.email, passwordHash],
+    );
+  } catch (error) {
+    if (isUniqueViolation(error)) {
+      throw new EmailTakenError();
+    }
+    throw error;
+  }
   logger.info({ email: data.email }, 'User account created');
 }
 
@@ -84,6 +99,9 @@ export const updateUser = async (userId: string, data: UpdateUserBody): Promise<
 
     const [userResult, planResult] = await Promise.all([userQuery, planQuery]);
     const user = userResult.rows[0];
+    if (!user) {
+      throw new UserNotFoundError();
+    }
     logger.info({ userId, fields: Object.keys(data) }, 'User updated');
 
     return {
@@ -100,12 +118,17 @@ export const updateUser = async (userId: string, data: UpdateUserBody): Promise<
   });
 };
 // Delete user (GDPR / account deletion)
-export async function deleteUser(userId: string) {
-  // All related tables cascade-delete from users.user_id
-  // await pool.query('DELETE FROM users WHERE user_id = $1', [userId]);
-  // logger.info({ userId }, 'User account deleted');
-  //TODO implement such that it emails me the requests users make for account deletion
-  console.warn(userId, 'User account deletion requested. Not implemented yet.');
+export async function deleteUser(userId: string): Promise<void> {
+  const result = await pool.query(
+    'DELETE FROM users WHERE user_id = $1 RETURNING user_id',
+    [userId],
+  );
+
+  if (result.rows.length === 0) {
+    throw new UserNotFoundError();
+  }
+
+  logger.info({ userId }, 'User account deleted');
 }
 
 // Subscribe
@@ -118,12 +141,19 @@ export async function subscribe(
       userId,
     ]);
     const user = userResult.rows[0];
+    if (!user) {
+      throw new UserNotFoundError();
+    }
 
     const existingPlanResult = await client.query<PlanRow>(
       'SELECT * FROM plans WHERE user_id = $1',
       [userId],
     );
     const existingPlan = existingPlanResult.rows[0] ?? null;
+
+    if (data.planType === Plan.none) {
+      return cancelSubscription(client, userId, existingPlan);
+    }
 
     let stripeCustomerId = user.stripe_customer_id;
     if (!stripeCustomerId) {
@@ -136,10 +166,6 @@ export async function subscribe(
         stripeCustomerId,
         userId,
       ]);
-    }
-
-    if (data.planType === Plan.none) {
-      return cancelSubscription(client, userId, existingPlan);
     }
 
     const { planType, yearPlan, paymentMethodId } = data;

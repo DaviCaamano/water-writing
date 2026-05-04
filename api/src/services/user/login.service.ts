@@ -7,7 +7,7 @@ import { InvalidCredentialsError, UserNotFoundError } from '#constants/error/cus
 import { withQuery } from '#utils/database/with-query';
 import { LoginResponse } from '#types/shared/response';
 import { parseExpiration } from '#utils/database/parse-expiration';
-import { fetchLegacy } from '#services/story/world.service';
+import { fetchLegacy } from '#services/story/cannon.service';
 import { isAccessibleSubscriptionStatus } from '#services/stripe/subscription-sync.service';
 
 export const login = async (data: LoginBody): Promise<LoginResponse> => {

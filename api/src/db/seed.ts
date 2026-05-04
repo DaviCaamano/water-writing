@@ -6,9 +6,9 @@ import { createHash } from 'crypto';
 import { eq } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
-import type { StoryRowWithDocuments, WorldRowWithStories } from '#types/database';
+import type { StoryRowWithDocuments, CannonRowWithStories } from '#types/database';
 import { Plan } from '#types/shared/enum/plan';
-import { billing, documents, plans, stories, users, worlds } from '#db/schema';
+import { billing, documents, plans, stories, users, cannons } from '#db/schema';
 import { mockLegacy } from '#__tests__/utils/mock-linked-documents';
 import { RenewOn } from '#types/shared/enum/renew-on';
 import { StripeSubscriptionStatus } from '#types/enum/stripe';
@@ -17,7 +17,7 @@ const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const db = drizzle(pool);
 const SALT_ROUNDS = 12;
 
-type SeedWorld = typeof worlds.$inferInsert;
+type SeedCannon = typeof cannons.$inferInsert;
 type SeedStory = typeof stories.$inferInsert;
 type SeedDocument = typeof documents.$inferInsert;
 
@@ -42,20 +42,20 @@ function deterministicUuid(scope: string, value: string): string {
 }
 
 function buildLegacySeedRows(seedUserId: string): {
-  worldsToInsert: SeedWorld[];
+  cannonsToInsert: SeedCannon[];
   storiesToInsert: SeedStory[];
   documentsToInsert: SeedDocument[];
 } {
-  const legacy = mockLegacy() as WorldRowWithStories[];
+  const legacy = mockLegacy() as CannonRowWithStories[];
 
-  const worldIds = new Map<string, string>();
+  const cannonIds = new Map<string, string>();
   const storyIds = new Map<string, string>();
   const documentIds = new Map<string, string>();
 
-  for (const world of legacy) {
-    worldIds.set(world.world_id, deterministicUuid('world', `${seedUserId}:${world.world_id}`));
+  for (const cannon of legacy) {
+    cannonIds.set(cannon.cannon_id, deterministicUuid('cannon', `${seedUserId}:${cannon.cannon_id}`));
 
-    for (const story of world.stories as StoryRowWithDocuments[]) {
+    for (const story of cannon.stories as StoryRowWithDocuments[]) {
       storyIds.set(story.story_id, deterministicUuid('story', `${seedUserId}:${story.story_id}`));
 
       for (const document of story.documents) {
@@ -67,18 +67,18 @@ function buildLegacySeedRows(seedUserId: string): {
     }
   }
 
-  const worldsToInsert: SeedWorld[] = legacy.map((world) => ({
-    worldId: worldIds.get(world.world_id)!,
+  const cannonsToInsert: SeedCannon[] = legacy.map((cannon) => ({
+    cannonId: cannonIds.get(cannon.cannon_id)!,
     userId: seedUserId,
-    title: world.title,
-    createdAt: world.created_at,
-    updatedAt: world.updated_at,
+    title: cannon.title,
+    createdAt: cannon.created_at,
+    updatedAt: cannon.updated_at,
   }));
 
-  const storiesToInsert: SeedStory[] = legacy.flatMap((world) =>
-    (world.stories as StoryRowWithDocuments[]).map((story) => ({
+  const storiesToInsert: SeedStory[] = legacy.flatMap((cannon) =>
+    (cannon.stories as StoryRowWithDocuments[]).map((story) => ({
       storyId: storyIds.get(story.story_id)!,
-      worldId: worldIds.get(world.world_id)!,
+      cannonId: cannonIds.get(cannon.cannon_id)!,
       title: story.title,
       predecessorId: story.predecessor_id ? storyIds.get(story.predecessor_id)! : null,
       successorId: story.successor_id ? storyIds.get(story.successor_id)! : null,
@@ -87,8 +87,8 @@ function buildLegacySeedRows(seedUserId: string): {
     })),
   );
 
-  const documentsToInsert: SeedDocument[] = legacy.flatMap((world) =>
-    (world.stories as StoryRowWithDocuments[]).flatMap((story) =>
+  const documentsToInsert: SeedDocument[] = legacy.flatMap((cannon) =>
+    (cannon.stories as StoryRowWithDocuments[]).flatMap((story) =>
       story.documents.map((document) => ({
         documentId: documentIds.get(document.document_id)!,
         storyId: storyIds.get(story.story_id)!,
@@ -102,7 +102,7 @@ function buildLegacySeedRows(seedUserId: string): {
     ),
   );
 
-  return { worldsToInsert, storiesToInsert, documentsToInsert };
+  return { cannonsToInsert, storiesToInsert, documentsToInsert };
 }
 
 async function seed() {
@@ -128,7 +128,7 @@ async function seed() {
     );
   }
 
-  const { worldsToInsert, storiesToInsert, documentsToInsert } = buildLegacySeedRows(seedUserId);
+  const { cannonsToInsert, storiesToInsert, documentsToInsert } = buildLegacySeedRows(seedUserId);
 
   await db.transaction(async (tx) => {
     if (existingUser.length === 0) {
@@ -186,13 +186,13 @@ async function seed() {
       });
     }
 
-    await tx.insert(worlds).values(worldsToInsert).onConflictDoNothing();
+    await tx.insert(cannons).values(cannonsToInsert).onConflictDoNothing();
     await tx.insert(stories).values(storiesToInsert).onConflictDoNothing();
     await tx.insert(documents).values(documentsToInsert).onConflictDoNothing();
   });
 
   console.log(
-    `Seeded legacy for user_id=${seedUserId}: ${worldsToInsert.length} worlds, ${storiesToInsert.length} stories, ${documentsToInsert.length} documents.`,
+    `Seeded legacy for user_id=${seedUserId}: ${cannonsToInsert.length} cannons, ${storiesToInsert.length} stories, ${documentsToInsert.length} documents.`,
   );
 }
 

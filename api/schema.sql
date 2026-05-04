@@ -74,31 +74,31 @@ CREATE INDEX idx_genres_user_id ON genres(story_id);
 
 
 -- =============================================================
--- WORLDS
+-- CANNONS
 -- Top-level grouping (a fictional universe / setting).
--- A user's full collection of worlds is their "Legacy."
+-- A user's full collection of cannons is their "Legacy."
 -- =============================================================
 
-CREATE TABLE worlds (
-    world_id    UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+CREATE TABLE cannons (
+    cannon_id   UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id     UUID        NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
     title       VARCHAR(500) NOT NULL,
     created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_worlds_user_id ON worlds(user_id);
+CREATE INDEX idx_cannons_user_id ON cannons(user_id);
 
 
 -- =============================================================
 -- STORIES
--- A collection of documents belonging to one world.
+-- A collection of documents belonging to one cannon.
 -- Represents a single book in a series.
 -- =============================================================
 
 CREATE TABLE stories (
     story_id        UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
-    world_id        UUID        NOT NULL REFERENCES worlds(world_id) ON DELETE CASCADE,
+    cannon_id       UUID        NOT NULL REFERENCES cannons(cannon_id) ON DELETE CASCADE,
     title           VARCHAR(500) NOT NULL,
     predecessor_id  UUID        REFERENCES stories(story_id) ON DELETE SET NULL,
     successor_id    UUID        REFERENCES stories(story_id) ON DELETE SET NULL,
@@ -109,7 +109,7 @@ CREATE TABLE stories (
     CONSTRAINT chk_story_no_self_successor   CHECK (successor_id   <> story_id)
 );
 
-CREATE INDEX idx_stories_world_id       ON stories(world_id);
+CREATE INDEX idx_stories_cannon_id     ON stories(cannon_id);
 CREATE INDEX idx_stories_predecessor_id ON stories(predecessor_id);
 CREATE INDEX idx_stories_successor_id   ON stories(successor_id);
 

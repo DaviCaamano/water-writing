@@ -1,6 +1,6 @@
-import { DocumentResponse, StoryResponse, WorldResponse } from '#types/shared/response';
+import { DocumentResponse, StoryResponse, CannonResponse } from '#types/shared/response';
 import { orderLinkedDocs } from '#utils/order-linked-docs';
-import { Document, Story, World } from '~types/story';
+import { Document, Story, Cannon } from '~types/story';
 
 export const mapDocumentState = (response: DocumentResponse): Document => {
   return {
@@ -16,7 +16,7 @@ export const mapDocumentState = (response: DocumentResponse): Document => {
 export const mapStoryState = (response: StoryResponse): Story => {
   return {
     id: response.storyId,
-    worldId: response.worldId,
+    cannonId: response.cannonId,
     title: response.title,
     predecessorId: response.predecessorId,
     successorId: response.successorId,
@@ -24,9 +24,9 @@ export const mapStoryState = (response: StoryResponse): Story => {
   };
 };
 
-export const mapWorldState = (response: WorldResponse): World => {
+export const mapCannonState = (response: CannonResponse): Cannon => {
   return {
-    id: response.worldId,
+    id: response.cannonId,
     userId: response.userId,
     title: response.title,
     stories: orderLinkedDocs(response.stories, (doc) => doc.storyId).map(mapStoryState),

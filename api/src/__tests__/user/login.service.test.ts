@@ -2,12 +2,12 @@ import { Plan } from '#types/shared/enum/plan';
 import { StripeSubscriptionStatus } from '#types/enum/stripe';
 
 jest.mock('#utils/database/with-query');
-jest.mock('#services/story/world.service');
+jest.mock('#services/story/cannon.service');
 jest.mock('bcrypt');
 jest.mock('jsonwebtoken');
 
 import { withQuery } from '#utils/database/with-query';
-import { fetchLegacy } from '#services/story/world.service';
+import { fetchLegacy } from '#services/story/cannon.service';
 import { getSession, login } from '#services/user/login.service';
 import {
   MOCK_LOGIN_EMAIL,

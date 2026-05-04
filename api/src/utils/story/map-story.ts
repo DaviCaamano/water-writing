@@ -1,10 +1,10 @@
-import { DocumentResponse, StoryResponse, WorldResponse } from '#types/shared/response';
+import { DocumentResponse, StoryResponse, CannonResponse } from '#types/shared/response';
 import {
   DocumentRow,
   StoryRow,
   StoryRowWithDocuments,
-  WorldRow,
-  WorldRowWithStories,
+  CannonRow,
+  CannonRowWithStories,
 } from '#types/database';
 import { orderLinkedDocs } from '#utils/order-linked-docs';
 
@@ -30,7 +30,7 @@ export const mapStoryResponse = (
   );
   return {
     storyId: row.story_id,
-    worldId: row.world_id,
+    cannonId: row.cannon_id,
     title: row.title,
     predecessorId: row.predecessor_id,
     successorId: row.successor_id,
@@ -40,15 +40,15 @@ export const mapStoryResponse = (
   };
 };
 
-export const mapWorldResponse = (
-  row: WorldRow | WorldRowWithStories,
+export const mapCannonResponse = (
+  row: CannonRow | CannonRowWithStories,
   stories: StoryRow | StoryRowWithDocuments[] = [],
-): WorldResponse => {
-  const rowWithStories = ((row as WorldRowWithStories).stories ?? stories)?.map((world) =>
-    mapStoryResponse(world),
+): CannonResponse => {
+  const rowWithStories = ((row as CannonRowWithStories).stories ?? stories)?.map((cannon) =>
+    mapStoryResponse(cannon),
   );
   return {
-    worldId: row.world_id,
+    cannonId: row.cannon_id,
     userId: row.user_id,
     title: row.title,
     stories: orderLinkedDocs(rowWithStories, (doc) => doc.storyId),

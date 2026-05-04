@@ -39,8 +39,8 @@ class StoryApiRoute {
     method: 'GET',
     includeAuth: true,
   });
-  fetchWorld = createRoute({
-    url: '/story/world/:worldId',
+  fetchCannon = createRoute({
+    url: '/story/cannon/:cannonId',
     method: 'GET',
     includeAuth: true,
   });
@@ -59,8 +59,8 @@ class StoryApiRoute {
     method: 'POST',
     includeAuth: true,
   });
-  upsertWorld = createRoute({
-    url: '/story/world',
+  upsertCannon = createRoute({
+    url: '/story/cannon',
     method: 'POST',
     includeAuth: true,
   });
@@ -74,8 +74,8 @@ class StoryApiRoute {
     method: 'POST',
     includeAuth: true,
   });
-  deleteWorld = createRoute({
-    url: '/story/world/:worldId',
+  deleteCannon = createRoute({
+    url: '/story/cannon/:cannonId',
     method: 'DELETE',
     includeAuth: true,
   });

@@ -70,7 +70,12 @@ app.get('/health', (_req, res) => {
 
 // Global error handler
 // Express 5 natively forwards async errors to this handler — no monkey-patching needed.
-app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
+app.use((err: Error & { status?: number; type?: string }, _req: Request, res: Response, _next: NextFunction) => {
+  if (err instanceof SyntaxError && err.status === 400 && err.type === 'entity.parse.failed') {
+    res.status(400).json({ error: 'Malformed JSON' });
+    return;
+  }
+
   logger.error({ err }, 'Unhandled error');
   res.status(500).json({ error: 'Internal server error' });
 });

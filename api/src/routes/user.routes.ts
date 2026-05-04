@@ -1,4 +1,4 @@
-import { Router, Request, Response } from 'express';
+import { Router, Request } from 'express';
 import { authMiddleware } from '#middleware/auth';
 import { validate } from '#middleware/validate';
 import {
@@ -40,7 +40,7 @@ const router = Router();
 router.post(
   '/login',
   loginLimiter,
-  validate(LoginSchema),
+  validate(LoginSchema, 'Invalid email or password'),
   async (req: Request, res: RouteResponse<LoginResponse>) => {
     try {
       const result = await login(req.body as LoginBody);
@@ -88,18 +88,19 @@ router.post(
   '/create',
   createAccountLimiter,
   validate(CreateUserSchema),
-  async (req: Request, res: RouteResponse<{ status: string }>): Promise<void> => {
+  async (req: Request, res: RouteResponse<{ status: 'ok' }>): Promise<void> => {
     const user: CreateUserBody = req.body;
     try {
       await createUser(user);
     } catch (err) {
       if (err instanceof EmailTakenError) {
         // Return identical response to prevent email enumeration
-        res.status(201).json({ status: 'ok', ...user });
+        res.status(201).json({ status: 'ok' });
+        return;
       }
       throw err;
     }
-    res.status(200).json({ status: 'ok', ...user });
+    res.status(201).json({ status: 'ok' });
   },
 );
 
@@ -109,8 +110,16 @@ router.post(
   authMiddleware,
   generalLimiter,
   validate(UpdateUserSchema),
-  async (req: AuthRequest, res: Response<UserResponse>): Promise<void> => {
-    res.json(await updateUser(req.userId!, req.body as UpdateUserBody));
+  async (req: AuthRequest, res: RouteResponse<UserResponse>): Promise<void> => {
+    try {
+      res.json(await updateUser(req.userId!, req.body as UpdateUserBody));
+    } catch (err) {
+      if (err instanceof UserNotFoundError) {
+        res.status(404).json({ error: 'User not found' });
+        return;
+      }
+      throw err;
+    }
   },
 );
 
@@ -118,9 +127,17 @@ router.post(
 router.delete(
   '/deleteme',
   authMiddleware,
-  async (req: AuthRequest, res: Response): Promise<void> => {
-    await deleteUser(req.userId!);
-    res.json({ status: 'ok' });
+  async (req: AuthRequest, res: RouteResponse<{ status: 'ok' }>): Promise<void> => {
+    try {
+      await deleteUser(req.userId!);
+      res.json({ status: 'ok' });
+    } catch (err) {
+      if (err instanceof UserNotFoundError) {
+        res.status(404).json({ error: 'User not found' });
+        return;
+      }
+      throw err;
+    }
   },
 );
 
@@ -137,6 +154,10 @@ router.post(
     try {
       res.json({ status: 'ok', ...(await subscribe(req.userId!, req.body as SubscribeBody)) });
     } catch (err) {
+      if (err instanceof UserNotFoundError) {
+        res.status(404).json({ error: 'User not found' });
+        return;
+      }
       if (err instanceof StripePaymentFailed) {
         res.status(402).json({ error: 'Payment failed' });
         return;

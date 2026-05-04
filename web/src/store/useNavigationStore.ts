@@ -5,7 +5,7 @@ import { ViewMode } from '~types/story';
 
 export const createInitialNavigationState = (): NavigationState => ({
   currentView: ViewMode.legacy,
-  currentWorldId: null,
+  currentCannonId: null,
   currentStoryId: null,
   currentDocumentId: null,
   selectedDocumentId: null,
@@ -14,9 +14,9 @@ export const createInitialNavigationState = (): NavigationState => ({
 export interface NavigationActions {
   setView: (view: ViewMode) => void;
   navigateUp: () => void;
-  navigateToEditor: (documentId: string, storyId: string, worldId: string) => void;
-  navigateToStory: (storyId: string, worldId: string) => void;
-  navigateToWorld: (worldId: string) => void;
+  navigateToEditor: (documentId: string, storyId: string, cannonId: string) => void;
+  navigateToStory: (storyId: string, cannonId: string) => void;
+  navigateToCannon: (cannonId: string) => void;
   navigateToLegacy: () => void;
   selectDocument: (id: string | null) => void;
   setCurrentDocument: (documentId: string | null) => void;
@@ -35,8 +35,8 @@ export const navigationActions: NavigationActions = {
         case ViewMode.editor:
           return { ...state, currentView: ViewMode.storyView };
         case ViewMode.storyView:
-          return { ...state, currentView: ViewMode.worldView };
-        case ViewMode.worldView:
+          return { ...state, currentView: ViewMode.cannonView };
+        case ViewMode.cannonView:
           return { ...state, currentView: ViewMode.legacy };
         default:
           return state;
@@ -44,32 +44,32 @@ export const navigationActions: NavigationActions = {
     });
   },
 
-  navigateToEditor: (documentId, storyId, worldId) => {
+  navigateToEditor: (documentId, storyId, cannonId) => {
     navigationStore.setState((state) => ({
       ...state,
       currentView: ViewMode.editor,
-      currentWorldId: worldId,
+      currentCannonId: cannonId,
       currentStoryId: storyId,
       currentDocumentId: documentId,
       selectedDocumentId: documentId,
     }));
   },
 
-  navigateToStory: (storyId, worldId) => {
+  navigateToStory: (storyId, cannonId) => {
     navigationStore.setState((state) => ({
       ...state,
       currentView: ViewMode.storyView,
-      currentWorldId: worldId,
+      currentCannonId: cannonId,
       currentStoryId: storyId,
       selectedDocumentId: null,
     }));
   },
 
-  navigateToWorld: (worldId) => {
+  navigateToCannon: (cannonId) => {
     navigationStore.setState((state) => ({
       ...state,
-      currentView: ViewMode.worldView,
-      currentWorldId: worldId,
+      currentView: ViewMode.cannonView,
+      currentCannonId: cannonId,
       currentStoryId: null,
       selectedDocumentId: null,
     }));

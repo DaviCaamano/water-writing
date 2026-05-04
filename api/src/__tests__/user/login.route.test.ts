@@ -24,6 +24,18 @@ describe(
       const res = await request(app).post('/user/login').send({ email: 'not-an-email' });
       expect(res.status).toBe(400);
       expect(res.body.error).toBe('Invalid email or password');
+      expect(mockLogin).not.toHaveBeenCalled();
+    });
+
+    it('returns 400 when the request body contains malformed JSON', async () => {
+      const res = await request(app)
+        .post('/user/login')
+        .set('Content-Type', 'application/json')
+        .send('{"email":"jane@example.com"');
+
+      expect(res.status).toBe(400);
+      expect(res.body).toEqual({ error: 'Malformed JSON' });
+      expect(mockLogin).not.toHaveBeenCalled();
     });
 
     it('returns 401 on invalid credentials', async () => {
@@ -66,6 +78,7 @@ describe(
       const res = await request(app).post('/user/logout').set(headers).send();
       expect(res.status).toBe(200);
       expect(res.body.status).toBe('ok');
+      expect(mockLogout).toHaveBeenCalledWith(expect.any(String));
     });
   }),
 );

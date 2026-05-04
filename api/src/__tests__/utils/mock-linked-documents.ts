@@ -3,15 +3,15 @@ import {
   MOCK_DOCK_RESPONSE,
   MOCK_STORY,
   MOCK_STORY_RESPONSE,
-  MOCK_WORLD,
-  MOCK_WORLD_RESPONSE,
+  MOCK_CANNON,
+  MOCK_CANNON_RESPONSE,
 } from '#__tests__/constants/mock-story';
-import { DocumentRow, StoryRow, StoryRowWithDocuments, WorldRowWithStories } from '#types/database';
-import { DocumentResponse, StoryResponse, WorldResponse } from '#types/shared/response';
+import { DocumentRow, StoryRow, StoryRowWithDocuments, CannonRowWithStories } from '#types/database';
+import { DocumentResponse, StoryResponse, CannonResponse } from '#types/shared/response';
 
 export enum DocType {
-  worldRow = 'world-row',
-  worldResponse = 'world-response',
+  cannonRow = 'cannon-row',
+  cannonResponse = 'cannon-response',
   storyRow = 'story-row',
   storyResponse = 'story-response',
   documentRow = 'document-row',
@@ -58,37 +58,37 @@ export function mockDocList(
 // A helper to mock a list of stories
 export function mockStoryList(
   docType: DocType.storyRow,
-  worldId: string,
+  cannonId: string,
   documentCounts: number[],
 ): StoryRow[];
 export function mockStoryList(
   docType: DocType.storyResponse,
-  worldId: string,
+  cannonId: string,
   documentCounts: number[],
 ): StoryResponse[];
 export function mockStoryList(
   docType: DocType.storyRow | DocType.storyResponse,
-  worldId: string,
+  cannonId: string,
   documentCounts: number[],
 ): StoryRow[] | StoryResponse[] {
   const length = documentCounts.length;
   const predecessorKey = docType === DocType.storyRow ? 'predecessor_id' : 'predecessorId';
   const successorKey = docType === DocType.storyRow ? 'successor_id' : 'successorId';
-  const worldIdKey = docType === DocType.storyRow ? 'world_id' : 'worldId';
+  const cannonIdKey = docType === DocType.storyRow ? 'cannon_id' : 'cannonId';
   const storyIdKey = docType === DocType.storyRow ? 'story_id' : 'storyId';
 
   return Array.from({ length }, (_, i) => {
-    const storyId = `${docType}-${worldId}-${i}`;
+    const storyId = `${docType}-${cannonId}-${i}`;
     const documents =
       docType === DocType.storyRow
         ? mockDocList(DocType.documentRow, documentCounts[i], storyId)
         : mockDocList(DocType.documentResponse, documentCounts[i], storyId);
     return {
       ...DocTypeMap[docType],
-      [worldIdKey]: worldId,
+      [cannonIdKey]: cannonId,
       [storyIdKey]: storyId,
-      [predecessorKey]: i > 0 ? `${docType}-${worldId}-${i - 1}` : null,
-      [successorKey]: i < length - 1 ? `${docType}-${worldId}-${i + 1}` : null,
+      [predecessorKey]: i > 0 ? `${docType}-${cannonId}-${i - 1}` : null,
+      [successorKey]: i < length - 1 ? `${docType}-${cannonId}-${i + 1}` : null,
       documents,
     };
   }) as StoryRow[] | StoryResponse[];
@@ -168,53 +168,53 @@ export function checkDocListStructure(
 
 // See example below for how to use document matrix
 export type DocumentMatrix = number[][];
-// The following matrix creates 5 worlds
+// The following matrix creates 5 cannons
 const defaultDocumentMatrix: DocumentMatrix = [
-  // 1st world has 5 stories with 0, 1, 2, 3, and 4 documents in each respective story
+  // 1st cannon has 5 stories with 0, 1, 2, 3, and 4 documents in each respective story
   [0, 1, 2, 3, 4],
-  // 2nd world has 3 stories with no documents in any story
+  // 2nd cannon has 3 stories with no documents in any story
   [0, 0, 0],
-  // 3rd world has 4 stories with 5, 6, 7, and 8 documents in each respective story
+  // 3rd cannon has 4 stories with 5, 6, 7, and 8 documents in each respective story
   [5, 6, 7, 8],
-  // 4th world has 4 stories with 1 documents in all stories
+  // 4th cannon has 4 stories with 1 documents in all stories
   [1, 1, 1, 1],
-  // 5th world has 4 stories with 11, 22, 33, and 44 documents in each respective story
+  // 5th cannon has 4 stories with 11, 22, 33, and 44 documents in each respective story
   [11, 22, 33, 44],
 ];
 
-// A helper to mock a legacy (all worlds that belong to a single user)
+// A helper to mock a legacy (all cannons that belong to a single user)
 export const mockLegacy = (
   documentMatrix: DocumentMatrix = defaultDocumentMatrix,
-): WorldRowWithStories[] => {
+): CannonRowWithStories[] => {
   return documentMatrix.map((stories, index) => ({
-    ...MOCK_WORLD,
-    world_id: 'world-' + (index + 1),
-    stories: mockStoryList(DocType.storyRow, 'world-' + (index + 1), stories),
+    ...MOCK_CANNON,
+    cannon_id: 'cannon-' + (index + 1),
+    stories: mockStoryList(DocType.storyRow, 'cannon-' + (index + 1), stories),
   }));
 };
 
-// A helper to mock a legacy (all worlds that belong to a single user) response
+// A helper to mock a legacy (all cannons that belong to a single user) response
 export const mockLegacyResponse = (
   documentMatrix: DocumentMatrix = defaultDocumentMatrix,
-): WorldResponse[] => {
+): CannonResponse[] => {
   return documentMatrix.map((stories, index) => ({
-    ...MOCK_WORLD_RESPONSE,
-    worldId: 'world-' + (index + 1),
-    stories: mockStoryList(DocType.storyResponse, 'world-' + (index + 1), stories),
+    ...MOCK_CANNON_RESPONSE,
+    cannonId: 'cannon-' + (index + 1),
+    stories: mockStoryList(DocType.storyResponse, 'cannon-' + (index + 1), stories),
   }));
 };
 
-// A helper to check the structure of a legacy (all worlds that belong to a single user)
-// Any stories within a world also have their structure's checked
+// A helper to check the structure of a legacy (all cannons that belong to a single user)
+// Any stories within a cannon also have their structure's checked
 // Any documents within any stories also have their structure checked
 // A structure is valid if every element in the linked list is strongly connected with no breaks
 export const checkLegacyStructure = (
-  legacy: WorldRowWithStories[] | WorldResponse[],
-  docType: DocType.worldRow | DocType.worldResponse,
+  legacy: CannonRowWithStories[] | CannonResponse[],
+  docType: DocType.cannonRow | DocType.cannonResponse,
 ): boolean =>
-  legacy.every((world: WorldRowWithStories | WorldResponse) => {
-    if (docType === DocType.worldRow) {
-      return checkDocListStructure(world.stories as StoryRowWithDocuments[], DocType.storyRow);
+  legacy.every((cannon: CannonRowWithStories | CannonResponse) => {
+    if (docType === DocType.cannonRow) {
+      return checkDocListStructure(cannon.stories as StoryRowWithDocuments[], DocType.storyRow);
     }
-    return checkDocListStructure(world.stories as StoryResponse[], DocType.storyResponse);
+    return checkDocListStructure(cannon.stories as StoryResponse[], DocType.storyResponse);
   });
