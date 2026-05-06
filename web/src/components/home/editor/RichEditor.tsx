@@ -1,5 +1,5 @@
 'use client';
-
+import '~styles/tiptap.css';
 import { useEditor, EditorContent, Editor as TiptapEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
@@ -10,6 +10,9 @@ import { useEffect, useRef } from 'react';
 import { cn } from '~utils/merge-css-classes';
 import { buildEditorHtml, splitEditorHtml } from './markdown';
 import { Title, TitleDocument } from './extensions/Title';
+import { Entity } from '~components/home/editor/extensions/Entity';
+import { Candidate } from '~components/home/editor/extensions/Candidate';
+import { RejectedEntity } from '~components/home/editor/extensions/RejectedEntity';
 
 interface RichEditorProps {
   title: string;
@@ -51,6 +54,8 @@ export function RichEditor({
         link: false,
         document: false,
       }),
+      Candidate,
+      Entity,
       TitleDocument,
       Title,
       Link.configure({
@@ -64,6 +69,7 @@ export function RichEditor({
         placeholder: ({ node }) =>
           node.type.name === 'title' ? titlePlaceholder : bodyPlaceholder,
       }),
+      RejectedEntity,
     ],
     content: buildEditorHtml(title, body),
     editorProps: {
@@ -111,7 +117,7 @@ export function RichEditor({
   return (
     <div
       className={cn('-rich-editor- flex-1 flex flex-col overflow-hidden', 'tiptap-host')}
-      style={{ fontSize, lineHeight: 1.8, fontFamily }}
+      style={{ fontSize, fontFamily, lineHeight: 'var(--lh)' }}
     >
       <EditorContent editor={editor} className='flex-1 flex flex-col overflow-hidden' />
     </div>
