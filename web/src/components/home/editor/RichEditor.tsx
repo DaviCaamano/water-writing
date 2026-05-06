@@ -12,6 +12,7 @@ import { buildEditorHtml, splitEditorHtml } from './markdown';
 import { Title, TitleDocument } from './extensions/Title';
 import { Entity } from '~components/home/editor/extensions/Entity';
 import { Candidate } from '~components/home/editor/extensions/Candidate';
+import { Paragraph } from '~components/home/editor/extensions/Paragraph';
 import { RejectedEntity } from '~components/home/editor/extensions/RejectedEntity';
 
 interface RichEditorProps {
@@ -53,7 +54,9 @@ export function RichEditor({
       StarterKit.configure({
         link: false,
         document: false,
+        paragraph: false,
       }),
+      Paragraph,
       Candidate,
       Entity,
       TitleDocument,

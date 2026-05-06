@@ -3,6 +3,19 @@
 .tiptap-body {
     min-height: 100%;
 }
+.tiptap-body .paragraph-nodeview {
+    margin: 0;
+}
+.tiptap-body .boop {
+    display: block;
+}
+.tiptap-body p.editor-line {
+    display: block;
+    width: calc(100% + 6rem);
+    margin: 1rem -3rem;
+    padding: 1rem 3rem;
+    box-sizing: border-box;
+}
 .tiptap-body h1[data-title] {
     font-size: 1.8em;
     font-weight: 700;

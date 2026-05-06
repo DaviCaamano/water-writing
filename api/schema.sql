@@ -35,6 +35,8 @@ CREATE TABLE users (
     email       VARCHAR(255) NOT NULL UNIQUE,
     password_hash TEXT       NOT NULL,
     stripe_customer_id VARCHAR(255),
+    image_url TEXT,
+    image_key TEXT,
     created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -83,6 +85,8 @@ CREATE TABLE cannons (
     cannon_id   UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id     UUID        NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
     title       VARCHAR(500) NOT NULL,
+    image_url TEXT,
+    image_key TEXT,
     created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -104,7 +108,8 @@ CREATE TABLE stories (
     successor_id    UUID        REFERENCES stories(story_id) ON DELETE SET NULL,
     created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-
+    image_url       TEXT,
+    image_key       TEXT,
     CONSTRAINT chk_story_no_self_predecessor CHECK (predecessor_id <> story_id),
     CONSTRAINT chk_story_no_self_successor   CHECK (successor_id   <> story_id)
 );
@@ -127,6 +132,8 @@ CREATE TABLE documents (
     body            TEXT        NOT NULL DEFAULT '',
     predecessor_id  UUID        REFERENCES documents(document_id) ON DELETE SET NULL,
     successor_id    UUID        REFERENCES documents(document_id) ON DELETE SET NULL,
+    image_url       TEXT,
+    image_key       TEXT,
     created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
