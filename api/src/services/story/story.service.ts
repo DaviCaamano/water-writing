@@ -1,10 +1,11 @@
 import type { UpsertStoryBody } from '#schemas/story.schemas';
 import { withTransaction } from '#utils/database/with-transaction';
-import { DocumentRow, GenreRow, StoryRow, StoryRowWithDocuments } from '#types/database';
+import { DocumentRowWithBody, GenreRow, StoryRow, StoryRowWithDocuments } from '#types/database';
 import { StoryNotFoundError, CannonNotFoundError } from '#constants/error/custom-errors';
 import { withQuery } from '#utils/database/with-query';
 import { StoryResponse } from '#types/shared/response';
 import { mapStoryResponse } from '#utils/story/map-story';
+import { decompressBody } from '#utils/compression';
 import pool from '#config/database';
 
 export const fetchStory = async (storyId: string): Promise<StoryRowWithDocuments> => {
@@ -20,25 +21,34 @@ export const fetchStory = async (storyId: string): Promise<StoryRowWithDocuments
   return result.rows[0];
 };
 
+async function decompressDocumentRows(rows: DocumentRowWithBody[]): Promise<StoryRowWithDocuments['documents']> {
+  return Promise.all(
+    rows.map(async (doc) => ({
+      ...doc,
+      body: doc.body ? await decompressBody(doc.body) : '',
+    })),
+  );
+}
+
 export const fetchStoryWithDocuments = async (storyId: string): Promise<StoryRowWithDocuments> => {
   return withQuery<StoryRowWithDocuments>(async (client) => {
-    const result = await client.query<StoryRowWithDocuments>(
-      `SELECT
-      s.*,
-      COALESCE(
-        json_agg(d ORDER BY d.created_at) FILTER (WHERE d.document_id IS NOT NULL),
-        '[]'
-      ) AS documents
-      FROM stories s
-      LEFT JOIN documents d ON d.story_id = s.story_id
-      WHERE s.story_id = $1
-      GROUP BY s.story_id;`,
+    const storyResult = await client.query<StoryRow>(
+      'SELECT * FROM stories WHERE story_id = $1',
       [storyId],
     );
-    if (result.rows.length === 0) {
+    if (storyResult.rows.length === 0) {
       throw new StoryNotFoundError();
     }
-    return result.rows[0];
+    const docsResult = await client.query<DocumentRowWithBody>(
+      `SELECT d.*, dc.body FROM documents d
+       LEFT JOIN document_content dc ON dc.document_id = d.document_id
+       WHERE d.story_id = $1 ORDER BY d.created_at`,
+      [storyId],
+    );
+    return {
+      ...storyResult.rows[0],
+      documents: await decompressDocumentRows(docsResult.rows),
+    };
   });
 };
 
@@ -47,24 +57,25 @@ export const fetchUserStoryWithDocuments = async (
   storyId: string,
 ): Promise<StoryRowWithDocuments> => {
   return withQuery<StoryRowWithDocuments>(async (client) => {
-    const result = await client.query<StoryRowWithDocuments>(
-      `SELECT
-      s.*,
-      COALESCE(
-        json_agg(d ORDER BY d.created_at) FILTER (WHERE d.document_id IS NOT NULL),
-        '[]'
-      ) AS documents
-      FROM stories s
-      JOIN cannons w ON w.cannon_id = s.cannon_id
-      LEFT JOIN documents d ON d.story_id = s.story_id
-      WHERE s.story_id = $1 AND w.user_id = $2
-      GROUP BY s.story_id;`,
+    const storyResult = await client.query<StoryRow>(
+      `SELECT s.* FROM stories s
+       JOIN cannons w ON w.cannon_id = s.cannon_id
+       WHERE s.story_id = $1 AND w.user_id = $2`,
       [storyId, userId],
     );
-    if (result.rows.length === 0) {
+    if (storyResult.rows.length === 0) {
       throw new StoryNotFoundError();
     }
-    return result.rows[0];
+    const docsResult = await client.query<DocumentRowWithBody>(
+      `SELECT d.*, dc.body FROM documents d
+       LEFT JOIN document_content dc ON dc.document_id = d.document_id
+       WHERE d.story_id = $1 ORDER BY d.created_at`,
+      [storyId],
+    );
+    return {
+      ...storyResult.rows[0],
+      documents: await decompressDocumentRows(docsResult.rows),
+    };
   });
 };
 
@@ -165,13 +176,17 @@ export async function fetchUserStories(userId: string): Promise<StoryResponse[]>
   if (storiesResult.rows.length === 0) return [];
 
   const storyIds = storiesResult.rows.map((s) => s.story_id);
-  const docsResult = await pool.query<DocumentRow>(
-    'SELECT * FROM documents WHERE story_id = ANY($1) ORDER BY created_at',
+  const docsResult = await pool.query<DocumentRowWithBody>(
+    `SELECT d.*, dc.body FROM documents d
+     LEFT JOIN document_content dc ON dc.document_id = d.document_id
+     WHERE d.story_id = ANY($1) ORDER BY d.created_at`,
     [storyIds],
   );
 
-  const docsByStory = new Map<string, DocumentRow[]>();
-  for (const doc of docsResult.rows) {
+  const decompressedDocs = await decompressDocumentRows(docsResult.rows);
+
+  const docsByStory = new Map<string, StoryRowWithDocuments['documents']>();
+  for (const doc of decompressedDocs) {
     const arr = docsByStory.get(doc.story_id) ?? [];
     arr.push(doc);
     docsByStory.set(doc.story_id, arr);

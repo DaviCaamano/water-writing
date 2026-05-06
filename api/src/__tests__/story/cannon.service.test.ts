@@ -1,3 +1,8 @@
+jest.mock('#utils/compression', () => ({
+  decompressBody: async (buf: unknown) => (typeof buf === 'string' ? buf : String(buf)),
+  compressBody: async (text: string) => Buffer.from(text),
+}));
+
 import {
   MOCK_DOC_ID,
   MOCK_STORY_ID,
@@ -9,7 +14,7 @@ import {
 } from '#__tests__/constants/mock-story';
 
 import { CannonNotFoundError } from '#constants/error/custom-errors';
-import { DocumentRow, StoryRow, StoryRowWithDocuments, CannonRowWithStories } from '#types/database';
+import { DecompressedDocumentRow, StoryRow, StoryRowWithDocuments, CannonRowWithStories } from '#types/database';
 import { mockPool } from '#__tests__/constants/mock-database';
 import { MOCK_DATE } from '#__tests__/constants/mock-basic';
 import { mockClear } from '#__tests__/utils/test-wrappers';
@@ -136,7 +141,7 @@ describe(
       const storyList = (singleCannon.stories as StoryRowWithDocuments[]).map(
         ({ documents: _, ...story }) => story,
       );
-      const documentList = (singleCannon.stories as StoryRowWithDocuments[]).reduce<DocumentRow[]>(
+      const documentList = (singleCannon.stories as StoryRowWithDocuments[]).reduce<DecompressedDocumentRow[]>(
         (acc, story) => [...acc, ...story.documents],
         [],
       );
@@ -267,7 +272,7 @@ describe(
         .reduce<
           StoryRowWithDocuments[]
         >((acc, cannon) => [...acc, ...(cannon.stories as StoryRowWithDocuments[])], [])
-        .reduce<DocumentRow[]>((acc, story) => [...acc, ...story.documents], []);
+        .reduce<DecompressedDocumentRow[]>((acc, story) => [...acc, ...story.documents], []);
 
       mockPool.query
         .mockResolvedValueOnce({ rows: cannonList })

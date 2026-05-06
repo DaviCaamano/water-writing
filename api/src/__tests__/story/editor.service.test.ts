@@ -2,6 +2,10 @@ jest.mock('#config/anthropic', () => ({
   __esModule: true,
   default: { messages: { stream: jest.fn() } },
 }));
+jest.mock('#utils/compression', () => ({
+  decompressBody: async (buf: unknown) => (typeof buf === 'string' ? buf : String(buf)),
+  compressBody: async (text: string) => Buffer.from(text),
+}));
 
 import anthropic from '#config/anthropic';
 import { waterWrite } from '#services/story/editor.service';

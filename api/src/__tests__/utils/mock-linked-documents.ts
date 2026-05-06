@@ -6,7 +6,7 @@ import {
   MOCK_CANNON,
   MOCK_CANNON_RESPONSE,
 } from '#__tests__/constants/mock-story';
-import { DocumentRow, StoryRow, StoryRowWithDocuments, CannonRowWithStories } from '#types/database';
+import { DecompressedDocumentRow, StoryRow, StoryRowWithDocuments, CannonRowWithStories } from '#types/database';
 import { DocumentResponse, StoryResponse, CannonResponse } from '#types/shared/response';
 
 export enum DocType {
@@ -30,7 +30,7 @@ export function mockDocList(
   docType: DocType.documentRow,
   length: number,
   storyId: string,
-): DocumentRow[];
+): DecompressedDocumentRow[];
 export function mockDocList(
   docType: DocType.documentResponse,
   length: number,
@@ -40,7 +40,7 @@ export function mockDocList(
   docType: DocType.documentRow | DocType.documentResponse,
   length: number,
   storyId: string,
-): DocumentRow[] | DocumentResponse[] {
+): DecompressedDocumentRow[] | DocumentResponse[] {
   const predecessorKey = docType === DocType.documentRow ? 'predecessor_id' : 'predecessorId';
   const successorKey = docType === DocType.documentRow ? 'successor_id' : 'successorId';
   const storyIdKey = docType === DocType.documentRow ? 'story_id' : 'storyId';
@@ -52,7 +52,7 @@ export function mockDocList(
     [predecessorKey]: i > 0 ? `${docType}-${storyId}-${i - 1}` : null,
     [successorKey]: i < length - 1 ? `${docType}-${storyId}-${i + 1}` : null,
     [documentIdKey]: `${docType}-${storyId}-${i}`,
-  })) as DocumentRow[] | DocumentResponse[];
+  })) as DecompressedDocumentRow[] | DocumentResponse[];
 }
 
 // A helper to mock a list of stories
@@ -106,7 +106,7 @@ export function checkDocListStructure(
   docType: DocType.storyResponse,
 ): boolean;
 export function checkDocListStructure(
-  docList: DocumentRow[],
+  docList: DecompressedDocumentRow[],
   docType: DocType.documentRow,
 ): boolean;
 export function checkDocListStructure(
@@ -114,7 +114,7 @@ export function checkDocListStructure(
   docType: DocType.documentResponse,
 ): boolean;
 export function checkDocListStructure(
-  docList: (StoryResponse | StoryRowWithDocuments | DocumentResponse | DocumentRow)[],
+  docList: (StoryResponse | StoryRowWithDocuments | DocumentResponse | DecompressedDocumentRow)[],
   docType:
     | DocType.storyRow
     | DocType.storyResponse

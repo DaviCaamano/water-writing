@@ -2,8 +2,9 @@ import { CannonNotFoundError } from '#constants/error/custom-errors';
 import { UpsertCannonBody } from '#schemas/story.schemas';
 import { CannonResponse } from '#types/shared/response';
 import pool from '#config/database';
-import { DocumentRow, StoryRow, StoryRowWithDocuments, CannonRow } from '#types/database';
+import { DocumentRowWithBody, StoryRow, StoryRowWithDocuments, CannonRow } from '#types/database';
 import { mapCannonResponse } from '#utils/story/map-story';
+import { decompressBody } from '#utils/compression';
 
 export const deleteCannon = async (userId: string, cannonId: string): Promise<void> => {
   const result = await pool.query('DELETE FROM cannons WHERE cannon_id = $1 AND user_id = $2', [
@@ -75,17 +76,26 @@ async function fetchCannonById(cannonId: string, userId?: string): Promise<Canno
 
   const storyIds = storiesResult.rows.map((s) => s.story_id);
 
-  let documentRows: DocumentRow[] = [];
+  let documentRows: DocumentRowWithBody[] = [];
   if (storyIds.length > 0) {
-    const docsResult = await pool.query<DocumentRow>(
-      'SELECT * FROM documents WHERE story_id = ANY($1) ORDER BY created_at',
+    const docsResult = await pool.query<DocumentRowWithBody>(
+      `SELECT d.*, dc.body FROM documents d
+       LEFT JOIN document_content dc ON dc.document_id = d.document_id
+       WHERE d.story_id = ANY($1) ORDER BY d.created_at`,
       [storyIds],
     );
     documentRows = docsResult.rows;
   }
 
-  const docsByStory = new Map<string, DocumentRow[]>();
-  for (const doc of documentRows) {
+  const decompressedDocs = await Promise.all(
+    documentRows.map(async (doc) => ({
+      ...doc,
+      body: doc.body ? await decompressBody(doc.body) : '',
+    })),
+  );
+
+  const docsByStory = new Map<string, StoryRowWithDocuments['documents']>();
+  for (const doc of decompressedDocs) {
     const arr = docsByStory.get(doc.story_id) ?? [];
     arr.push(doc);
     docsByStory.set(doc.story_id, arr);
@@ -119,24 +129,31 @@ export async function fetchLegacy(userId: string): Promise<CannonResponse[]> {
 
   const storyIds = storiesResult.rows.map((s) => s.story_id);
 
-  let documentRows: DocumentRow[] = [];
+  let documentRows: DocumentRowWithBody[] = [];
   if (storyIds.length > 0) {
-    const docsResult = await pool.query<DocumentRow>(
-      'SELECT * FROM documents WHERE story_id = ANY($1) ORDER BY created_at',
+    const docsResult = await pool.query<DocumentRowWithBody>(
+      `SELECT d.*, dc.body FROM documents d
+       LEFT JOIN document_content dc ON dc.document_id = d.document_id
+       WHERE d.story_id = ANY($1) ORDER BY d.created_at`,
       [storyIds],
     );
     documentRows = docsResult.rows;
   }
 
-  // Group documents by story
-  const docsByStory = new Map<string, DocumentRow[]>();
-  for (const doc of documentRows) {
+  const decompressedDocs = await Promise.all(
+    documentRows.map(async (doc) => ({
+      ...doc,
+      body: doc.body ? await decompressBody(doc.body) : '',
+    })),
+  );
+
+  const docsByStory = new Map<string, StoryRowWithDocuments['documents']>();
+  for (const doc of decompressedDocs) {
     const arr = docsByStory.get(doc.story_id) ?? [];
     arr.push(doc);
     docsByStory.set(doc.story_id, arr);
   }
 
-  // Group stories by cannon
   const storiesByCannon = new Map<string, StoryRowWithDocuments[]>();
   for (const story of storiesResult.rows) {
     const arr: StoryRowWithDocuments[] = (storiesByCannon.get(story.cannon_id) ??

@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react';
 import { uploadCannonImage } from '~lib/actions/upload-image-s3';
+import Image from 'next/image';
 
 export function ImageUploader({ cannonId }: { cannonId: string }) {
   const [loading, setLoading] = useState(false);
@@ -52,7 +53,7 @@ export function ImageUploader({ cannonId }: { cannonId: string }) {
 
       {preview && (
         <div>
-          <img src={preview} alt='Preview' style={{ maxWidth: '200px', marginTop: '1rem' }} />
+          <Image src={preview} alt='Preview' style={{ maxWidth: '200px', marginTop: '1rem' }} />
         </div>
       )}
     </div>

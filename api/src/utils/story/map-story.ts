@@ -1,6 +1,6 @@
 import { DocumentResponse, StoryResponse, CannonResponse } from '#types/shared/response';
 import {
-  DocumentRow,
+  DecompressedDocumentRow,
   StoryRow,
   StoryRowWithDocuments,
   CannonRow,
@@ -8,7 +8,7 @@ import {
 } from '#types/database';
 import { orderLinkedDocs } from '#utils/order-linked-docs';
 
-export const mapDocumentResponse = (row: DocumentRow): DocumentResponse => {
+export const mapDocumentResponse = (row: DecompressedDocumentRow): DocumentResponse => {
   return {
     documentId: row.document_id,
     storyId: row.story_id,
@@ -23,7 +23,7 @@ export const mapDocumentResponse = (row: DocumentRow): DocumentResponse => {
 
 export const mapStoryResponse = (
   row: StoryRow | StoryRowWithDocuments,
-  documents: DocumentRow[] = [],
+  documents: DecompressedDocumentRow[] = [],
 ): StoryResponse => {
   const rowWithDocs = ((row as StoryRowWithDocuments).documents ?? documents)?.map(
     mapDocumentResponse,

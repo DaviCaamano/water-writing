@@ -129,7 +129,6 @@ CREATE TABLE documents (
     document_id     UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
     story_id        UUID        NOT NULL REFERENCES stories(story_id) ON DELETE CASCADE,
     title           VARCHAR(500) NOT NULL,
-    body            TEXT        NOT NULL DEFAULT '',
     predecessor_id  UUID        REFERENCES documents(document_id) ON DELETE SET NULL,
     successor_id    UUID        REFERENCES documents(document_id) ON DELETE SET NULL,
     image_url       TEXT,
@@ -145,6 +144,17 @@ CREATE TABLE documents (
 CREATE INDEX idx_documents_story_id       ON documents(story_id);
 CREATE INDEX idx_documents_predecessor_id ON documents(predecessor_id);
 CREATE INDEX idx_documents_successor_id   ON documents(successor_id);
+
+
+-- =============================================================
+-- DOCUMENT CONTENT
+-- Stores document body separately, compressed with zlib (BYTEA).
+-- =============================================================
+
+CREATE TABLE document_content (
+    document_id  UUID        PRIMARY KEY REFERENCES documents(document_id) ON DELETE CASCADE,
+    body         BYTEA       NOT NULL DEFAULT ''
+);
 
 
 -- =============================================================

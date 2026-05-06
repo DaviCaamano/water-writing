@@ -2,6 +2,10 @@ import { MOCK_GENRES, MOCK_USER_ID } from '#__tests__/constants/mock-user';
 
 jest.mock('#utils/database/with-transaction');
 jest.mock('#utils/database/with-query');
+jest.mock('#utils/compression', () => ({
+  decompressBody: async (buf: unknown) => (typeof buf === 'string' ? buf : String(buf)),
+  compressBody: async (text: string) => Buffer.from(text),
+}));
 
 import * as storyService from '#services/story/story.service';
 import { withTransaction } from '#utils/database/with-transaction';
@@ -46,7 +50,9 @@ describe(
     it('returns a story with its documents', async () => {
       const storyWithDocs = { ...MOCK_STORY, documents: [MOCK_DOC] };
       const mockClient = createMockClient();
-      mockClient.query.mockResolvedValueOnce({ rows: [storyWithDocs] });
+      mockClient.query
+        .mockResolvedValueOnce({ rows: [MOCK_STORY] })
+        .mockResolvedValueOnce({ rows: [MOCK_DOC] });
       mockWithQuery.mockImplementation((callback) => callback(mockClient as PoolClient));
 
       await expect(storyService.fetchStoryWithDocuments(MOCK_STORY_ID)).resolves.toEqual(
@@ -72,7 +78,9 @@ describe(
     it('returns the story when it belongs to the authenticated user', async () => {
       const storyWithDocs = { ...MOCK_STORY, documents: [MOCK_DOC] };
       const mockClient = createMockClient();
-      mockClient.query.mockResolvedValueOnce({ rows: [storyWithDocs] });
+      mockClient.query
+        .mockResolvedValueOnce({ rows: [MOCK_STORY] })
+        .mockResolvedValueOnce({ rows: [MOCK_DOC] });
       mockWithQuery.mockImplementation((callback) => callback(mockClient as PoolClient));
 
       await expect(

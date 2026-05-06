@@ -1,5 +1,5 @@
 import type { DocumentResponse, StoryResponse, CannonResponse } from '#types/shared/response';
-import type { DocumentRow, StoryRow, CannonRow } from '#types/database';
+import type { DecompressedDocumentRow, StoryRow, CannonRow } from '#types/database';
 import { MOCK_DATE } from '#__tests__/constants/mock-basic';
 import { MOCK_USER_ID } from '#__tests__/constants/mock-ids';
 export { mockPool } from '#__tests__/constants/mock-database';
@@ -46,7 +46,7 @@ export const MOCK_STORY_RESPONSE: StoryResponse = {
   updatedAt: MOCK_DATE,
 };
 
-export const MOCK_DOC: DocumentRow = {
+export const MOCK_DOC: DecompressedDocumentRow = {
   document_id: MOCK_DOC_ID,
   story_id: MOCK_STORY_ID,
   title: 'Test Document',

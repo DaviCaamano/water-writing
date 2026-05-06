@@ -3,6 +3,10 @@ import { MOCK_USER_ID } from '#__tests__/constants/mock-user';
 jest.mock('#services/story/cannon.service');
 jest.mock('#utils/database/with-transaction');
 jest.mock('#utils/database/with-query');
+jest.mock('#utils/compression', () => ({
+  decompressBody: async (buf: unknown) => (typeof buf === 'string' ? buf : String(buf)),
+  compressBody: async (text: string) => Buffer.from(text),
+}));
 
 import { withTransaction } from '#utils/database/with-transaction';
 import { withQuery } from '#utils/database/with-query';
@@ -180,6 +184,7 @@ describe(
       mockClient.query.mockResolvedValueOnce({ rows: [{ story_id: MOCK_STORY_ID }] }); // INSERT story
       mockClient.query.mockResolvedValueOnce({ rows: [] }); // SELECT predecessor
       mockClient.query.mockResolvedValueOnce({ rows: [{ document_id: MOCK_DOC_ID }] }); // INSERT document
+      mockClient.query.mockResolvedValueOnce({}); // INSERT document_content
       mockFetchCannon.mockResolvedValueOnce(MOCK_CANNON_RESPONSE);
 
       expect(await upsertDocument(MOCK_USER_ID, { title: 'Chapter 1', body: 'Content' })).toEqual(
@@ -201,7 +206,8 @@ describe(
             },
           ],
         })
-        .mockResolvedValueOnce({});
+        .mockResolvedValueOnce({}) // UPDATE documents
+        .mockResolvedValueOnce({}); // UPSERT document_content
       mockFetchCannon.mockResolvedValueOnce(MOCK_CANNON_RESPONSE);
 
       const result = await upsertDocument(MOCK_USER_ID, {
@@ -213,8 +219,12 @@ describe(
       expect(result).toEqual(MOCK_CANNON_RESPONSE);
       expect(mockFetchCannon).toHaveBeenCalledWith(MOCK_CANNON_ID);
       expect(mockClient.query).toHaveBeenCalledWith(
-        'UPDATE documents SET title = $1, body = $2, updated_at = NOW() WHERE document_id = $3',
-        ['Updated Chapter', 'Updated content', MOCK_DOC_ID],
+        'UPDATE documents SET title = $1, updated_at = NOW() WHERE document_id = $2',
+        ['Updated Chapter', MOCK_DOC_ID],
+      );
+      expect(mockClient.query).toHaveBeenCalledWith(
+        expect.stringContaining('INSERT INTO document_content'),
+        [MOCK_DOC_ID, expect.any(Buffer)],
       );
     });
 

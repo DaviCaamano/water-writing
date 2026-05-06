@@ -10,6 +10,7 @@ import {
   uniqueIndex,
   index,
   check,
+  customType,
   PgColumn,
 } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
@@ -123,7 +124,6 @@ export const documents = pgTable(
       .notNull()
       .references(() => stories.storyId, { onDelete: 'cascade' }),
     title: varchar('title', { length: 500 }).notNull(),
-    body: text('body').notNull().default(''),
     predecessorId: uuid('predecessor_id').references((): PgColumn => documents.documentId, {
       onDelete: 'set null',
     }),
@@ -141,6 +141,20 @@ export const documents = pgTable(
     check('chk_no_self_successor', sql`${t.successorId}   <> ${t.documentId}`),
   ],
 );
+
+const bytea = customType<{ data: Buffer }>({
+  dataType() {
+    return 'bytea';
+  },
+});
+
+// Document Content (body stored separately, compressed with zlib)
+export const documentContent = pgTable('document_content', {
+  documentId: uuid('document_id')
+    .primaryKey()
+    .references(() => documents.documentId, { onDelete: 'cascade' }),
+  body: bytea('body').notNull(),
+});
 
 // Plans
 export const plans = pgTable('plans', {

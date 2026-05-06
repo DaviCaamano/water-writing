@@ -1,13 +1,23 @@
 import pool from '#config/database';
 import anthropic from '#config/anthropic';
 import { ClaudeModel } from '#constants/anthropic-models';
-import { DocumentRow } from '#types/database';
+import { DocumentRowWithBody } from '#types/database';
 import { DocumentNotFoundError, InvalidSelectionError } from '#constants/error/custom-errors';
+import { decompressBody } from '#utils/compression';
 import { Response } from 'express';
 
-async function fetchContextDocuments(userId: string, documentId: string): Promise<DocumentRow[]> {
-  const result = await pool.query<DocumentRow>(
-    `SELECT d2.document_id, d2.title, d2.body, d2.predecessor_id, d2.successor_id,
+interface ContextDocument {
+  document_id: string;
+  title: string;
+  body: string;
+  predecessor_id: string | null;
+  successor_id: string | null;
+  story_id: string;
+}
+
+async function fetchContextDocuments(userId: string, documentId: string): Promise<ContextDocument[]> {
+  const result = await pool.query<DocumentRowWithBody>(
+    `SELECT d2.document_id, d2.title, dc.body, d2.predecessor_id, d2.successor_id,
             d2.story_id, d2.created_at, d2.updated_at
      FROM documents d
      JOIN stories s ON s.story_id = d.story_id
@@ -18,6 +28,7 @@ async function fetchContextDocuments(userId: string, documentId: string): Promis
          OR d2.document_id = d.predecessor_id
          OR d2.document_id = d.successor_id
        )
+     LEFT JOIN document_content dc ON dc.document_id = d2.document_id
      WHERE d.document_id = $1 AND w.user_id = $2
      ORDER BY CASE
        WHEN d2.document_id = d.predecessor_id THEN 0
@@ -28,7 +39,17 @@ async function fetchContextDocuments(userId: string, documentId: string): Promis
   );
 
   if (result.rows.length === 0) throw new DocumentNotFoundError();
-  return result.rows;
+
+  return Promise.all(
+    result.rows.map(async (row) => ({
+      document_id: row.document_id,
+      title: row.title,
+      body: row.body ? await decompressBody(row.body) : '',
+      predecessor_id: row.predecessor_id,
+      successor_id: row.successor_id,
+      story_id: row.story_id,
+    })),
+  );
 }
 
 export async function waterWrite(

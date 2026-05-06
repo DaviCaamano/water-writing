@@ -42,19 +42,31 @@ export interface StoryRow {
   updated_at: Date;
 }
 
+export interface DecompressedDocumentRow extends DocumentRow {
+  body: string;
+}
+
 export interface StoryRowWithDocuments extends StoryRow {
-  documents: DocumentRow[];
+  documents: DecompressedDocumentRow[];
 }
 
 export interface DocumentRow {
   document_id: string;
   story_id: string;
   title: string;
-  body: string;
   predecessor_id: string | null;
   successor_id: string | null;
   created_at: Date;
   updated_at: Date;
+}
+
+export interface DocumentRowWithBody extends DocumentRow {
+  body: Buffer | null;
+}
+
+export interface DocumentContentRow {
+  document_id: string;
+  body: Buffer;
 }
 
 export interface PlanRow {

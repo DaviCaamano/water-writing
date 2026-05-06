@@ -8,7 +8,8 @@ import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
 import type { StoryRowWithDocuments, CannonRowWithStories } from '#types/database';
 import { Plan } from '#types/shared/enum/plan';
-import { billing, documents, plans, stories, users, cannons } from '#db/schema';
+import { billing, documents, documentContent, plans, stories, users, cannons } from '#db/schema';
+import { compressBody } from '#utils/compression';
 import { mockLegacy } from '#__tests__/utils/mock-linked-documents';
 import { RenewOn } from '#types/shared/enum/renew-on';
 import { StripeSubscriptionStatus } from '#types/enum/stripe';
@@ -20,6 +21,7 @@ const SALT_ROUNDS = 12;
 type SeedCannon = typeof cannons.$inferInsert;
 type SeedStory = typeof stories.$inferInsert;
 type SeedDocument = typeof documents.$inferInsert;
+type SeedDocumentContent = typeof documentContent.$inferInsert;
 
 function getRequiredEnv(name: string): string {
   const value = process.env[name];
@@ -45,6 +47,7 @@ function buildLegacySeedRows(seedUserId: string): {
   cannonsToInsert: SeedCannon[];
   storiesToInsert: SeedStory[];
   documentsToInsert: SeedDocument[];
+  documentContentsToInsert: { documentId: string; body: string }[];
 } {
   const legacy = mockLegacy() as CannonRowWithStories[];
 
@@ -93,7 +96,6 @@ function buildLegacySeedRows(seedUserId: string): {
         documentId: documentIds.get(document.document_id)!,
         storyId: storyIds.get(story.story_id)!,
         title: document.title,
-        body: document.body,
         predecessorId: document.predecessor_id ? documentIds.get(document.predecessor_id)! : null,
         successorId: document.successor_id ? documentIds.get(document.successor_id)! : null,
         createdAt: document.created_at,
@@ -102,7 +104,16 @@ function buildLegacySeedRows(seedUserId: string): {
     ),
   );
 
-  return { cannonsToInsert, storiesToInsert, documentsToInsert };
+  const documentContentsToInsert = legacy.flatMap((cannon) =>
+    (cannon.stories as StoryRowWithDocuments[]).flatMap((story) =>
+      story.documents.map((document) => ({
+        documentId: documentIds.get(document.document_id)!,
+        body: document.body,
+      })),
+    ),
+  );
+
+  return { cannonsToInsert, storiesToInsert, documentsToInsert, documentContentsToInsert };
 }
 
 async function seed() {
@@ -128,7 +139,8 @@ async function seed() {
     );
   }
 
-  const { cannonsToInsert, storiesToInsert, documentsToInsert } = buildLegacySeedRows(seedUserId);
+  const { cannonsToInsert, storiesToInsert, documentsToInsert, documentContentsToInsert } =
+    buildLegacySeedRows(seedUserId);
 
   await db.transaction(async (tx) => {
     if (existingUser.length === 0) {
@@ -189,6 +201,16 @@ async function seed() {
     await tx.insert(cannons).values(cannonsToInsert).onConflictDoNothing();
     await tx.insert(stories).values(storiesToInsert).onConflictDoNothing();
     await tx.insert(documents).values(documentsToInsert).onConflictDoNothing();
+
+    if (documentContentsToInsert.length > 0) {
+      const compressedContents: SeedDocumentContent[] = await Promise.all(
+        documentContentsToInsert.map(async (dc) => ({
+          documentId: dc.documentId,
+          body: await compressBody(dc.body),
+        })),
+      );
+      await tx.insert(documentContent).values(compressedContents).onConflictDoNothing();
+    }
   });
 
   console.log(
