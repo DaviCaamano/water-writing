@@ -1,6 +1,7 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
+@import './tiptap.css';
 
 @custom-variant dark (&:is(.dark *));
 @custom-variant sepia (&:is(.sepia *));
@@ -66,15 +67,15 @@
   /* background: the main page/app background */
   --background: oklch(0.874 0.034 263.561);
   /* foreground: the default text/icon color on background */
-  --foreground: #131e23;
+  --foreground: oklch(0.227 0.018 227.798);
   /* card: surface for cards, panels, containers */
-  --card: #e9f0f4;
+  --card: oklch(0.951 0.009 232.367);
   /* card-foreground: text/icon color on card */
-  --card-foreground: #282a2b;
+  --card-foreground: oklch(0.283 0.003 228.91);
   /* primary: the main brand or highest-emphasis action color */
-  --primary: #012a4a;
+  --primary: oklch(0.278 0.073 247.723);
   /* primary-foreground: readable text/icon color on primary */
-  --primary-foreground: #bacada;
+  --primary-foreground: oklch(0.832 0.028 248.17);
   /* secondary: lower-emphasis supporting action/surface color */
   --secondary: #28454a;
   /* secondary-foreground: readable text/icon color on secondary */

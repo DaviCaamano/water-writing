@@ -3,6 +3,8 @@ import TurndownService from 'turndown';
 
 marked.setOptions({ gfm: true, breaks: false });
 
+const MAX_EDITOR_LINE_LENGTH = 65;
+
 const turndown = new TurndownService({
   headingStyle: 'atx',
   bulletListMarker: '-',
@@ -98,8 +100,85 @@ function escapeHtml(s: string): string {
   return div.innerHTML;
 }
 
+function wrapParagraphBlock(block: string, maxLength = MAX_EDITOR_LINE_LENGTH): string[] {
+  const text = block.replace(/\s+/g, ' ').trim();
+
+  if (!text) {
+    return [];
+  }
+
+  const words = text.split(' ');
+  const lines: string[] = [];
+  let currentLine = '';
+
+  for (const word of words) {
+    if (!word) continue;
+
+    if (!currentLine) {
+      currentLine = word;
+      continue;
+    }
+
+    const nextLine = `${currentLine} ${word}`;
+    if (nextLine.length <= maxLength) {
+      currentLine = nextLine;
+      continue;
+    }
+
+    lines.push(currentLine);
+    currentLine = word;
+  }
+
+  if (currentLine) {
+    lines.push(currentLine);
+  }
+
+  return lines;
+}
+
+function isStructuredMarkdownBlock(block: string): boolean {
+  const trimmed = block.trim();
+
+  return (
+    /^(```|~~~)/.test(trimmed) ||
+    /^(#{1,6})\s/.test(trimmed) ||
+    /^>\s/.test(trimmed) ||
+    /^([-+*])\s/.test(trimmed) ||
+    /^\d+\.\s/.test(trimmed) ||
+    /^(-{3,}|\*{3,}|_{3,})$/.test(trimmed) ||
+    /^\|/.test(trimmed)
+  );
+}
+
+export function normalizeEditorBody(body: string, maxLength = MAX_EDITOR_LINE_LENGTH): string {
+  const normalized = body.replace(/\r\n?/g, '\n').trim();
+
+  if (!normalized) {
+    return '';
+  }
+
+  const blocks = normalized.split(/\n{2,}/);
+  const outputBlocks: string[] = [];
+
+  for (const block of blocks) {
+    const trimmedBlock = block.trim();
+    if (!trimmedBlock) continue;
+
+    if (isStructuredMarkdownBlock(trimmedBlock)) {
+      outputBlocks.push(trimmedBlock);
+      continue;
+    }
+
+    outputBlocks.push(...wrapParagraphBlock(trimmedBlock, maxLength));
+  }
+
+  return outputBlocks.join('\n\n');
+}
+
 export function buildEditorHtml(title: string, body: string): string {
-  return `<h1 data-title>${escapeHtml(title)}</h1>${markdownToHtml(body)}`;
+  const bodyHtml = markdownToHtml(normalizeEditorBody(body)).trim();
+  const normalizedBodyHtml = bodyHtml.length > 0 ? bodyHtml : '<p></p>';
+  return `<h1 data-title>${escapeHtml(title)}</h1>${normalizedBodyHtml}`;
 }
 
 export function splitEditorHtml(html: string): { title: string; body: string } {

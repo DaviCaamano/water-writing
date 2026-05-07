@@ -8,6 +8,7 @@ import { cn } from '~utils/merge-css-classes';
 import { EditorToolbar } from '~components/home/editor/EditorToolbar';
 import { RichEditor } from '~components/home/editor/RichEditor';
 import { EditorWordCount } from '~components/home/editor/EditorWordCount';
+import { normalizeEditorBody } from '~components/home/editor/markdown';
 
 export function Editor() {
   const { title, body, fontSize, fontFamily, setTitle, setBody, markSaved } = useEditorStore();
@@ -69,19 +70,19 @@ export function Editor() {
   const handleChange = useCallback(
     (next: { title: string; body: string }) => {
       setTitle(next.title);
-      setBody(next.body);
+      setBody(normalizeEditorBody(next.body));
     },
     [setTitle, setBody],
   );
 
   return (
-    <div className='-editor- h-100vh w-full max-w-[65ch] mx-auto'>
+    <div className='-editor- h-100vh w-full max-w-[calc(65ch+6rem)] mx-auto bg-transparent'>
       <div
         className={cn(
           'flex-1 flex flex-col',
           'w-full h-[calc(100vh-2rem)]',
           'mt-2 border-2 border-border rounded-lg',
-          'bg-temp shadow-background shadow-2xl',
+          'shadow-background shadow-2xl bg-background',
           'text-foreground overflow-hidden',
         )}
       >

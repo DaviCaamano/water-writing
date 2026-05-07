@@ -71,6 +71,13 @@
       "when": 1778044869108,
       "tag": "0009_watery_mystique",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1778090273346,
+      "tag": "0010_chunky_thunderbird",
+      "breakpoints": true
     }
   ]
 }

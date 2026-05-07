@@ -104,8 +104,8 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
       }
       return {
         inTitle: editor.state.selection.$from.parent.type.name === 'title',
-        canUndo: editor.can().chain().focus().undo().run(),
-        canRedo: editor.can().chain().focus().redo().run(),
+        canUndo: editor.can().undo(),
+        canRedo: editor.can().redo(),
         bold: editor.isActive('bold'),
         italic: editor.isActive('italic'),
         strike: editor.isActive('strike'),
@@ -151,8 +151,9 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
       className={cn(
         '-editor-toolbar-',
         'flex items-center gap-0.5 flex-wrap',
-        'px-12 py-1.5',
+        'px-12 pt-1.5 pb-4 -mb-2.5',
         'sticky top-0 z-10',
+        '[background:linear-gradient(to_bottom,var(--background)_calc(100%_-_16px),transparent_100%)]',
       )}
     >
       <Tooltip>

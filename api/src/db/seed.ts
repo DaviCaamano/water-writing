@@ -3,14 +3,14 @@ config({ path: '.env.local' });
 
 import bcrypt from 'bcrypt';
 import { createHash } from 'crypto';
+import * as fs from 'fs';
+import * as path from 'path';
 import { eq } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
-import type { StoryRowWithDocuments, CannonRowWithStories } from '#types/database';
 import { Plan } from '#types/shared/enum/plan';
 import { billing, documents, documentContent, plans, stories, users, cannons } from '#db/schema';
 import { compressBody } from '#utils/compression';
-import { mockLegacy } from '#__tests__/utils/mock-linked-documents';
 import { RenewOn } from '#types/shared/enum/renew-on';
 import { StripeSubscriptionStatus } from '#types/enum/stripe';
 
@@ -43,75 +43,104 @@ function deterministicUuid(scope: string, value: string): string {
   return `${versioned}-${variantByte}${hash.slice(18, 20)}-${hash.slice(20, 32)}`;
 }
 
+function naturalSort(a: string, b: string): number {
+  return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
+}
+
+const BOOKS_DIR = path.resolve(__dirname, '..', '__tests__', 'constants', 'books');
+
 function buildLegacySeedRows(seedUserId: string): {
   cannonsToInsert: SeedCannon[];
   storiesToInsert: SeedStory[];
   documentsToInsert: SeedDocument[];
   documentContentsToInsert: { documentId: string; body: string }[];
 } {
-  const legacy = mockLegacy() as CannonRowWithStories[];
+  const cannonsToInsert: SeedCannon[] = [];
+  const storiesToInsert: SeedStory[] = [];
+  const documentsToInsert: SeedDocument[] = [];
+  const documentContentsToInsert: { documentId: string; body: string }[] = [];
 
-  const cannonIds = new Map<string, string>();
-  const storyIds = new Map<string, string>();
-  const documentIds = new Map<string, string>();
+  const cannonDirs = fs
+    .readdirSync(BOOKS_DIR, { withFileTypes: true })
+    .filter((d) => d.isDirectory())
+    .sort((a, b) => naturalSort(a.name, b.name));
 
-  for (const cannon of legacy) {
-    cannonIds.set(cannon.cannon_id, deterministicUuid('cannon', `${seedUserId}:${cannon.cannon_id}`));
+  for (const cannonDir of cannonDirs) {
+    const cannonId = deterministicUuid('cannon', `${seedUserId}:${cannonDir.name}`);
 
-    for (const story of cannon.stories as StoryRowWithDocuments[]) {
-      storyIds.set(story.story_id, deterministicUuid('story', `${seedUserId}:${story.story_id}`));
+    cannonsToInsert.push({
+      cannonId,
+      userId: seedUserId,
+      title: cannonDir.name,
+    });
 
-      for (const document of story.documents) {
-        documentIds.set(
-          document.document_id,
-          deterministicUuid('document', `${seedUserId}:${document.document_id}`),
+    const cannonPath = path.join(BOOKS_DIR, cannonDir.name);
+    const storyDirs = fs
+      .readdirSync(cannonPath, { withFileTypes: true })
+      .filter((d) => d.isDirectory())
+      .sort((a, b) => naturalSort(a.name, b.name));
+
+    let prevStoryId: string | null = null;
+    const storyIds: string[] = [];
+
+    for (let si = 0; si < storyDirs.length; si++) {
+      const storyDir = storyDirs[si];
+      const storyId = deterministicUuid('story', `${seedUserId}:${cannonDir.name}:${storyDir.name}`);
+      storyIds.push(storyId);
+
+      const nextStoryId =
+        si < storyDirs.length - 1
+          ? deterministicUuid('story', `${seedUserId}:${cannonDir.name}:${storyDirs[si + 1].name}`)
+          : null;
+
+      storiesToInsert.push({
+        storyId,
+        cannonId,
+        title: storyDir.name,
+        predecessorId: prevStoryId,
+        successorId: nextStoryId,
+      });
+
+      prevStoryId = storyId;
+
+      const storyPath = path.join(cannonPath, storyDir.name);
+      const docFiles = fs
+        .readdirSync(storyPath, { withFileTypes: true })
+        .filter((f) => f.isFile() && f.name.endsWith('.txt'))
+        .sort((a, b) => naturalSort(a.name, b.name));
+
+      let prevDocId: string | null = null;
+
+      for (let di = 0; di < docFiles.length; di++) {
+        const docFile = docFiles[di];
+        const docId = deterministicUuid(
+          'document',
+          `${seedUserId}:${cannonDir.name}:${storyDir.name}:${docFile.name}`,
         );
+
+        const nextDocId =
+          di < docFiles.length - 1
+            ? deterministicUuid(
+                'document',
+                `${seedUserId}:${cannonDir.name}:${storyDir.name}:${docFiles[di + 1].name}`,
+              )
+            : null;
+
+        documentsToInsert.push({
+          documentId: docId,
+          storyId,
+          title: docFile.name.replace(/\.txt$/, ''),
+          predecessorId: prevDocId,
+          successorId: nextDocId,
+        });
+
+        const body = fs.readFileSync(path.join(storyPath, docFile.name), 'utf-8');
+        documentContentsToInsert.push({ documentId: docId, body });
+
+        prevDocId = docId;
       }
     }
   }
-
-  const cannonsToInsert: SeedCannon[] = legacy.map((cannon) => ({
-    cannonId: cannonIds.get(cannon.cannon_id)!,
-    userId: seedUserId,
-    title: cannon.title,
-    createdAt: cannon.created_at,
-    updatedAt: cannon.updated_at,
-  }));
-
-  const storiesToInsert: SeedStory[] = legacy.flatMap((cannon) =>
-    (cannon.stories as StoryRowWithDocuments[]).map((story) => ({
-      storyId: storyIds.get(story.story_id)!,
-      cannonId: cannonIds.get(cannon.cannon_id)!,
-      title: story.title,
-      predecessorId: story.predecessor_id ? storyIds.get(story.predecessor_id)! : null,
-      successorId: story.successor_id ? storyIds.get(story.successor_id)! : null,
-      createdAt: story.created_at,
-      updatedAt: story.updated_at,
-    })),
-  );
-
-  const documentsToInsert: SeedDocument[] = legacy.flatMap((cannon) =>
-    (cannon.stories as StoryRowWithDocuments[]).flatMap((story) =>
-      story.documents.map((document) => ({
-        documentId: documentIds.get(document.document_id)!,
-        storyId: storyIds.get(story.story_id)!,
-        title: document.title,
-        predecessorId: document.predecessor_id ? documentIds.get(document.predecessor_id)! : null,
-        successorId: document.successor_id ? documentIds.get(document.successor_id)! : null,
-        createdAt: document.created_at,
-        updatedAt: document.updated_at,
-      })),
-    ),
-  );
-
-  const documentContentsToInsert = legacy.flatMap((cannon) =>
-    (cannon.stories as StoryRowWithDocuments[]).flatMap((story) =>
-      story.documents.map((document) => ({
-        documentId: documentIds.get(document.document_id)!,
-        body: document.body,
-      })),
-    ),
-  );
 
   return { cannonsToInsert, storiesToInsert, documentsToInsert, documentContentsToInsert };
 }
@@ -198,9 +227,11 @@ async function seed() {
       });
     }
 
-    await tx.insert(cannons).values(cannonsToInsert).onConflictDoNothing();
-    await tx.insert(stories).values(storiesToInsert).onConflictDoNothing();
-    await tx.insert(documents).values(documentsToInsert).onConflictDoNothing();
+    await tx.delete(cannons).where(eq(cannons.userId, seedUserId));
+
+    await tx.insert(cannons).values(cannonsToInsert);
+    await tx.insert(stories).values(storiesToInsert);
+    await tx.insert(documents).values(documentsToInsert);
 
     if (documentContentsToInsert.length > 0) {
       const compressedContents: SeedDocumentContent[] = await Promise.all(
@@ -209,7 +240,10 @@ async function seed() {
           body: await compressBody(dc.body),
         })),
       );
-      await tx.insert(documentContent).values(compressedContents).onConflictDoNothing();
+      const BATCH_SIZE = 50;
+      for (let i = 0; i < compressedContents.length; i += BATCH_SIZE) {
+        await tx.insert(documentContent).values(compressedContents.slice(i, i + BATCH_SIZE));
+      }
     }
   });
 
