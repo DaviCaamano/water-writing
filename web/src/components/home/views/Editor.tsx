@@ -81,7 +81,7 @@ export function Editor() {
         className={cn(
           'flex-1 flex flex-col',
           'w-full h-[calc(100vh-2rem)]',
-          'mt-2 border-2 border-border rounded-lg',
+          'mt-2.5 border-2 border-border rounded-lg',
           'shadow-background shadow-2xl bg-background',
           'text-foreground overflow-hidden',
         )}

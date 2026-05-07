@@ -153,7 +153,7 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
         'flex items-center gap-0.5 flex-wrap',
         'px-12 pt-1.5 pb-4 -mb-2.5',
         'sticky top-0 z-10',
-        '[background:linear-gradient(to_bottom,var(--background)_calc(100%_-_16px),transparent_100%)]',
+        '[background:linear-gradient(to_bottom,var(--background)_calc(100%-10px),transparent_100%)]',
       )}
     >
       <Tooltip>
