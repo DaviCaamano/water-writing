@@ -15,7 +15,10 @@ interface ContextDocument {
   story_id: string;
 }
 
-async function fetchContextDocuments(userId: string, documentId: string): Promise<ContextDocument[]> {
+async function fetchContextDocuments(
+  userId: string,
+  documentId: string,
+): Promise<ContextDocument[]> {
   const result = await pool.query<DocumentRowWithBody>(
     `SELECT d2.document_id, d2.title, dc.body, d2.predecessor_id, d2.successor_id,
             d2.story_id, d2.created_at, d2.updated_at
