@@ -6,6 +6,7 @@ import type { PlanRow } from '#types/database';
 import { RenewOn } from '#types/shared/enum/renew-on';
 import { StripeSubscriptionStatus, toStripeSubscriptionStatus } from '#types/enum/stripe';
 import { StripePaymentFailed } from '#constants/error/custom-errors';
+import { env } from '#config/env';
 
 export async function syncPlanSnapshot(
   client: PoolClient,
@@ -69,19 +70,16 @@ export async function syncPlanSnapshot(
 }
 
 export function getStripePriceId(planType: typeof Plan.pro | typeof Plan.max, yearPlan: boolean): string {
-  const envKey =
+  const priceId =
     planType === Plan.pro
       ? yearPlan
-        ? 'STRIPE_PRICE_PRO_YEARLY'
-        : 'STRIPE_PRICE_PRO_MONTHLY'
+        ? env.STRIPE_PRICE_PRO_YEARLY
+        : env.STRIPE_PRICE_PRO_MONTHLY
       : yearPlan
-        ? 'STRIPE_PRICE_MAX_YEARLY'
-        : 'STRIPE_PRICE_MAX_MONTHLY';
+        ? env.STRIPE_PRICE_MAX_YEARLY
+        : env.STRIPE_PRICE_MAX_MONTHLY;
 
-  return (
-    process.env[envKey] ??
-    `price_${planType.replace(/[^a-z0-9]/gi, '_')}_${yearPlan ? RenewOn.yearly : RenewOn.monthly}`
-  );
+  return priceId ?? `price_${planType.replace(/[^a-z0-9]/gi, '_')}_${yearPlan ? RenewOn.yearly : RenewOn.monthly}`;
 }
 
 export function getSubscriptionPriceId(subscription: Stripe.Subscription): string | null {

@@ -1,17 +1,9 @@
-import dotenv from 'dotenv';
-import path from 'path';
 import Stripe from 'stripe';
+import { env } from '#config/env';
 
-dotenv.config({ path: path.resolve(__dirname, '..', '..', '.env.local') });
-
-const stripeKey = process.env.STRIPE_SECRET_KEY;
-if (!stripeKey) {
-  throw new Error('STRIPE_SECRET_KEY environment variable is required');
-}
-
-const stripe = new Stripe(stripeKey);
+const stripe = new Stripe(env.STRIPE_SECRET_KEY);
 
 export const getStripeWebhookSecret = (): string | null =>
-  process.env.STRIPE_WEBHOOK_SECRET ?? null;
+  env.STRIPE_WEBHOOK_SECRET ?? null;
 
 export default stripe;

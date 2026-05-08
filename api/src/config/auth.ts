@@ -1,9 +1,6 @@
-const jwtSecret = process.env.JWT_SECRET;
-if (!jwtSecret) {
-  throw new Error('JWT_SECRET environment variable is required');
-}
+import { env } from '#config/env';
 
 export const authConfig = {
-  jwtSecret,
-  jwtExpiresIn: process.env.JWT_EXPIRES_IN || '7d',
+  jwtSecret: env.JWT_SECRET,
+  jwtExpiresIn: env.JWT_EXPIRES_IN,
 } as const;

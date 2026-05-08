@@ -1,8 +1,9 @@
 import pino from 'pino';
+import { env } from '#config/env';
 
 const logger = pino({
-  level: process.env.LOG_LEVEL ?? (process.env.NODE_ENV === 'production' ? 'info' : 'debug'),
-  ...(process.env.NODE_ENV === 'development' && {
+  level: env.LOG_LEVEL ?? (env.NODE_ENV === 'production' ? 'info' : 'debug'),
+  ...(env.NODE_ENV === 'development' && {
     transport: {
       target: 'pino-pretty',
       options: { colorize: true },

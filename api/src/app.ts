@@ -2,7 +2,10 @@ import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import pinoHttp from 'pino-http';
+import { randomUUID } from 'crypto';
+import { env } from '#config/env';
 import logger from '#config/logger';
+import pool from '#config/database';
 import { AppError } from '#constants/error/custom-errors';
 import stripeRoutes from '#routes/stripe.routes';
 import userRoutes from '#routes/user.routes';
@@ -24,7 +27,7 @@ app.use(
   }),
 );
 
-const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',').map((o) => o.trim()) || [];
+const allowedOrigins = env.ALLOWED_ORIGINS?.split(',').map((o) => o.trim()) ?? [];
 
 app.use(
   cors({
@@ -47,12 +50,19 @@ app.use('/stripe', stripeRoutes);
 app.use(express.json({ limit: '1mb' }));
 
 // HTTP request logging (skip in tests to keep output clean)
-if (process.env.NODE_ENV !== 'test') {
+if (env.NODE_ENV !== 'test') {
   app.use(
     pinoHttp({
       logger,
+      genReqId: (req, res) => {
+        const existing = req.headers['x-request-id'];
+        if (typeof existing === 'string' && existing) return existing;
+        const id = randomUUID();
+        res.setHeader('X-Request-Id', id);
+        return id;
+      },
       autoLogging: {
-        ignore: (req) => req.url.startsWith('/docs'),
+        ignore: (req) => req.url?.startsWith('/docs') ?? false,
       },
     }),
   );
@@ -64,9 +74,14 @@ app.use('/docs', docsRoutes);
 app.use('/story', storyRoutes);
 app.use('/user', userRoutes);
 
-// Health check
-app.get('/health', (_req, res) => {
-  res.json({ status: 'ok' });
+// Health check — probes the database so load balancers get accurate signal
+app.get('/health', async (_req, res) => {
+  try {
+    await pool.query('SELECT 1');
+    res.json({ status: 'ok' });
+  } catch {
+    res.status(503).json({ status: 'error', error: 'Database unavailable' });
+  }
 });
 
 // Global error handler
@@ -78,6 +93,9 @@ app.use((err: Error & { status?: number; type?: string }, _req: Request, res: Re
   }
 
   if (err instanceof AppError) {
+    if (!err.isOperational) {
+      logger.fatal({ err }, 'Non-operational error');
+    }
     res.status(err.statusCode).json({ error: err.message });
     return;
   }
