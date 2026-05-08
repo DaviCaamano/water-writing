@@ -1,6 +1,7 @@
 import { Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import pool from '#config/database';
+import { authConfig } from '#config/auth';
 import { AuthRequest } from '#types/request';
 
 export const authMiddleware = async (
@@ -17,7 +18,7 @@ export const authMiddleware = async (
   const token = authHeader.split(' ')[1];
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as { userId: string };
+    const decoded = jwt.verify(token, authConfig.jwtSecret) as { userId: string };
 
     // Cross-check: the token must exist in the DB AND belong to the claimed userId
     const result = await pool.query(

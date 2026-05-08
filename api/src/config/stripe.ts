@@ -11,4 +11,7 @@ if (!stripeKey) {
 
 const stripe = new Stripe(stripeKey);
 
+export const getStripeWebhookSecret = (): string | null =>
+  process.env.STRIPE_WEBHOOK_SECRET ?? null;
+
 export default stripe;

@@ -62,11 +62,11 @@ describe(
       expect(res.body.error).toBe('Invalid selection range');
     });
 
-    it('delegates to editText on success', async () => {
-      mockEditText.mockImplementationOnce(async (_u, _d, _s, _p, res) => {
-        res.setHeader('Content-Type', 'text/event-stream');
-        res.write('data: [DONE]\n\n');
-        res.end();
+    it('delegates to waterWrite on success and streams SSE', async () => {
+      mockEditText.mockResolvedValueOnce({
+        async *[Symbol.asyncIterator]() {
+          yield 'hello';
+        },
       });
 
       const res = await request(app)
@@ -75,12 +75,13 @@ describe(
         .send(validBody);
 
       expect(res.status).toBe(200);
+      expect(res.text).toContain(`data: ${JSON.stringify({ text: 'hello' })}`);
+      expect(res.text).toContain('data: [DONE]');
       expect(mockEditText).toHaveBeenCalledWith(
         MOCK_USER_ID,
         MOCK_DOC_ID,
         { start: 0, end: 5 },
         'rewrite this',
-        expect.anything(),
       );
     });
   }),

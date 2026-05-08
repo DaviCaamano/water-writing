@@ -93,97 +93,115 @@ export async function deleteDocument(userId: string, documentId: string): Promis
   });
 }
 
+async function updateExistingDocument(
+  client: { query: InstanceType<typeof import('pg').Pool>['query'] },
+  userId: string,
+  documentId: string,
+  title: string,
+  body: string | undefined,
+): Promise<string> {
+  const existingDoc = await client.query<DocumentRowWithBody & { cannon_id: string }>(
+    `SELECT d.*, dc.body, s.cannon_id FROM documents d
+     LEFT JOIN document_content dc ON dc.document_id = d.document_id
+     JOIN stories s ON s.story_id = d.story_id
+     JOIN (SELECT w2.cannon_id, w2.user_id FROM cannons w2 WHERE w2.user_id = $1) w ON w.cannon_id = s.cannon_id
+     WHERE d.document_id = $2`,
+    [userId, documentId],
+  );
+
+  if (existingDoc.rows.length === 0) {
+    throw new DocumentNotFoundError();
+  }
+
+  await client.query(
+    'UPDATE documents SET title = $1, updated_at = NOW() WHERE document_id = $2',
+    [title, documentId],
+  );
+
+  if (body !== undefined) {
+    const compressed = await compressBody(body);
+    await client.query(
+      `INSERT INTO document_content (document_id, body) VALUES ($1, $2)
+       ON CONFLICT (document_id) DO UPDATE SET body = $2`,
+      [documentId, compressed],
+    );
+  }
+
+  return existingDoc.rows[0].cannon_id;
+}
+
+async function createNewDocument(
+  client: { query: InstanceType<typeof import('pg').Pool>['query'] },
+  userId: string,
+  title: string,
+  body: string | undefined,
+  storyId: string | undefined,
+): Promise<string> {
+  let targetStoryId = storyId;
+  let cannonId: string;
+
+  if (!targetStoryId) {
+    const cannonResult = await client.query(
+      'INSERT INTO cannons (user_id, title) VALUES ($1, $2) RETURNING cannon_id',
+      [userId, 'Untitled Cannon'],
+    );
+    cannonId = cannonResult.rows[0].cannon_id;
+    const storyResult = await client.query(
+      'INSERT INTO stories (cannon_id, title) VALUES ($1, $2) RETURNING story_id',
+      [cannonId, 'Untitled Story'],
+    );
+    targetStoryId = storyResult.rows[0].story_id;
+  } else {
+    const storyResult = await client.query<StoryRow>(
+      `SELECT s.* FROM stories s
+       JOIN cannons w ON w.cannon_id = s.cannon_id
+       WHERE s.story_id = $1 AND w.user_id = $2`,
+      [targetStoryId, userId],
+    );
+    if (storyResult.rows.length === 0) {
+      throw new StoryNotFoundError();
+    }
+    cannonId = storyResult.rows[0].cannon_id;
+  }
+
+  const lastDocResult = await client.query<DocumentRowWithBody>(
+    `SELECT * FROM documents WHERE story_id = $1 AND successor_id IS NULL
+     ORDER BY created_at DESC LIMIT 1 FOR UPDATE`,
+    [targetStoryId],
+  );
+  const predecessorId = lastDocResult.rows.length > 0 ? lastDocResult.rows[0].document_id : null;
+
+  const result = await client.query(
+    `INSERT INTO documents (story_id, title, predecessor_id)
+     VALUES ($1, $2, $3) RETURNING document_id`,
+    [targetStoryId, title, predecessorId],
+  );
+  const newDocId = result.rows[0].document_id;
+
+  const compressed = await compressBody(body ?? '');
+  await client.query(
+    'INSERT INTO document_content (document_id, body) VALUES ($1, $2)',
+    [newDocId, compressed],
+  );
+
+  if (predecessorId) {
+    await client.query(
+      'UPDATE documents SET successor_id = $1, updated_at = NOW() WHERE document_id = $2',
+      [newDocId, predecessorId],
+    );
+  }
+
+  return cannonId;
+}
+
 export async function upsertDocument(userId: string, data: UpsertDocumentBody) {
   const { documentId, title, body, storyId } = data;
 
   const cannonId = await withTransaction(async (client) => {
-    let targetStoryId = storyId;
-    let persistedCannonId: string;
-
     if (documentId) {
-      const existingDoc = await client.query<DocumentRowWithBody & { user_id: string; cannon_id: string }>(
-        `SELECT d.*, dc.body, w.user_id, s.cannon_id FROM documents d
-         LEFT JOIN document_content dc ON dc.document_id = d.document_id
-         JOIN stories s ON s.story_id = d.story_id
-         JOIN (SELECT w2.cannon_id, w2.user_id FROM cannons w2 WHERE w2.user_id = $1) w ON w.cannon_id = s.cannon_id
-         WHERE d.document_id = $2`,
-        [userId, documentId],
-      );
-
-      if (existingDoc.rows.length === 0) {
-        throw new DocumentNotFoundError();
-      }
-
-      await client.query(
-        'UPDATE documents SET title = $1, updated_at = NOW() WHERE document_id = $2',
-        [title, documentId],
-      );
-
-      if (body !== undefined) {
-        const compressed = await compressBody(body);
-        await client.query(
-          `INSERT INTO document_content (document_id, body) VALUES ($1, $2)
-           ON CONFLICT (document_id) DO UPDATE SET body = $2`,
-          [documentId, compressed],
-        );
-      }
-
-      persistedCannonId = existingDoc.rows[0].cannon_id;
-      return persistedCannonId;
+      return updateExistingDocument(client, userId, documentId, title, body);
     }
-
-    if (!targetStoryId) {
-      const cannonResult = await client.query(
-        'INSERT INTO cannons (user_id, title) VALUES ($1, $2) RETURNING cannon_id',
-        [userId, 'Untitled Cannon'],
-      );
-      persistedCannonId = cannonResult.rows[0].cannon_id;
-      const storyResult = await client.query(
-        'INSERT INTO stories (cannon_id, title) VALUES ($1, $2) RETURNING story_id',
-        [persistedCannonId, 'Untitled Story'],
-      );
-      targetStoryId = storyResult.rows[0].story_id;
-    } else {
-      const storyResult = await client.query<StoryRow>(
-        `SELECT s.* FROM stories s
-         JOIN cannons w ON w.cannon_id = s.cannon_id
-         WHERE s.story_id = $1 AND w.user_id = $2`,
-        [targetStoryId, userId],
-      );
-      if (storyResult.rows.length === 0) {
-        throw new StoryNotFoundError();
-      }
-      persistedCannonId = storyResult.rows[0].cannon_id;
-    }
-
-    const lastDocResult = await client.query<DocumentRowWithBody>(
-      `SELECT * FROM documents WHERE story_id = $1 AND successor_id IS NULL
-       ORDER BY created_at DESC LIMIT 1 FOR UPDATE`,
-      [targetStoryId],
-    );
-    const predecessorId = lastDocResult.rows.length > 0 ? lastDocResult.rows[0].document_id : null;
-
-    const result = await client.query(
-      `INSERT INTO documents (story_id, title, predecessor_id)
-       VALUES ($1, $2, $3) RETURNING document_id`,
-      [targetStoryId, title, predecessorId],
-    );
-    const newDocId = result.rows[0].document_id;
-
-    const compressed = await compressBody(body ?? '');
-    await client.query(
-      'INSERT INTO document_content (document_id, body) VALUES ($1, $2)',
-      [newDocId, compressed],
-    );
-
-    if (predecessorId) {
-      await client.query(
-        'UPDATE documents SET successor_id = $1, updated_at = NOW() WHERE document_id = $2',
-        [newDocId, predecessorId],
-      );
-    }
-
-    return persistedCannonId;
+    return createNewDocument(client, userId, title, body, storyId);
   });
 
   return fetchCannon(cannonId);

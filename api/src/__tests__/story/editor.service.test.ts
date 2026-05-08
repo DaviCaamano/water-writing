@@ -1,6 +1,7 @@
 jest.mock('#config/anthropic', () => ({
   __esModule: true,
   default: { messages: { stream: jest.fn() } },
+  editorModel: 'claude-haiku-4-5',
 }));
 jest.mock('#utils/compression', () => ({
   decompressBody: async (buf: unknown) => (typeof buf === 'string' ? buf : String(buf)),
@@ -13,16 +14,16 @@ import { DocumentNotFoundError, InvalidSelectionError } from '#constants/error/c
 import { MOCK_USER_ID } from '#__tests__/constants/mock-user';
 import { MOCK_DOC, MOCK_DOC_ID, mockPool } from '#__tests__/constants/mock-story';
 import { mockClear } from '#__tests__/utils/test-wrappers';
-import type { Response } from 'express';
 
 const mockStream = anthropic.messages.stream as jest.Mock;
 
-const createMockRes = () =>
-  ({
-    setHeader: jest.fn(),
-    write: jest.fn(),
-    end: jest.fn(),
-  }) as unknown as Response & { setHeader: jest.Mock; write: jest.Mock; end: jest.Mock };
+async function collectStream(iterable: AsyncIterable<string>): Promise<string[]> {
+  const chunks: string[] = [];
+  for await (const text of iterable) {
+    chunks.push(text);
+  }
+  return chunks;
+}
 
 const asyncIter = (events: unknown[]) => ({
   async *[Symbol.asyncIterator]() {
@@ -37,7 +38,7 @@ describe(
       mockPool.query.mockResolvedValueOnce({ rows: [] });
 
       await expect(
-        waterWrite(MOCK_USER_ID, MOCK_DOC_ID, { start: 0, end: 5 }, 'rewrite', createMockRes()),
+        waterWrite(MOCK_USER_ID, MOCK_DOC_ID, { start: 0, end: 5 }, 'rewrite'),
       ).rejects.toThrow(DocumentNotFoundError);
     });
 
@@ -48,17 +49,11 @@ describe(
       });
 
       await expect(
-        waterWrite(
-          MOCK_USER_ID,
-          MOCK_DOC_ID,
-          { start: 0, end: body.length + 1 },
-          'rewrite',
-          createMockRes(),
-        ),
+        waterWrite(MOCK_USER_ID, MOCK_DOC_ID, { start: 0, end: body.length + 1 }, 'rewrite'),
       ).rejects.toThrow(InvalidSelectionError);
     });
 
-    it('streams text deltas as SSE data then writes [DONE]', async () => {
+    it('yields text deltas from the stream', async () => {
       mockPool.query.mockResolvedValueOnce({
         rows: [{ ...MOCK_DOC, body: 'Hello world' }],
       });
@@ -70,13 +65,10 @@ describe(
         ]),
       );
 
-      const res = createMockRes();
-      await waterWrite(MOCK_USER_ID, MOCK_DOC_ID, { start: 0, end: 5 }, 'rewrite', res);
+      const iterable = await waterWrite(MOCK_USER_ID, MOCK_DOC_ID, { start: 0, end: 5 }, 'rewrite');
+      const chunks = await collectStream(iterable);
 
-      expect(res.write).toHaveBeenCalledWith(`data: ${JSON.stringify({ text: 'Hi ' })}\n\n`);
-      expect(res.write).toHaveBeenCalledWith(`data: ${JSON.stringify({ text: 'there' })}\n\n`);
-      expect(res.write).toHaveBeenCalledWith('data: [DONE]\n\n');
-      expect(res.end).toHaveBeenCalled();
+      expect(chunks).toEqual(['Hi ', 'there']);
     });
 
     it('passes the sliced selection text to anthropic', async () => {
@@ -85,13 +77,8 @@ describe(
       });
       mockStream.mockReturnValueOnce(asyncIter([]));
 
-      await waterWrite(
-        MOCK_USER_ID,
-        MOCK_DOC_ID,
-        { start: 6, end: 11 },
-        'make it louder',
-        createMockRes(),
-      );
+      const iterable = await waterWrite(MOCK_USER_ID, MOCK_DOC_ID, { start: 6, end: 11 }, 'make it louder');
+      await collectStream(iterable);
 
       const args = mockStream.mock.calls[0][0];
       expect(args.messages[0].content).toContain(

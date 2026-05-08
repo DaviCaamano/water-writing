@@ -19,9 +19,9 @@ import {
   getStoredPlanType,
   getStripePriceId,
   getSubscriptionDate,
-  isAccessibleSubscriptionStatus,
+  getUserPlan,
+  resetPlanToNone,
   syncPlanSnapshot,
-  toStripeSubscriptionStatus,
 } from '#services/stripe/subscription-sync.service';
 import { withTransaction } from '#utils/database/with-transaction';
 import { PoolClient } from 'pg';
@@ -88,16 +88,10 @@ export const updateUser = async (userId: string, data: UpdateUserBody): Promise<
       );
     }
 
-    const userQuery = client.query<UserRow>('SELECT * FROM users WHERE user_id = $1', [userId]);
-    const planQuery = client.query<PlanRow>(
-      `SELECT plan_type, subscription_status
-       FROM plans
-       WHERE user_id = $1
-       LIMIT 1`,
-      [userId],
-    );
-
-    const [userResult, planResult] = await Promise.all([userQuery, planQuery]);
+    const [userResult, plan] = await Promise.all([
+      client.query<UserRow>('SELECT * FROM users WHERE user_id = $1', [userId]),
+      getUserPlan(client, userId),
+    ]);
     const user = userResult.rows[0];
     if (!user) {
       throw new UserNotFoundError();
@@ -109,11 +103,7 @@ export const updateUser = async (userId: string, data: UpdateUserBody): Promise<
       firstName: user.first_name,
       lastName: user.last_name,
       email: user.email,
-      plan:
-        planResult.rows.length > 0 &&
-        isAccessibleSubscriptionStatus(planResult.rows[0].subscription_status)
-          ? planResult.rows[0].plan_type
-          : null,
+      plan,
     };
   });
 };
@@ -129,6 +119,38 @@ export async function deleteUser(userId: string): Promise<void> {
   }
 
   logger.info({ userId }, 'User account deleted');
+}
+
+async function ensureStripeCustomer(
+  client: PoolClient,
+  user: UserRow,
+): Promise<string> {
+  if (user.stripe_customer_id) return user.stripe_customer_id;
+
+  const customer = await stripe.customers.create({
+    email: user.email,
+    name: `${user.first_name} ${user.last_name}`,
+  });
+  await client.query('UPDATE users SET stripe_customer_id = $1 WHERE user_id = $2', [
+    customer.id,
+    user.user_id,
+  ]);
+  return customer.id;
+}
+
+async function recordBilling(
+  client: PoolClient,
+  userId: string,
+  planType: Plan,
+  yearPlan: boolean,
+  amountCents: number,
+  subscription: Stripe.Subscription,
+): Promise<void> {
+  await client.query(
+    `INSERT INTO billing (user_id, plan_type, is_year_plan, amount_cents, stripe_payment_intent_id)
+     VALUES ($1, $2, $3, $4, $5)`,
+    [userId, planType, yearPlan, amountCents, extractPaymentIntentId(subscription)],
+  );
 }
 
 // Subscribe
@@ -155,19 +177,7 @@ export async function subscribe(
       return cancelSubscription(client, userId, existingPlan);
     }
 
-    let stripeCustomerId = user.stripe_customer_id;
-    if (!stripeCustomerId) {
-      const customer = await stripe.customers.create({
-        email: user.email,
-        name: `${user.first_name} ${user.last_name}`,
-      });
-      stripeCustomerId = customer.id;
-      await client.query('UPDATE users SET stripe_customer_id = $1 WHERE user_id = $2', [
-        stripeCustomerId,
-        userId,
-      ]);
-    }
-
+    const stripeCustomerId = await ensureStripeCustomer(client, user);
     const { planType, yearPlan, paymentMethodId } = data;
     const renewOn = yearPlan ? RenewOn.yearly : RenewOn.monthly;
     const priceId = getStripePriceId(planType, yearPlan);
@@ -188,19 +198,8 @@ export async function subscribe(
 
     const amountCents = getAmountCentsFromSubscription(subscription, priceId);
 
-    await syncPlanSnapshot(client, {
-      userId,
-      planType,
-      subscription,
-      renewOn,
-      yearPlan,
-    });
-
-    await client.query(
-      `INSERT INTO billing (user_id, plan_type, is_year_plan, amount_cents, stripe_payment_intent_id)
-       VALUES ($1, $2, $3, $4, $5)`,
-      [userId, planType, yearPlan, amountCents, extractPaymentIntentId(subscription)],
-    );
+    await syncPlanSnapshot(client, { userId, planType, subscription, renewOn, yearPlan });
+    await recordBilling(client, userId, planType, yearPlan, amountCents, subscription);
 
     logger.info(
       { userId, planType, yearPlan, amountCents, subscriptionId: subscription.id },
@@ -213,7 +212,7 @@ export async function subscribe(
       cancelAtPeriodEnd: subscription.cancel_at_period_end,
       planType,
       renewDate: getSubscriptionDate(subscription.current_period_end),
-      subscriptionStatus: toStripeSubscriptionStatus(subscription.status),
+      subscriptionStatus: subscription.status as StripeSubscriptionStatus,
       yearPlan,
     };
   });
@@ -226,36 +225,7 @@ async function cancelSubscription(
   existingPlan: PlanRow | null,
 ): Promise<SubscriptionResponse> {
   if (!existingPlan?.stripe_subscription_id) {
-    await client.query(
-      `INSERT INTO plans (
-         user_id,
-         plan_type,
-         is_year_plan,
-         renew_on,
-         renew_date,
-         stripe_price_id,
-         stripe_subscription_id,
-         subscription_status,
-         cancel_at_period_end,
-         start_date,
-         end_date,
-         updated_at
-       )
-       VALUES ($1, $2, FALSE, NULL, NOW(), NULL, NULL, $3, FALSE, NOW(), NOW(), NOW())
-       ON CONFLICT (user_id)
-       DO UPDATE SET
-         plan_type = EXCLUDED.plan_type,
-         is_year_plan = EXCLUDED.is_year_plan,
-         renew_on = EXCLUDED.renew_on,
-         renew_date = EXCLUDED.renew_date,
-         stripe_price_id = EXCLUDED.stripe_price_id,
-         stripe_subscription_id = EXCLUDED.stripe_subscription_id,
-         subscription_status = EXCLUDED.subscription_status,
-         cancel_at_period_end = EXCLUDED.cancel_at_period_end,
-         end_date = EXCLUDED.end_date,
-         updated_at = NOW()`,
-      [userId, Plan.none, StripeSubscriptionStatus.canceled],
-    );
+    await resetPlanToNone(client, userId);
 
     return {
       action: 'already_canceled',
@@ -288,7 +258,7 @@ async function cancelSubscription(
     cancelAtPeriodEnd: subscription.cancel_at_period_end,
     planType: getStoredPlanType(existingPlan),
     renewDate: getSubscriptionDate(subscription.current_period_end),
-    subscriptionStatus: toStripeSubscriptionStatus(subscription.status),
+    subscriptionStatus: subscription.status as StripeSubscriptionStatus,
     yearPlan: existingPlan.is_year_plan,
   };
 }
@@ -308,7 +278,7 @@ async function createOrUpdateSubscription(args: {
 
     if (
       [StripeSubscriptionStatus.canceled, StripeSubscriptionStatus.incompleteExpired].includes(
-        toStripeSubscriptionStatus(existingSubscription.status),
+        existingSubscription.status as StripeSubscriptionStatus,
       )
     ) {
       return stripe.subscriptions.create({

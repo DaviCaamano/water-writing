@@ -1,10 +1,8 @@
 import pool from '#config/database';
-import anthropic from '#config/anthropic';
-import { ClaudeModel } from '#constants/anthropic-models';
+import anthropic, { editorModel } from '#config/anthropic';
 import { DocumentRowWithBody } from '#types/database';
 import { DocumentNotFoundError, InvalidSelectionError } from '#constants/error/custom-errors';
 import { decompressBody } from '#utils/compression';
-import { Response } from 'express';
 
 interface ContextDocument {
   document_id: string;
@@ -57,8 +55,7 @@ export async function waterWrite(
   documentId: string,
   selection: { start: number; end: number },
   prompt: string,
-  res: Response,
-): Promise<void> {
+): Promise<AsyncIterable<string>> {
   const documents = await fetchContextDocuments(userId, documentId);
   const current = documents.find((d) => d.document_id === documentId)!;
   const body = current.body ?? '';
@@ -71,17 +68,13 @@ export async function waterWrite(
     .map((doc) => `# ${doc.title}\n\n${doc.body ?? ''}`)
     .join('\n\n---\n\n');
 
-  res.setHeader('Content-Type', 'text/event-stream');
-  res.setHeader('Cache-Control', 'no-cache');
-  res.setHeader('Connection', 'keep-alive');
-
   const stream = anthropic.messages.stream({
-    model: process.env.NODE_ENV === 'development' ? ClaudeModel.Haiku4_5 : ClaudeModel.Opus4_7,
+    model: editorModel,
     max_tokens: 1000,
-    system: `You are an expert creative writing assistant. 
-The user will provide you with story context in a <story> tag, 
-two indexes which represent a substring of the story text inside <startSelectionIndex> and <endSelectionindex> tags, 
-and instructions for how to replace substring inside an <instructions> tag. 
+    system: `You are an expert creative writing assistant.
+The user will provide you with story context in a <story> tag,
+two indexes which represent a substring of the story text inside <startSelectionIndex> and <endSelectionindex> tags,
+and instructions for how to replace substring inside an <instructions> tag.
 Return ONLY the replacement text — no preamble, no explanation, no quotation marks around the output.`,
     messages: [
       {
@@ -91,12 +84,13 @@ Return ONLY the replacement text — no preamble, no explanation, no quotation m
     ],
   });
 
-  for await (const event of stream) {
-    if (event.type === 'content_block_delta' && event.delta.type === 'text_delta') {
-      res.write(`data: ${JSON.stringify({ text: event.delta.text })}\n\n`);
-    }
-  }
-
-  res.write('data: [DONE]\n\n');
-  res.end();
+  return {
+    async *[Symbol.asyncIterator]() {
+      for await (const event of stream) {
+        if (event.type === 'content_block_delta' && event.delta.type === 'text_delta') {
+          yield event.delta.text;
+        }
+      }
+    },
+  };
 }

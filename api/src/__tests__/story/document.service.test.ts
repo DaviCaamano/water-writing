@@ -2,14 +2,12 @@ import { MOCK_USER_ID } from '#__tests__/constants/mock-user';
 
 jest.mock('#services/story/cannon.service');
 jest.mock('#utils/database/with-transaction');
-jest.mock('#utils/database/with-query');
 jest.mock('#utils/compression', () => ({
   decompressBody: async (buf: unknown) => (typeof buf === 'string' ? buf : String(buf)),
   compressBody: async (text: string) => Buffer.from(text),
 }));
 
 import { withTransaction } from '#utils/database/with-transaction';
-import { withQuery } from '#utils/database/with-query';
 import {
   deleteDocument,
   fetchDocument,
@@ -32,14 +30,11 @@ import { mockClear } from '#__tests__/utils/test-wrappers';
 
 const mockFetchCannon = fetchCannon as jest.MockedFunction<typeof fetchCannon>;
 const mockWithTransaction = withTransaction as jest.MockedFunction<typeof withTransaction>;
-const mockWithQuery = withQuery as jest.MockedFunction<typeof withQuery>;
 
 describe(
   'fetchDocument',
   mockClear(() => {
     it('should fetch a document by its ID', async () => {
-      mockWithQuery.mockImplementation((callback) => callback(mockClient as any));
-      const mockClient = createMockClient();
       mockPool.query.mockResolvedValueOnce({ rows: [MOCK_DOC] });
       expect(await fetchDocument(MOCK_DOC_ID)).toEqual(MOCK_DOCK_RESPONSE);
     });
