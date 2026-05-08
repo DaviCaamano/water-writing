@@ -1,5 +1,6 @@
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import pinoHttp from 'pino-http';
 import { randomUUID } from 'crypto';
@@ -50,6 +51,7 @@ app.use(
 // Stripe webhook verification requires the raw request body before JSON parsing.
 app.use('/stripe', stripeRoutes);
 
+app.use(cookieParser());
 app.use(express.json({ limit: '1mb' }));
 
 // HTTP request logging (skip in tests to keep output clean)

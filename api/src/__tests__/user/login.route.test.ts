@@ -49,7 +49,7 @@ describe(
       expect(res.body.error).toBe('Invalid email or password');
     });
 
-    it('returns 200 with user data on success', async () => {
+    it('returns 200 with user data on success and sets httpOnly cookie', async () => {
       mockLogin.mockResolvedValueOnce(MOCK_LOGIN_RESPONSE);
 
       const res = await request(app).post('/user/login').send({
@@ -58,7 +58,18 @@ describe(
       });
 
       expect(res.status).toBe(200);
-      expect(res.body).toMatchObject(JSON.parse(JSON.stringify(MOCK_LOGIN_RESPONSE)));
+      const { token: _token, ...expectedBody } = JSON.parse(JSON.stringify(MOCK_LOGIN_RESPONSE));
+      expect(res.body).toMatchObject(expectedBody);
+      expect(res.body.token).toBeUndefined();
+
+      const cookies = res.headers['set-cookie'];
+      expect(cookies).toBeDefined();
+      const tokenCookie = Array.isArray(cookies)
+        ? cookies.find((c: string) => c.startsWith('token='))
+        : typeof cookies === 'string' && cookies.startsWith('token=') ? cookies : undefined;
+      expect(tokenCookie).toBeDefined();
+      expect(tokenCookie).toContain('HttpOnly');
+      expect(tokenCookie).toContain('SameSite=Strict');
     });
   }),
 );
@@ -71,7 +82,7 @@ describe(
       expect(res.status).toBe(401);
     });
 
-    it('returns 200 and calls logout with the token', async () => {
+    it('returns 200, calls logout with the token, and clears the cookie', async () => {
       mockLogout.mockResolvedValueOnce(undefined);
 
       const headers = mockAuthHeaders();
@@ -79,6 +90,13 @@ describe(
       expect(res.status).toBe(200);
       expect(res.body.status).toBe('ok');
       expect(mockLogout).toHaveBeenCalledWith(expect.any(String));
+
+      const cookies = res.headers['set-cookie'];
+      expect(cookies).toBeDefined();
+      const tokenCookie = Array.isArray(cookies)
+        ? cookies.find((c: string) => c.startsWith('token='))
+        : typeof cookies === 'string' && cookies.startsWith('token=') ? cookies : undefined;
+      expect(tokenCookie).toBeDefined();
     });
   }),
 );
@@ -109,13 +127,15 @@ describe(
       expect(res.body.error).toBe('Internal server error');
     });
 
-    it('returns 200 with the authenticated session payload', async () => {
+    it('returns 200 with the authenticated session payload (without token)', async () => {
       mockGetSession.mockResolvedValueOnce(MOCK_LOGIN_RESPONSE);
 
       const res = await request(app).get('/user/session').set(mockAuthHeaders()).send();
 
       expect(res.status).toBe(200);
-      expect(res.body).toMatchObject(JSON.parse(JSON.stringify(MOCK_LOGIN_RESPONSE)));
+      const { token: _token, ...expectedBody } = JSON.parse(JSON.stringify(MOCK_LOGIN_RESPONSE));
+      expect(res.body).toMatchObject(expectedBody);
+      expect(res.body.token).toBeUndefined();
     });
   }),
 );

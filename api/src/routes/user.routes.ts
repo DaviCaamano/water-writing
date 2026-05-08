@@ -1,6 +1,7 @@
 import { Router, Request } from 'express';
 import { authMiddleware } from '#middleware/auth';
 import { validate } from '#middleware/validate';
+import { TOKEN_COOKIE_NAME, tokenCookieOptions } from '#config/cookie';
 import {
   loginLimiter,
   createAccountLimiter,
@@ -35,9 +36,10 @@ router.post(
   '/login',
   loginLimiter,
   validate(LoginSchema, 'Invalid email or password'),
-  async (req: Request, res: RouteResponse<LoginResponse>) => {
-    const result = await login(req.body as LoginBody);
-    res.json(result);
+  async (req: Request, res: RouteResponse<Omit<LoginResponse, 'token'>>) => {
+    const { token, ...body } = await login(req.body as LoginBody);
+    res.cookie(TOKEN_COOKIE_NAME, token, tokenCookieOptions());
+    res.json(body);
   },
 );
 
@@ -47,6 +49,7 @@ router.post(
   async (req: AuthRequest, res: RouteResponse<LogoutResponse>) => {
     assertAuthenticated(req);
     await logout(req.token);
+    res.clearCookie(TOKEN_COOKIE_NAME, tokenCookieOptions());
     res.json({ status: 'ok' });
   },
 );
@@ -54,9 +57,10 @@ router.post(
 router.get(
   '/session',
   authMiddleware,
-  async (req: AuthRequest, res: RouteResponse<LoginResponse>): Promise<void> => {
+  async (req: AuthRequest, res: RouteResponse<Omit<LoginResponse, 'token'>>): Promise<void> => {
     assertAuthenticated(req);
-    res.json(await getSession(req.userId, req.token));
+    const { token: _token, ...body } = await getSession(req.userId, req.token);
+    res.json(body);
   },
 );
 

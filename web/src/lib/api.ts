@@ -6,12 +6,12 @@ const apiClient = ky.create({
   prefix: BASE_URL,
   retry: 0,
   timeout: false,
+  credentials: 'include',
 });
 
 export async function api<T>(
   path: string,
   options: RequestInit = {},
-  includeAuth = true,
 ): Promise<T> {
   const headers = new Headers(options.headers);
 
@@ -19,17 +19,11 @@ export async function api<T>(
     headers.set('Content-Type', 'application/json');
   }
 
-  if (includeAuth) {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-    if (token) {
-      headers.set('Authorization', `Bearer ${token}`);
-    }
-  }
-
   try {
     return await apiClient(path.replace(/^\/+/, ''), {
       ...options,
       headers,
+      credentials: 'include',
     }).json<T>();
   } catch (error) {
     if (error instanceof HTTPError) {
@@ -54,5 +48,5 @@ export const queryApi = <T>(route: ApiRouteBody, options?: ApiQueryOptions): Pro
   if (typeof options?.body !== 'undefined' && options.body !== 'string') {
     queryOptions.body = JSON.stringify(options.body);
   }
-  return api(route.url, queryOptions as ApiQueryOptions & { body?: string }, route.includeAuth);
+  return api(route.url, queryOptions as ApiQueryOptions & { body?: string });
 };

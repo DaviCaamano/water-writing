@@ -4,11 +4,11 @@ import { LoginResponse } from '#types/shared/response';
 import { apiRoutes } from '#types/shared/api-route';
 import { queryKeys } from '~types/lib/tanstack-query/query-keys';
 
-export function useSessionQuery(token: string | null) {
+export function useSessionQuery(isAuthenticated: boolean) {
   return useQuery({
     queryKey: queryKeys.user.session,
     queryFn: () => queryApi<LoginResponse>(apiRoutes.user.session()),
-    enabled: !!token,
+    enabled: isAuthenticated,
     staleTime: 5 * 60 * 1000,
     retry: false,
   });

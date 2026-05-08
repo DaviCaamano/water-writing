@@ -47,8 +47,9 @@ export interface LoginResponse {
   lastName: string;
   legacy: CannonResponse[];
   plan: Plan | null;
-  token: string;
   userId: string;
+  /** Present server-side only; stripped before sending to the client via httpOnly cookie */
+  token?: string;
 }
 
 export interface LogoutResponse {

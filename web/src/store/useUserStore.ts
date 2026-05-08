@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useCallback } from 'react';
 import { Store, useStore } from '@tanstack/react-store';
 import { useQueryClient } from '@tanstack/react-query';
 import { queryApi } from '~lib/api';
@@ -7,29 +7,13 @@ import { apiRoutes } from '#types/shared/api-route';
 import { queryKeys } from '~types/lib/tanstack-query/query-keys';
 import { useSessionQuery } from '~lib/queries/user';
 
-interface TokenState {
-  token: string | null;
+interface AuthState {
+  isAuthenticated: boolean;
 }
 
-const tokenStore = new Store<TokenState>({
-  token: typeof window !== 'undefined' ? localStorage.getItem('token') : null,
+const authStore = new Store<AuthState>({
+  isAuthenticated: typeof document !== 'undefined' && document.cookie.includes('token='),
 });
-
-function setToken(token: string | null) {
-  if (token) {
-    localStorage.setItem('token', token);
-  } else {
-    localStorage.removeItem('token');
-    localStorage.removeItem('account_id');
-  }
-  tokenStore.setState(() => ({ token }));
-}
-
-function applyLoginResponse(data: LoginResponse, queryClient: ReturnType<typeof useQueryClient>) {
-  localStorage.setItem('account_id', data.userId);
-  queryClient.setQueryData(queryKeys.user.session, data);
-  setToken(data.token);
-}
 
 export interface UserActions {
   login: (email: string, password: string) => Promise<void>;
@@ -46,9 +30,9 @@ export interface UserActions {
 }
 
 export function useUserStore() {
-  const { token } = useStore(tokenStore);
+  const { isAuthenticated } = useStore(authStore);
   const queryClient = useQueryClient();
-  const { data: session } = useSessionQuery(token);
+  const { data: session } = useSessionQuery(isAuthenticated);
 
   const actions = useMemo<UserActions>(
     () => ({
@@ -56,19 +40,21 @@ export function useUserStore() {
         const data = await queryApi<LoginResponse>(apiRoutes.user.login(), {
           body: { email, password },
         });
-        applyLoginResponse(data, queryClient);
+        authStore.setState(() => ({ isAuthenticated: true }));
+        queryClient.setQueryData(queryKeys.user.session, data);
       },
 
       signup: async (signupData) => {
         const data = await queryApi<LoginResponse>(apiRoutes.user.create(), { body: signupData });
-        applyLoginResponse(data, queryClient);
+        authStore.setState(() => ({ isAuthenticated: true }));
+        queryClient.setQueryData(queryKeys.user.session, data);
       },
 
       logout: async () => {
         try {
           await queryApi(apiRoutes.user.logout());
         } finally {
-          setToken(null);
+          authStore.setState(() => ({ isAuthenticated: false }));
           queryClient.clear();
         }
       },
@@ -85,7 +71,7 @@ export function useUserStore() {
       },
 
       reset: () => {
-        setToken(null);
+        authStore.setState(() => ({ isAuthenticated: false }));
         queryClient.clear();
       },
     }),

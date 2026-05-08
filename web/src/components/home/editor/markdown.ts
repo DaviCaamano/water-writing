@@ -1,4 +1,5 @@
 import { marked } from 'marked';
+import DOMPurify from 'dompurify';
 import TurndownService from 'turndown';
 
 marked.setOptions({ gfm: true, breaks: false });
@@ -67,10 +68,15 @@ function transformTaskLists(html: string): string {
   return wrapper.innerHTML;
 }
 
+function sanitize(html: string): string {
+  if (typeof window === 'undefined') return html;
+  return DOMPurify.sanitize(html, { USE_PROFILES: { html: true } });
+}
+
 export function markdownToHtml(md: string): string {
   if (!md) return '';
   const raw = marked.parse(md, { async: false }) as string;
-  return transformTaskLists(raw);
+  return transformTaskLists(sanitize(raw));
 }
 
 export function htmlToMarkdown(html: string): string {
@@ -184,7 +190,7 @@ export function buildEditorHtml(title: string, body: string): string {
 export function splitEditorHtml(html: string): { title: string; body: string } {
   if (typeof document === 'undefined') return { title: '', body: htmlToMarkdown(html) };
   const wrapper = document.createElement('div');
-  wrapper.innerHTML = html;
+  wrapper.innerHTML = sanitize(html);
   const titleEl = wrapper.querySelector('h1[data-title]');
   const title = (titleEl?.textContent ?? '').trim();
   titleEl?.remove();
