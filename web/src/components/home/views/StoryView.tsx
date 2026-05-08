@@ -12,10 +12,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '~components/ui/dropdown-menu';
-import { useEditorStore } from '~store/useEditorStore';
 import { useNavigationStore } from '~store/useNavigationStore';
 import { useStoryQuery, useCannonQuery } from '~lib/queries/story';
 import { useDeleteDocumentMutation, useUpsertDocumentMutation } from '~lib/mutations/story';
+import { useQueryClient } from '@tanstack/react-query';
+import { queryKeys } from '~types/lib/tanstack-query/query-keys';
 import Image from 'next/image';
 
 function summarizeDocument(body: string): string {
@@ -52,7 +53,7 @@ export function StoryView() {
   const { currentCannonId, currentStoryId, navigateToEditor } = useNavigationStore();
   const { data: currentStory } = useStoryQuery(currentStoryId);
   const { data: currentCannon } = useCannonQuery(currentCannonId);
-  const { loadDocument } = useEditorStore();
+  const queryClient = useQueryClient();
   const upsertDocument = useUpsertDocumentMutation();
   const deleteDocument = useDeleteDocumentMutation();
 
@@ -73,7 +74,7 @@ export function StoryView() {
     const document = documents.find((entry) => entry.documentId === documentId);
     if (!document) return;
 
-    loadDocument(document);
+    queryClient.setQueryData(queryKeys.documents.detail(documentId), document);
     navigateToEditor(document.documentId, document.storyId, currentCannonId);
   };
 

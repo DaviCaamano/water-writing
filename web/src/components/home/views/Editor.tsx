@@ -3,6 +3,8 @@
 import { useEffect, useRef, useCallback, useMemo, useState } from 'react';
 import type { Editor as TiptapEditor } from '@tiptap/react';
 import { editorStoreSnapshot, useEditorStore } from '~store/useEditorStore';
+import { useNavigationStore } from '~store/useNavigationStore';
+import { useDocumentQuery } from '~lib/queries/story';
 import { useUpsertDocumentMutation } from '~lib/mutations/story';
 import { cn } from '~utils/merge-css-classes';
 import { EditorToolbar } from '~components/home/editor/EditorToolbar';
@@ -11,10 +13,29 @@ import { EditorWordCount } from '~components/home/editor/EditorWordCount';
 import { normalizeEditorBody } from '~components/home/editor/markdown';
 
 export function Editor() {
-  const { title, body, fontSize, fontFamily, setTitle, setBody, markSaved } = useEditorStore();
+  const { fontSize, fontFamily, markDirty, markSaved } = useEditorStore();
+  const { currentDocumentId, currentStoryId } = useNavigationStore();
+  const { data: documentData } = useDocumentQuery(currentDocumentId);
+
+  const [title, setTitle] = useState('');
+  const [body, setBody] = useState('');
+  const hasInitialized = useRef(false);
+  const titleRef = useRef(title);
+  const bodyRef = useRef(body);
+  titleRef.current = title;
+  bodyRef.current = body;
+
   const [editor, setEditor] = useState<TiptapEditor | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const upsertDocument = useUpsertDocumentMutation();
+
+  // One-time initialization from query data
+  useEffect(() => {
+    if (!documentData || hasInitialized.current) return;
+    hasInitialized.current = true;
+    setTitle(documentData.title);
+    setBody(documentData.body);
+  }, [documentData]);
 
   const wordCount = useMemo(() => {
     const trimmed = body.trim();
@@ -25,19 +46,19 @@ export function Editor() {
 
   const handleSave = useCallback(async () => {
     const snapshot = editorStoreSnapshot();
-    if (!snapshot.isDirty || !snapshot.documentId) return;
+    if (!snapshot.isDirty || !currentDocumentId) return;
     try {
       await upsertDocument.mutateAsync({
-        documentId: snapshot.documentId,
-        storyId: snapshot.storyId ?? undefined,
-        title: snapshot.title,
-        body: snapshot.body,
+        documentId: currentDocumentId,
+        storyId: currentStoryId ?? undefined,
+        title: titleRef.current,
+        body: bodyRef.current,
       });
       markSaved();
     } catch (e) {
       console.error('Auto-save failed:', e);
     }
-  }, [upsertDocument, markSaved]);
+  }, [upsertDocument, markSaved, currentDocumentId, currentStoryId]);
 
   useEffect(() => {
     intervalRef.current = setInterval(handleSave, 5 * 60 * 1000);
@@ -71,8 +92,9 @@ export function Editor() {
     (next: { title: string; body: string }) => {
       setTitle(next.title);
       setBody(normalizeEditorBody(next.body));
+      markDirty();
     },
-    [setTitle, setBody],
+    [markDirty],
   );
 
   return (

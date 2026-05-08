@@ -1,14 +1,9 @@
 import { useMemo } from 'react';
 import { Store, useStore } from '@tanstack/react-store';
 import { EditorActions, EditorState, EditorStore } from '~types/state/editor-state';
-import { DocumentResponse } from '#types/shared/response';
 
 function createInitialEditorState(): EditorState {
   return {
-    documentId: null,
-    storyId: null,
-    title: '',
-    body: '',
     isDirty: false,
     lastSaved: null,
     fontSize: 18,
@@ -21,23 +16,8 @@ const editorStore = new Store<EditorState>(createInitialEditorState());
 export const editorStoreSnapshot = () => editorStore.state;
 
 const editorActions: EditorActions = {
-  setTitle: (title) => {
-    editorStore.setState((state) => ({ ...state, title, isDirty: true }));
-  },
-
-  setBody: (body) => {
-    editorStore.setState((state) => ({ ...state, body, isDirty: true }));
-  },
-
-  loadDocument: (doc: Pick<DocumentResponse, 'body' | 'documentId' | 'storyId' | 'title'>) => {
-    editorStore.setState((state) => ({
-      ...state,
-      body: doc.body,
-      documentId: doc.documentId,
-      isDirty: false,
-      storyId: doc.storyId,
-      title: doc.title,
-    }));
+  markDirty: () => {
+    editorStore.setState((state) => ({ ...state, isDirty: true }));
   },
 
   markSaved: () => {
@@ -53,15 +33,7 @@ const editorActions: EditorActions = {
   },
 
   resetEditor: () => {
-    editorStore.setState((state) => ({
-      ...state,
-      documentId: null,
-      storyId: null,
-      title: '',
-      body: '',
-      isDirty: false,
-      lastSaved: null,
-    }));
+    editorStore.setState((state) => ({ ...state, isDirty: false, lastSaved: null }));
   },
 };
 

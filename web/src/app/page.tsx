@@ -1,16 +1,14 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useNavigationStore } from '~store/useNavigationStore';
-import { useEditorStore } from '~store/useEditorStore';
-import { useDocumentQuery } from '~lib/queries/story';
 import { UserMenu } from '~components/home/user/UserMenu';
 import { AuthDialog } from '~components/home/login/AuthDialog';
 import { SettingsModal } from '~components/home/user/user-settings/SettingsModal';
 import { EditorSettingsPopover } from '~components/home/editor/EditorSettingsPopover';
 import { NavButton } from '~components/home/NavButton';
 import { HomeView } from '~components/home/views/HomeView';
-import { useToggleSettings } from '~hooks/components/home/useToggleSettings';
+import { useToggleSettings } from '~components/home/user/user-settings/useToggleSettings';
 import { cn } from '~utils/merge-css-classes';
 
 export default function Home() {
@@ -18,19 +16,7 @@ export default function Home() {
   const { handleOpenSettings, settingsOpen, setSettingsOpen, settingsSection } =
     useToggleSettings();
 
-  const { documentId: editorDocumentId, loadDocument } = useEditorStore();
-  const { currentView, currentDocumentId, navigateUp } = useNavigationStore();
-  const shouldFetchDocument =
-    currentView === 'editor' &&
-    currentDocumentId !== null &&
-    currentDocumentId !== editorDocumentId;
-  const { data: documentData } = useDocumentQuery(shouldFetchDocument ? currentDocumentId : null);
-
-  // Sync editor context state to currently selected document
-  useEffect(() => {
-    if (!documentData || editorDocumentId === documentData.documentId) return;
-    loadDocument(documentData);
-  }, [documentData, editorDocumentId, loadDocument]);
+  const { currentView, navigateUp } = useNavigationStore();
 
   return (
     <div className='-home- h-screen overflow-hidden bg-temp'>

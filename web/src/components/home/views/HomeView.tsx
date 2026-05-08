@@ -1,11 +1,15 @@
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { ViewMode } from '~types/story';
 import { assertNever } from '~utils/assert-never';
-import { Editor } from '~components/home/views/Editor';
+import { useNavigationStore } from '~store/useNavigationStore';
 import { StoryView } from '~components/home/views/StoryView';
 import { WorldView } from '~components/home/views/WorldView';
 import { LegacyView } from '~components/home/views/LegacyView';
-import { useEffect, useRef, useState } from 'react';
+
+const LazyEditor = lazy(() =>
+  import('~components/home/views/Editor').then((m) => ({ default: m.Editor })),
+);
 
 const VIEW_DEPTH: Record<ViewMode, number> = {
   legacy: 0,
@@ -17,7 +21,9 @@ const VIEW_DEPTH: Record<ViewMode, number> = {
 export interface HomeViewProps {
   currentView: ViewMode;
 }
+
 export const HomeView = ({ currentView }: HomeViewProps) => {
+  const { currentDocumentId } = useNavigationStore();
   const [transitioningView, setTransitioningView] = useState<{
     view: ViewMode;
     direction: number;
@@ -40,7 +46,7 @@ export const HomeView = ({ currentView }: HomeViewProps) => {
     previousViewRef.current = currentView;
   }, [currentView]);
 
-  const activeView = renderView(currentView);
+  const activeView = renderView(currentView, currentDocumentId);
   return (
     <div className='-home-view- relative h-full'>
       <motion.div
@@ -72,17 +78,21 @@ export const HomeView = ({ currentView }: HomeViewProps) => {
             )
           }
         >
-          {renderView(transitioningView.view)}
+          {renderView(transitioningView.view, currentDocumentId)}
         </motion.div>
       )}
     </div>
   );
 };
 
-function renderView(view: ViewMode) {
+function renderView(view: ViewMode, currentDocumentId: string | null) {
   switch (view) {
     case ViewMode.editor:
-      return <Editor />;
+      return (
+        <Suspense fallback={<div className='h-full' />}>
+          <LazyEditor key={currentDocumentId ?? 'no-doc'} />
+        </Suspense>
+      );
     case ViewMode.storyView:
       return <StoryView />;
     case ViewMode.cannonView:

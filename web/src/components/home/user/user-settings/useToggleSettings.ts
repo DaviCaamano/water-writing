@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { SettingsSection } from '~types/components/settings-modal';
 
-// Hook to isolate code for opening and closing the settings modal
 export const useToggleSettings = () => {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settingsSection, setSettingsSection] = useState<SettingsSection>(SettingsSection.general);

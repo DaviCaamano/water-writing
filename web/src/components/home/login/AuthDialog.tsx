@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useReducer } from 'react';
 import { Dialog, DialogPortal, DialogOverlay } from '~components/ui/dialog';
 import { WaterRipple } from '~components/visual-effects/WaterRipple';
 import { useUserStore } from '~store/useUserStore';
@@ -37,56 +37,87 @@ const neuTabActiveStyle: React.CSSProperties = {
 const textColor = 'oklch(0.32 0.01 240)';
 const mutedColor = 'oklch(0.58 0.01 240)';
 
+type AuthMode = 'login' | 'signup';
+
+interface AuthFormState {
+  mode: AuthMode;
+  email: string;
+  password: string;
+  confirm: string;
+  firstName: string;
+  lastName: string;
+  error: string;
+  loading: boolean;
+}
+
+type AuthFormAction =
+  | { type: 'SET_MODE'; mode: AuthMode }
+  | { type: 'SET_FIELD'; field: 'email' | 'password' | 'confirm' | 'firstName' | 'lastName'; value: string }
+  | { type: 'SET_ERROR'; error: string }
+  | { type: 'SUBMIT_START' }
+  | { type: 'SUBMIT_END' }
+  | { type: 'RESET_FORM' };
+
+const initialState: AuthFormState = {
+  mode: 'login',
+  email: '',
+  password: '',
+  confirm: '',
+  firstName: '',
+  lastName: '',
+  error: '',
+  loading: false,
+};
+
+function authFormReducer(state: AuthFormState, action: AuthFormAction): AuthFormState {
+  switch (action.type) {
+    case 'SET_MODE':
+      return { ...state, mode: action.mode, error: '' };
+    case 'SET_FIELD':
+      return { ...state, [action.field]: action.value };
+    case 'SET_ERROR':
+      return { ...state, error: action.error, loading: false };
+    case 'SUBMIT_START':
+      return { ...state, error: '', loading: true };
+    case 'SUBMIT_END':
+      return { ...state, loading: false };
+    case 'RESET_FORM':
+      return { ...initialState, mode: state.mode };
+    default:
+      return state;
+  }
+}
+
 export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
-  const [mode, setMode] = useState<'login' | 'signup'>('login');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirm, setConfirm] = useState('');
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [state, dispatch] = useReducer(authFormReducer, initialState);
+  const { mode, email, password, confirm, firstName, lastName, error, loading } = state;
 
   const { login, signup } = useUserStore();
 
-  const resetForm = () => {
-    setEmail('');
-    setPassword('');
-    setConfirm('');
-    setFirstName('');
-    setLastName('');
-    setError('');
-  };
-
-  const switchMode = (next: 'login' | 'signup') => {
-    setMode(next);
-    setError('');
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
 
     if (mode === 'signup' && password !== confirm) {
-      setError('Passwords do not match');
+      dispatch({ type: 'SET_ERROR', error: 'Passwords do not match' });
       return;
     }
 
-    setLoading(true);
+    dispatch({ type: 'SUBMIT_START' });
     try {
       if (mode === 'login') {
         await login(email, password);
       } else {
         await signup({ email, password, firstName, lastName });
       }
-      resetForm();
+      dispatch({ type: 'RESET_FORM' });
       onOpenChange(false);
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : mode === 'login' ? 'Login failed' : 'Signup failed',
-      );
+      dispatch({
+        type: 'SET_ERROR',
+        error: err instanceof Error ? err.message : mode === 'login' ? 'Login failed' : 'Signup failed',
+      });
     } finally {
-      setLoading(false);
+      dispatch({ type: 'SUBMIT_END' });
     }
   };
 
@@ -121,7 +152,7 @@ export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
                       ? { ...neuTabActiveStyle, color: textColor, fontWeight: 600 }
                       : { background: 'transparent', color: mutedColor }
                   }
-                  onClick={() => switchMode(tab)}
+                  onClick={() => dispatch({ type: 'SET_MODE', mode: tab })}
                 >
                   {tab === 'login' ? 'Log In' : 'Sign Up'}
                 </button>
@@ -142,7 +173,7 @@ export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
                     <input
                       type='text'
                       value={firstName}
-                      onChange={(e) => setFirstName(e.target.value)}
+                      onChange={(e) => dispatch({ type: 'SET_FIELD', field: 'firstName', value: e.target.value })}
                       placeholder='Jane'
                       required
                       className='rounded-full px-5 py-3.5 text-[15px] border-none outline-none w-full'
@@ -156,7 +187,7 @@ export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
                     <input
                       type='text'
                       value={lastName}
-                      onChange={(e) => setLastName(e.target.value)}
+                      onChange={(e) => dispatch({ type: 'SET_FIELD', field: 'lastName', value: e.target.value })}
                       placeholder='Doe'
                       required
                       className='rounded-full px-5 py-3.5 text-[15px] border-none outline-none w-full'
@@ -173,7 +204,7 @@ export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
                 <input
                   type='email'
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => dispatch({ type: 'SET_FIELD', field: 'email', value: e.target.value })}
                   placeholder='you@example.com'
                   autoComplete='email'
                   required
@@ -189,7 +220,7 @@ export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
                 <input
                   type='password'
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => dispatch({ type: 'SET_FIELD', field: 'password', value: e.target.value })}
                   placeholder='••••••••••'
                   autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
                   required
@@ -206,7 +237,7 @@ export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
                   <input
                     type='password'
                     value={confirm}
-                    onChange={(e) => setConfirm(e.target.value)}
+                    onChange={(e) => dispatch({ type: 'SET_FIELD', field: 'confirm', value: e.target.value })}
                     placeholder='••••••••••'
                     autoComplete='new-password'
                     required
