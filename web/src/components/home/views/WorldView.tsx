@@ -20,6 +20,7 @@ import { useUserStore } from '~store/useUserStore';
 import { useLegacyQuery, useCannonQuery } from '~lib/queries/story';
 import { useDeleteStoryMutation, useUpsertStoryMutation } from '~lib/mutations/story';
 import Image from 'next/image';
+import { promptForTitle, generateUntitledName } from '~utils/catalog-helpers';
 
 function summarizeStory(documentCount: number): string {
   if (documentCount === 0) {
@@ -31,22 +32,6 @@ function summarizeStory(documentCount: number): string {
   }
 
   return `${documentCount} documents are already part of this story.`;
-}
-
-function promptForTitle(kind: string, currentTitle: string): string | null {
-  const nextTitle = window.prompt(`Rename ${kind}`, currentTitle);
-
-  if (nextTitle === null) {
-    return null;
-  }
-
-  return nextTitle.trim() || currentTitle;
-}
-
-function generateUntitledStory(existing: string[]): string {
-  let i = 1;
-  while (existing.includes(`Untitled Story ${i}`)) i += 1;
-  return `Untitled Story ${i}`;
 }
 
 export function WorldView() {
@@ -64,7 +49,7 @@ export function WorldView() {
     if (!currentCannon) return;
     upsertStory.mutate({
       cannonId: currentCannon.cannonId,
-      title: generateUntitledStory(stories.map((s) => s.title)),
+      title: generateUntitledName('Untitled Story', stories.map((s) => s.title)),
     });
   };
 

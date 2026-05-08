@@ -27,11 +27,11 @@ function shutdown(signal: string) {
     });
   });
 
-  // Force exit if graceful shutdown takes too long
+  const GRACEFUL_SHUTDOWN_TIMEOUT_MS = 10_000;
   setTimeout(() => {
     logger.error('Graceful shutdown timed out, forcing exit');
     process.exit(1);
-  }, 10_000).unref();
+  }, GRACEFUL_SHUTDOWN_TIMEOUT_MS).unref();
 }
 
 process.on('SIGTERM', () => shutdown('SIGTERM'));

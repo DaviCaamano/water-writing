@@ -18,6 +18,7 @@ import { useUserStore } from '~store/useUserStore';
 import { useLegacyQuery } from '~lib/queries/story';
 import { useDeleteCannonMutation, useUpsertCannonMutation } from '~lib/mutations/story';
 import { cn } from '~utils/merge-css-classes';
+import { promptForTitle, generateUntitledName } from '~utils/catalog-helpers';
 
 const legacyViewDescription =
   'This is the top-level catalog for the user. Click a cannon card to dive into its ' +
@@ -28,22 +29,6 @@ function summarizeCannon(storyCount: number, documentCount: number): string {
   }
 
   return `${storyCount} stor${storyCount === 1 ? 'y' : 'ies'} and ${documentCount} document${documentCount === 1 ? '' : 's'} live in this cannon.`;
-}
-
-function promptForTitle(kind: string, currentTitle: string): string | null {
-  const nextTitle = window.prompt(`Rename ${kind}`, currentTitle);
-
-  if (nextTitle === null) {
-    return null;
-  }
-
-  return nextTitle.trim() || currentTitle;
-}
-
-function generateUntitled(existing: string[]): string {
-  let i = 1;
-  while (existing.includes(`Untitled Cannon ${i}`)) i += 1;
-  return `Untitled Cannon ${i}`;
 }
 
 export function LegacyView() {
@@ -62,7 +47,7 @@ export function LegacyView() {
 
   const handleAddCannon = () => {
     if (!userId) return;
-    upsertCannon.mutate({ title: generateUntitled(cannons.map((w) => w.title)) });
+    upsertCannon.mutate({ title: generateUntitledName('Untitled Cannon', cannons.map((c) => c.title)) });
   };
 
   const handleRenameCannon = (cannonId: string, currentTitle: string) => {

@@ -2,6 +2,7 @@ import pool from '#config/database';
 import anthropic, { editorModel } from '#config/anthropic';
 import { DocumentRowWithBody } from '#types/database';
 import { DocumentNotFoundError, InvalidSelectionError } from '#constants/error/custom-errors';
+import { assertFound } from '#utils/database/assert-found';
 import { decompressBody } from '#utils/compression';
 
 interface ContextDocument {
@@ -22,7 +23,7 @@ async function fetchContextDocuments(
             d2.story_id, d2.created_at, d2.updated_at
      FROM documents d
      JOIN stories s ON s.story_id = d.story_id
-     JOIN cannons w ON w.cannon_id = s.cannon_id
+     JOIN cannons c ON c.cannon_id = s.cannon_id
      JOIN documents d2 ON d2.story_id = d.story_id
        AND (
          d2.document_id = d.document_id
@@ -30,7 +31,7 @@ async function fetchContextDocuments(
          OR d2.document_id = d.successor_id
        )
      LEFT JOIN document_content dc ON dc.document_id = d2.document_id
-     WHERE d.document_id = $1 AND w.user_id = $2
+     WHERE d.document_id = $1 AND c.user_id = $2
      ORDER BY CASE
        WHEN d2.document_id = d.predecessor_id THEN 0
        WHEN d2.document_id = d.document_id    THEN 1
@@ -71,18 +72,20 @@ export async function waterWrite(
     .map((doc) => `# ${doc.title}\n\n${doc.body ?? ''}`)
     .join('\n\n---\n\n');
 
+  const EDITOR_MAX_TOKENS = 1000;
+
   const stream = anthropic.messages.stream({
     model: editorModel,
-    max_tokens: 1000,
+    max_tokens: EDITOR_MAX_TOKENS,
     system: `You are an expert creative writing assistant.
 The user will provide you with story context in a <story> tag,
-two indexes which represent a substring of the story text inside <startSelectionIndex> and <endSelectionindex> tags,
+two indexes which represent a substring of the story text inside <startSelectionIndex> and <endSelectionIndex> tags,
 and instructions for how to replace substring inside an <instructions> tag.
 Return ONLY the replacement text — no preamble, no explanation, no quotation marks around the output.`,
     messages: [
       {
         role: 'user',
-        content: `<story>\n${storyContext}\n</story>\n\n<startSelectionIndex>\n${selection.start}\n</startSelectionIndex>\n\n<endSelectionindex>\n${selection.end}\n</endSelectionindex>\n\n<instructions>\n${prompt}\n</instructions>`,
+        content: `<story>\n${storyContext}\n</story>\n\n<startSelectionIndex>\n${selection.start}\n</startSelectionIndex>\n\n<endSelectionIndex>\n${selection.end}\n</endSelectionIndex>\n\n<instructions>\n${prompt}\n</instructions>`,
       },
     ],
   });

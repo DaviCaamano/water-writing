@@ -50,7 +50,7 @@ async function syncFromSubscriptionEvent(subscription: Stripe.Subscription): Pro
       planType,
       subscription,
       renewOn: inferRenewOnFromSubscription(subscription),
-      yearPlan: inferYearPlanFromSubscription(subscription),
+      isYearPlan: inferYearPlanFromSubscription(subscription),
     });
   });
 
@@ -82,7 +82,7 @@ async function handleInvoicePaid(invoice: Stripe.Invoice): Promise<void> {
       planType,
       subscription,
       renewOn: inferRenewOnFromSubscription(subscription),
-      yearPlan: inferYearPlanFromSubscription(subscription),
+      isYearPlan: inferYearPlanFromSubscription(subscription),
     });
 
     const existingBilling = await billingRepo.findByInvoiceId(client, invoice.id);
@@ -126,7 +126,7 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice): Promise<void
       planType,
       subscription,
       renewOn: inferRenewOnFromSubscription(subscription),
-      yearPlan: inferYearPlanFromSubscription(subscription),
+      isYearPlan: inferYearPlanFromSubscription(subscription),
     });
   });
 

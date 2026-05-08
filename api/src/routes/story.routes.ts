@@ -214,8 +214,8 @@ router.post(
   validate(GenresSchema),
   async (req: AuthRequest, res: RouteResponse<{ genres: string[] }>): Promise<void> => {
     assertAuthenticated(req);
-    const { story_id, genres } = req.body as GenresBody;
-    res.json({ genres: await upsertGenre(req.userId, story_id, genres) });
+    const { storyId, genres } = req.body as GenresBody;
+    res.json({ genres: await upsertGenre(req.userId, storyId, genres) });
   },
 );
 

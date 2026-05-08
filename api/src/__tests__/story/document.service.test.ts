@@ -55,7 +55,7 @@ describe(
       const result = await fetchUserDocument(MOCK_USER_ID, MOCK_DOC_ID);
 
       expect(result).toEqual(MOCK_DOC_RESPONSE);
-      expect(mockPool.query).toHaveBeenCalledWith(expect.stringContaining('JOIN cannons w'), [
+      expect(mockPool.query).toHaveBeenCalledWith(expect.stringContaining('JOIN cannons c'), [
         MOCK_DOC_ID,
         MOCK_USER_ID,
       ]);

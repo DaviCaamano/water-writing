@@ -7,6 +7,7 @@ import { mapStoryResponse } from '#utils/story/map-story';
 import { fetchDocumentsForStories } from '#utils/story/fetch-documents';
 import { decompressBody } from '#utils/compression';
 import pool from '#config/database';
+import { assertFound } from '#utils/database/assert-found';
 import * as storyRepo from '#repositories/story.repository';
 import * as cannonRepo from '#repositories/cannon.repository';
 import * as documentRepo from '#repositories/document.repository';
@@ -14,10 +15,7 @@ import * as genreRepo from '#repositories/genre.repository';
 
 export const fetchStory = async (storyId: string): Promise<StoryRowWithDocuments> => {
   const result = await storyRepo.findById(pool, storyId);
-  if (result.rows.length === 0) {
-    throw new StoryNotFoundError();
-  }
-  return result.rows[0]! as StoryRowWithDocuments;
+  return assertFound(result, StoryNotFoundError) as StoryRowWithDocuments;
 };
 
 async function decompressDocumentRows(rows: DocumentRowWithBody[]): Promise<StoryRowWithDocuments['documents']> {
@@ -30,13 +28,10 @@ async function decompressDocumentRows(rows: DocumentRowWithBody[]): Promise<Stor
 }
 
 export const fetchStoryWithDocuments = async (storyId: string): Promise<StoryRowWithDocuments> => {
-  const storyResult = await storyRepo.findById(pool, storyId);
-  if (storyResult.rows.length === 0) {
-    throw new StoryNotFoundError();
-  }
+  const story = assertFound(await storyRepo.findById(pool, storyId), StoryNotFoundError);
   const docsResult = await documentRepo.findByStoryId(pool, storyId);
   return {
-    ...storyResult.rows[0]!,
+    ...story,
     documents: await decompressDocumentRows(docsResult.rows),
   };
 };
@@ -45,13 +40,10 @@ export const fetchUserStoryWithDocuments = async (
   userId: string,
   storyId: string,
 ): Promise<StoryRowWithDocuments> => {
-  const storyResult = await storyRepo.findByIdWithUser(pool, storyId, userId);
-  if (storyResult.rows.length === 0) {
-    throw new StoryNotFoundError();
-  }
+  const story = assertFound(await storyRepo.findByIdWithUser(pool, storyId, userId), StoryNotFoundError);
   const docsResult = await documentRepo.findByStoryId(pool, storyId);
   return {
-    ...storyResult.rows[0]!,
+    ...story,
     documents: await decompressDocumentRows(docsResult.rows),
   };
 };
@@ -63,21 +55,17 @@ async function updateExistingStory(
   title: string | undefined,
   cannonId: string | undefined,
 ): Promise<string> {
-  const existing = await storyRepo.findByIdWithUserOwnership(client, storyId, userId);
+  const existing = assertFound(
+    await storyRepo.findByIdWithUserOwnership(client, storyId, userId),
+    StoryNotFoundError,
+  );
 
-  if (existing.rows.length === 0) {
-    throw new StoryNotFoundError();
-  }
-
-  if (title && title !== existing.rows[0]!.title) {
+  if (title && title !== existing.title) {
     await storyRepo.updateTitle(client, storyId, title);
   }
 
-  if (cannonId && cannonId !== existing.rows[0]!.cannon_id) {
-    const targetCannon = await cannonRepo.exists(client, cannonId, userId);
-    if (targetCannon.rows.length === 0) {
-      throw new CannonNotFoundError();
-    }
+  if (cannonId && cannonId !== existing.cannon_id) {
+    assertFound(await cannonRepo.exists(client, cannonId, userId), CannonNotFoundError);
     await storyRepo.updateCannonId(client, storyId, cannonId);
   }
 
@@ -93,10 +81,7 @@ async function createNewStory(
   let resolvedCannonId = cannonId;
 
   if (resolvedCannonId) {
-    const cannonCheck = await cannonRepo.exists(client, resolvedCannonId, userId);
-    if (cannonCheck.rows.length === 0) {
-      throw new CannonNotFoundError();
-    }
+    assertFound(await cannonRepo.exists(client, resolvedCannonId, userId), CannonNotFoundError);
   } else {
     const newCannon = await cannonRepo.insert(client, userId, 'Untitled Cannon');
     resolvedCannonId = newCannon.rows[0]!.cannon_id;
@@ -140,11 +125,7 @@ export async function fetchUserStories(userId: string): Promise<StoryResponse[]>
 }
 
 export async function upsertGenre(userId: string, storyId: string, genres: string[]) {
-  const storyResult = await storyRepo.userOwnsStory(pool, storyId, userId);
-
-  if (storyResult.rows.length === 0) {
-    throw new StoryNotFoundError();
-  }
+  assertFound(await storyRepo.userOwnsStory(pool, storyId, userId), StoryNotFoundError);
 
   for (const genre of genres) {
     await genreRepo.insertGenre(pool, storyId, genre);

@@ -151,7 +151,7 @@ describe('route limiters', () => {
 
     const res = await request(app).post('/user/subscribe').send({
       planType: 'pro-plan',
-      yearPlan: false,
+      isYearPlan: false,
       paymentMethodId: 'pm_test',
     });
 

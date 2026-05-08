@@ -84,7 +84,7 @@ describe(
       expect(args.messages[0].content).toContain(
         '<startSelectionIndex>\n6\n</startSelectionIndex>',
       );
-      expect(args.messages[0].content).toContain('<endSelectionindex>\n11\n</endSelectionindex>');
+      expect(args.messages[0].content).toContain('<endSelectionIndex>\n11\n</endSelectionIndex>');
       expect(args.messages[0].content).toContain('<instructions>\nmake it louder\n</instructions>');
     });
   }),

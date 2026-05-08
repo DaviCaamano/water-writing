@@ -420,15 +420,15 @@ describe(
 // POST /story/genre
 describe(
   'POST /story/genres',
-  testAuth('/story/genre', 'post', { story_id: MOCK_STORY_ID, genres: ['Fantasy'] }, () => {
-    it('returns 400 when story_id is missing', async () => {
+  testAuth('/story/genre', 'post', { storyId: MOCK_STORY_ID, genres: ['Fantasy'] }, () => {
+    it('returns 400 when storyId is missing', async () => {
       const res = await request(app)
         .post('/story/genre')
         .set(mockAuthHeaders())
         .send({ genres: ['Fantasy'] });
 
       expect(res.status).toBe(400);
-      expect(res.body.details.properties).toHaveProperty('story_id');
+      expect(res.body.details.properties).toHaveProperty('storyId');
       expect(mockAddGenres).not.toHaveBeenCalled();
     });
 
@@ -436,7 +436,7 @@ describe(
       const res = await request(app)
         .post('/story/genre')
         .set(mockAuthHeaders())
-        .send({ story_id: MOCK_STORY_ID, genres: 'Fantasy' });
+        .send({ storyId: MOCK_STORY_ID, genres: 'Fantasy' });
       expect(res.status).toBe(400);
       expect(res.body.details.properties).toHaveProperty('genres');
       expect(mockAddGenres).not.toHaveBeenCalled();
@@ -449,7 +449,7 @@ describe(
       const res = await request(app)
         .post('/story/genre')
         .set(headers)
-        .send({ story_id: MOCK_STORY_ID, genres: ['Fantasy', 'Sci-Fi'] });
+        .send({ storyId: MOCK_STORY_ID, genres: ['Fantasy', 'Sci-Fi'] });
 
       expect(res.status).toBe(200);
       expect(res.body.genres).toEqual(['Fantasy', 'Sci-Fi']);
@@ -465,7 +465,7 @@ describe(
       const res = await request(app)
         .post('/story/genre')
         .set(mockAuthHeaders())
-        .send({ story_id: MOCK_STORY_ID, genres: ['Fantasy'] });
+        .send({ storyId: MOCK_STORY_ID, genres: ['Fantasy'] });
 
       expect(res.status).toBe(404);
       expect(res.body.error).toBe('Story not found');

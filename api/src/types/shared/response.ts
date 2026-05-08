@@ -78,5 +78,5 @@ export interface SubscriptionResponse {
   planType: Plan | null;
   renewDate: Date | null;
   subscriptionStatus: StripeSubscriptionStatus | null;
-  yearPlan: boolean;
+  isYearPlan: boolean;
 }

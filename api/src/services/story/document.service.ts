@@ -6,6 +6,7 @@ import { DocumentResponse } from '#types/shared/response';
 import { fetchCannon } from '#services/story/cannon.service';
 import { compressBody, decompressBody } from '#utils/compression';
 import pool from '#config/database';
+import { assertFound } from '#utils/database/assert-found';
 import * as documentRepo from '#repositories/document.repository';
 import * as cannonRepo from '#repositories/cannon.repository';
 import * as storyRepo from '#repositories/story.repository';
@@ -25,10 +26,7 @@ async function toDocumentResponse(row: DocumentRowWithBody): Promise<DocumentRes
 
 export async function fetchDocument(documentId: string): Promise<DocumentResponse> {
   const result = await documentRepo.findByIdWithBody(pool, documentId);
-  if (result.rows.length === 0) {
-    throw new DocumentNotFoundError();
-  }
-  return toDocumentResponse(result.rows[0]!);
+  return toDocumentResponse(assertFound(result, DocumentNotFoundError));
 }
 
 export async function fetchUserDocument(
@@ -36,19 +34,15 @@ export async function fetchUserDocument(
   documentId: string,
 ): Promise<DocumentResponse> {
   const result = await documentRepo.findByIdWithBodyAndUser(pool, documentId, userId);
-  if (result.rows.length === 0) {
-    throw new DocumentNotFoundError();
-  }
-  return toDocumentResponse(result.rows[0]!);
+  return toDocumentResponse(assertFound(result, DocumentNotFoundError));
 }
 
 export async function deleteDocument(userId: string, documentId: string): Promise<void> {
   return withTransaction(async (client) => {
-    const existing = await documentRepo.findOwnedForUpdate(client, documentId, userId);
-    if (existing.rows.length === 0) {
-      throw new DocumentNotFoundError();
-    }
-    const { predecessor_id, successor_id } = existing.rows[0]!;
+    const { predecessor_id, successor_id } = assertFound(
+      await documentRepo.findOwnedForUpdate(client, documentId, userId),
+      DocumentNotFoundError,
+    );
 
     if (predecessor_id && successor_id) {
       await documentRepo.setSuccessorId(client, predecessor_id, successor_id);
@@ -70,11 +64,10 @@ async function updateExistingDocument(
   title: string,
   body: string | undefined,
 ): Promise<string> {
-  const existingDoc = await documentRepo.findOwnedWithCannonId(client, documentId, userId);
-
-  if (existingDoc.rows.length === 0) {
-    throw new DocumentNotFoundError();
-  }
+  const existingDoc = assertFound(
+    await documentRepo.findOwnedWithCannonId(client, documentId, userId),
+    DocumentNotFoundError,
+  );
 
   await documentRepo.updateTitle(client, documentId, title);
 
@@ -83,7 +76,7 @@ async function updateExistingDocument(
     await documentRepo.upsertContent(client, documentId, compressed);
   }
 
-  return existingDoc.rows[0]!.cannon_id;
+  return existingDoc.cannon_id;
 }
 
 async function createNewDocument(
@@ -102,11 +95,11 @@ async function createNewDocument(
     const storyResult = await storyRepo.insert(client, cannonId, 'Untitled Story');
     targetStoryId = storyResult.rows[0]!.story_id;
   } else {
-    const storyResult = await documentRepo.findStoryForUser(client, targetStoryId, userId);
-    if (storyResult.rows.length === 0) {
-      throw new StoryNotFoundError();
-    }
-    cannonId = storyResult.rows[0]!.cannon_id;
+    const story = assertFound(
+      await documentRepo.findStoryForUser(client, targetStoryId, userId),
+      StoryNotFoundError,
+    );
+    cannonId = story.cannon_id;
   }
 
   const lastDocResult = await documentRepo.findLastInStory(client, targetStoryId);

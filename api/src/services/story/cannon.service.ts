@@ -5,6 +5,7 @@ import pool from '#config/database';
 import { StoryRowWithDocuments } from '#types/database';
 import { mapCannonResponse } from '#utils/story/map-story';
 import { fetchDocumentsForStories } from '#utils/story/fetch-documents';
+import { assertFound } from '#utils/database/assert-found';
 import * as cannonRepo from '#repositories/cannon.repository';
 import * as storyRepo from '#repositories/story.repository';
 
@@ -23,10 +24,7 @@ export const upsertCannon = async (
   const { cannonId, title } = data;
 
   if (cannonId) {
-    const existing = await cannonRepo.exists(pool, cannonId, userId);
-    if (existing.rows.length === 0) {
-      throw new CannonNotFoundError();
-    }
+    assertFound(await cannonRepo.exists(pool, cannonId, userId), CannonNotFoundError);
     await cannonRepo.updateTitle(pool, cannonId, title);
     return fetchCannonFn(cannonId);
   } else {
@@ -38,13 +36,10 @@ export const upsertCannon = async (
 };
 
 export async function fetchCannon(cannonId: string, userId?: string): Promise<CannonResponse> {
-  const cannonResult = await cannonRepo.findById(pool, cannonId, userId);
-
-  if (cannonResult.rows.length === 0) {
-    throw new CannonNotFoundError();
-  }
-
-  const cannon = cannonResult.rows[0]!;
+  const cannon = assertFound(
+    await cannonRepo.findById(pool, cannonId, userId),
+    CannonNotFoundError,
+  );
 
   const storiesResult = await storyRepo.findByCannonId(pool, cannonId);
 
@@ -69,7 +64,7 @@ export async function fetchLegacy(userId: string): Promise<CannonResponse[]> {
 
   const storiesResult = await storyRepo.findByCannonIds(
     pool,
-    cannonsResult.rows.map((w) => w.cannon_id),
+    cannonsResult.rows.map((cannon) => cannon.cannon_id),
   );
 
   const storyIds = storiesResult.rows.map((s) => s.story_id);
@@ -77,9 +72,9 @@ export async function fetchLegacy(userId: string): Promise<CannonResponse[]> {
 
   const storiesByCannon = new Map<string, StoryRowWithDocuments[]>();
   for (const story of storiesResult.rows) {
-    const arr = storiesByCannon.get(story.cannon_id) ?? [];
-    arr.push({ ...story, documents: docsByStory.get(story.story_id) ?? [] });
-    storiesByCannon.set(story.cannon_id, arr);
+    const cannonStories = storiesByCannon.get(story.cannon_id) ?? [];
+    cannonStories.push({ ...story, documents: docsByStory.get(story.story_id) ?? [] });
+    storiesByCannon.set(story.cannon_id, cannonStories);
   }
 
   return cannonsResult.rows.map((cannon) =>

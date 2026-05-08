@@ -19,9 +19,9 @@ export async function fetchDocumentsForStories(
   );
 
   for (const doc of decompressedDocs) {
-    const arr = docsByStory.get(doc.story_id) ?? [];
-    arr.push(doc);
-    docsByStory.set(doc.story_id, arr);
+    const storyDocs = docsByStory.get(doc.story_id) ?? [];
+    storyDocs.push(doc);
+    docsByStory.set(doc.story_id, storyDocs);
   }
 
   return docsByStory;

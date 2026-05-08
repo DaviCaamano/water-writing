@@ -22,7 +22,7 @@ export function upsert(
   args: {
     userId: string;
     planType: Plan;
-    yearPlan: boolean;
+    isYearPlan: boolean;
     renewOn: RenewOn | null;
     renewDate: Date;
     priceId: string | null;
@@ -56,7 +56,7 @@ export function upsert(
     [
       args.userId,
       args.planType,
-      args.yearPlan,
+      args.isYearPlan,
       args.renewOn,
       args.renewDate,
       args.priceId,

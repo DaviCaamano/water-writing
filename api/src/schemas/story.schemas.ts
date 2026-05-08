@@ -45,7 +45,7 @@ export const CannonParamsSchema = z.object({
 });
 
 export const GenresSchema = z.object({
-  story_id: z.uuid('story_id must be a valid UUID'),
+  storyId: z.uuid('storyId must be a valid UUID'),
   genres: z
     .array(z.string().min(1, 'Genre cannot be empty').max(100))
     .min(1, 'At least one genre is required')

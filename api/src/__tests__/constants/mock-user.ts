@@ -88,7 +88,7 @@ export const MOCK_PLAN: PlanRow = {
 
 export const MOCK_SUBSCRIPTION_REQUEST: SubscribeBody = {
   planType: Plan.pro,
-  yearPlan: false,
+  isYearPlan: false,
   paymentMethodId: mockStipePaymentMethodId,
 };
 

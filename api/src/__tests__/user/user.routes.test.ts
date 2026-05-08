@@ -210,7 +210,7 @@ describe(
       const res = await request(app)
         .post('/user/subscribe')
         .set(mockAuthHeaders())
-        .send({ planType: 'pro-plan', yearPlan: false });
+        .send({ planType: 'pro-plan', isYearPlan: false });
 
       expect(res.status).toBe(400);
       expect(res.body.error).toBe('Invalid request body');
@@ -225,7 +225,7 @@ describe(
         planType: MOCK_SUBSCRIPTION_REQUEST.planType,
         renewDate: null,
         subscriptionStatus: null,
-        yearPlan: false,
+        isYearPlan: false,
       });
 
       const res = await request(app)
@@ -241,7 +241,7 @@ describe(
         planType: MOCK_SUBSCRIPTION_REQUEST.planType,
         renewDate: null,
         subscriptionStatus: null,
-        yearPlan: false,
+        isYearPlan: false,
       });
       expect(mockSubscribe).toHaveBeenCalledWith(
         MOCK_USER_ID,

@@ -42,13 +42,13 @@ export const BillingHistoryParamsSchema = z.object({
 export const SubscribeSchema = z.discriminatedUnion('planType', [
   z.object({
     planType: z.literal(Plan.none),
-    yearPlan: z.boolean().optional().default(false),
+    isYearPlan: z.boolean().optional().default(false),
   }),
   z.object({
     planType: z.enum([Plan.pro, Plan.max], {
       message: 'planType must be "pro-plan" or "max-plan"',
     }),
-    yearPlan: z.boolean().optional().default(false),
+    isYearPlan: z.boolean().optional().default(false),
     paymentMethodId: z.string().min(1, 'paymentMethodId is required (from Stripe.js)'),
   }),
 ]);

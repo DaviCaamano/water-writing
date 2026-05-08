@@ -172,7 +172,7 @@ describe(
       mockWithTransaction.mockImplementationOnce((callback) => callback(mockClient as PoolClient));
 
       await expect(
-        subscribe(MOCK_USER_ID, { planType: Plan.none, yearPlan: false }),
+        subscribe(MOCK_USER_ID, { planType: Plan.none, isYearPlan: false }),
       ).resolves.toEqual({
         action: 'already_canceled',
         amountCents: null,
@@ -180,7 +180,7 @@ describe(
         planType: null,
         renewDate: null,
         subscriptionStatus: StripeSubscriptionStatus.canceled,
-        yearPlan: false,
+        isYearPlan: false,
       });
       expect(stripe.customers.create).not.toHaveBeenCalled();
     });

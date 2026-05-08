@@ -9,17 +9,16 @@ import { LoginResponse } from '#types/shared/response';
 import { parseExpiration } from '#utils/database/parse-expiration';
 import { fetchLegacy } from '#services/story/cannon.service';
 import { getUserPlan } from '#services/stripe/subscription-sync.service';
+import { assertFound } from '#utils/database/assert-found';
 import * as userRepo from '#repositories/user.repository';
 import * as authRepo from '#repositories/auth.repository';
 
 export const login = async (data: LoginBody): Promise<LoginResponse> => {
   const userResult = await userRepo.findByEmail(pool, data.email);
-
   if (userResult.rows.length === 0) {
     logger.info({ email: data.email }, 'Login failed: unknown email');
     throw new InvalidCredentialsError();
   }
-
   const user = userResult.rows[0]!;
   const passwordMatch = await bcrypt.compare(data.password, user.password_hash);
   if (!passwordMatch) {
@@ -64,12 +63,10 @@ export const logout = async (token: string) => {
 
 export const getSession = async (userId: string, token: string): Promise<LoginResponse> => {
   const userResult = await userRepo.findById(pool, userId);
-
   if (userResult.rows.length === 0) {
     logger.info({ userId }, 'Session refresh failed: unknown user');
     throw new UserNotFoundError();
   }
-
   const user = userResult.rows[0]!;
   const [plan, legacy] = await Promise.all([
     getUserPlan(pool, user.user_id),

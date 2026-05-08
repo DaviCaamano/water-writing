@@ -14,15 +14,15 @@ export async function syncPlanSnapshot(
     planType: Plan;
     subscription: Stripe.Subscription;
     renewOn: RenewOn | null;
-    yearPlan: boolean;
+    isYearPlan: boolean;
   },
 ) {
-  const { userId, planType, subscription, renewOn, yearPlan } = args;
+  const { userId, planType, subscription, renewOn, isYearPlan } = args;
 
   await planRepo.upsert(client, {
     userId,
     planType,
-    yearPlan,
+    isYearPlan,
     renewOn,
     renewDate: getSubscriptionDate(subscription.current_period_end) ?? new Date(),
     priceId: getSubscriptionPriceId(subscription),
@@ -34,17 +34,17 @@ export async function syncPlanSnapshot(
   });
 }
 
-export function getStripePriceId(planType: typeof Plan.pro | typeof Plan.max, yearPlan: boolean): string {
+export function getStripePriceId(planType: typeof Plan.pro | typeof Plan.max, isYearPlan: boolean): string {
   const priceId =
     planType === Plan.pro
-      ? yearPlan
+      ? isYearPlan
         ? env.STRIPE_PRICE_PRO_YEARLY
         : env.STRIPE_PRICE_PRO_MONTHLY
-      : yearPlan
+      : isYearPlan
         ? env.STRIPE_PRICE_MAX_YEARLY
         : env.STRIPE_PRICE_MAX_MONTHLY;
 
-  return priceId ?? `price_${planType.replace(/[^a-z0-9]/gi, '_')}_${yearPlan ? RenewOn.yearly : RenewOn.monthly}`;
+  return priceId ?? `price_${planType.replace(/[^a-z0-9]/gi, '_')}_${isYearPlan ? RenewOn.yearly : RenewOn.monthly}`;
 }
 
 export function getSubscriptionPriceId(subscription: Stripe.Subscription): string | null {

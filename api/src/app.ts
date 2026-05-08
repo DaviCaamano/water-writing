@@ -16,10 +16,13 @@ import billingRoutes from '#routes/billing.routes';
 const app = express();
 
 // Security & parsing middleware
+const HSTS_MAX_AGE_SECONDS = 31_536_000;
+const CORS_MAX_AGE_SECONDS = 3_600;
+
 app.use(
   helmet({
     hsts: {
-      maxAge: 31536000, // 1 year
+      maxAge: HSTS_MAX_AGE_SECONDS,
       includeSubDomains: true,
       preload: true,
     },
@@ -40,7 +43,7 @@ app.use(
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],
-    maxAge: 3600,
+    maxAge: CORS_MAX_AGE_SECONDS,
   }),
 );
 

@@ -16,8 +16,8 @@ export function findByIdWithBodyAndUser(q: Queryable, documentId: string, userId
      FROM documents d
      LEFT JOIN document_content dc ON dc.document_id = d.document_id
      JOIN stories s ON s.story_id = d.story_id
-     JOIN cannons w ON w.cannon_id = s.cannon_id
-     WHERE d.document_id = $1 AND w.user_id = $2`,
+     JOIN cannons c ON c.cannon_id = s.cannon_id
+     WHERE d.document_id = $1 AND c.user_id = $2`,
     [documentId, userId],
   );
 }
@@ -27,7 +27,7 @@ export function findOwnedWithCannonId(q: Queryable, documentId: string, userId: 
     `SELECT d.*, dc.body, s.cannon_id FROM documents d
      LEFT JOIN document_content dc ON dc.document_id = d.document_id
      JOIN stories s ON s.story_id = d.story_id
-     JOIN (SELECT w2.cannon_id, w2.user_id FROM cannons w2 WHERE w2.user_id = $1) w ON w.cannon_id = s.cannon_id
+     JOIN (SELECT c2.cannon_id, c2.user_id FROM cannons c2 WHERE c2.user_id = $1) c ON c.cannon_id = s.cannon_id
      WHERE d.document_id = $2`,
     [userId, documentId],
   );
@@ -37,8 +37,8 @@ export function findOwnedForUpdate(q: Queryable, documentId: string, userId: str
   return q.query<DocumentRowWithBody>(
     `SELECT d.* FROM documents d
      JOIN stories s ON s.story_id = d.story_id
-     JOIN cannons w ON w.cannon_id = s.cannon_id
-     WHERE d.document_id = $1 AND w.user_id = $2
+     JOIN cannons c ON c.cannon_id = s.cannon_id
+     WHERE d.document_id = $1 AND c.user_id = $2
      FOR UPDATE`,
     [documentId, userId],
   );
@@ -73,8 +73,8 @@ export function findLastInStory(q: Queryable, storyId: string) {
 export function findStoryForUser(q: Queryable, storyId: string, userId: string) {
   return q.query<StoryRow>(
     `SELECT s.* FROM stories s
-     JOIN cannons w ON w.cannon_id = s.cannon_id
-     WHERE s.story_id = $1 AND w.user_id = $2`,
+     JOIN cannons c ON c.cannon_id = s.cannon_id
+     WHERE s.story_id = $1 AND c.user_id = $2`,
     [storyId, userId],
   );
 }

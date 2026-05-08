@@ -26,6 +26,7 @@ import { withTransaction } from '#utils/database/with-transaction';
 import { PoolClient } from 'pg';
 import { RenewOn } from '#types/shared/enum/renew-on';
 import { StripeSubscriptionStatus, toStripeSubscriptionStatus } from '#types/enum/stripe';
+import { assertFound } from '#utils/database/assert-found';
 import * as userRepo from '#repositories/user.repository';
 import * as planRepo from '#repositories/plan.repository';
 import * as billingRepo from '#repositories/billing.repository';
@@ -101,12 +102,7 @@ export const updateUser = async (userId: string, data: UpdateUserBody): Promise<
 };
 
 export async function deleteUser(userId: string): Promise<void> {
-  const result = await userRepo.deleteById(pool, userId);
-
-  if (result.rows.length === 0) {
-    throw new UserNotFoundError();
-  }
-
+  assertFound(await userRepo.deleteById(pool, userId), UserNotFoundError);
   logger.info({ userId }, 'User account deleted');
 }
 
@@ -128,11 +124,11 @@ async function recordBilling(
   client: PoolClient,
   userId: string,
   planType: Plan,
-  yearPlan: boolean,
+  isYearPlan: boolean,
   amountCents: number,
   subscription: Stripe.Subscription,
 ): Promise<void> {
-  await billingRepo.insert(client, userId, planType, yearPlan, amountCents, extractPaymentIntentId(subscription));
+  await billingRepo.insert(client, userId, planType, isYearPlan, amountCents, extractPaymentIntentId(subscription));
 }
 
 export async function subscribe(
@@ -154,9 +150,9 @@ export async function subscribe(
     }
 
     const stripeCustomerId = await ensureStripeCustomer(client, user);
-    const { planType, yearPlan, paymentMethodId } = data;
-    const renewOn = yearPlan ? RenewOn.yearly : RenewOn.monthly;
-    const priceId = getStripePriceId(planType, yearPlan);
+    const { planType, isYearPlan, paymentMethodId } = data;
+    const renewOn = isYearPlan ? RenewOn.yearly : RenewOn.monthly;
+    const priceId = getStripePriceId(planType, isYearPlan);
 
     await stripe.paymentMethods.attach(paymentMethodId, { customer: stripeCustomerId });
     await stripe.customers.update(stripeCustomerId, {
@@ -174,11 +170,11 @@ export async function subscribe(
 
     const amountCents = getAmountCentsFromSubscription(subscription, priceId);
 
-    await syncPlanSnapshot(client, { userId, planType, subscription, renewOn, yearPlan });
-    await recordBilling(client, userId, planType, yearPlan, amountCents, subscription);
+    await syncPlanSnapshot(client, { userId, planType, subscription, renewOn, isYearPlan });
+    await recordBilling(client, userId, planType, isYearPlan, amountCents, subscription);
 
     logger.info(
-      { userId, planType, yearPlan, amountCents, subscriptionId: subscription.id },
+      { userId, planType, isYearPlan, amountCents, subscriptionId: subscription.id },
       existingPlan?.stripe_subscription_id ? 'Subscription updated' : 'Subscription created',
     );
 
@@ -189,7 +185,7 @@ export async function subscribe(
       planType,
       renewDate: getSubscriptionDate(subscription.current_period_end),
       subscriptionStatus: toStripeSubscriptionStatus(subscription.status),
-      yearPlan,
+      isYearPlan,
     };
   });
 }
@@ -209,7 +205,7 @@ async function cancelSubscription(
       planType: null,
       renewDate: null,
       subscriptionStatus: StripeSubscriptionStatus.canceled,
-      yearPlan: false,
+      isYearPlan: false,
     };
   }
 
@@ -222,7 +218,7 @@ async function cancelSubscription(
     planType: existingPlan.plan_type,
     subscription,
     renewOn: null,
-    yearPlan: existingPlan.is_year_plan,
+    isYearPlan: existingPlan.is_year_plan,
   });
 
   logger.info({ userId, subscriptionId: subscription.id }, 'Subscription cancellation scheduled');
@@ -234,7 +230,7 @@ async function cancelSubscription(
     planType: getStoredPlanType(existingPlan),
     renewDate: getSubscriptionDate(subscription.current_period_end),
     subscriptionStatus: toStripeSubscriptionStatus(subscription.status),
-    yearPlan: existingPlan.is_year_plan,
+    isYearPlan: existingPlan.is_year_plan,
   };
 }
 

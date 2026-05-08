@@ -7,17 +7,17 @@ export function findById(q: Queryable, storyId: string) {
 export function findByIdWithUser(q: Queryable, storyId: string, userId: string) {
   return q.query<StoryRow>(
     `SELECT s.* FROM stories s
-     JOIN cannons w ON w.cannon_id = s.cannon_id
-     WHERE s.story_id = $1 AND w.user_id = $2`,
+     JOIN cannons c ON c.cannon_id = s.cannon_id
+     WHERE s.story_id = $1 AND c.user_id = $2`,
     [storyId, userId],
   );
 }
 
 export function findByIdWithUserOwnership(q: Queryable, storyId: string, userId: string) {
   return q.query<StoryRow & { user_id: string }>(
-    `SELECT s.*, w.user_id FROM stories s
-     JOIN cannons w ON w.cannon_id = s.cannon_id
-     WHERE s.story_id = $1 AND w.user_id = $2`,
+    `SELECT s.*, c.user_id FROM stories s
+     JOIN cannons c ON c.cannon_id = s.cannon_id
+     WHERE s.story_id = $1 AND c.user_id = $2`,
     [storyId, userId],
   );
 }
@@ -40,8 +40,8 @@ export function findByUserId(q: Queryable, userId: string) {
   return q.query<StoryRow>(
     `SELECT s.*
      FROM stories s
-     JOIN cannons w ON w.cannon_id = s.cannon_id
-     WHERE w.user_id = $1
+     JOIN cannons c ON c.cannon_id = s.cannon_id
+     WHERE c.user_id = $1
      ORDER BY s.created_at`,
     [userId],
   );
@@ -51,8 +51,8 @@ export function userOwnsStory(q: Queryable, storyId: string, userId: string) {
   return q.query<{ '?column?': number }>(
     `SELECT 1
      FROM stories s
-     JOIN cannons w ON w.cannon_id = s.cannon_id
-     WHERE s.story_id = $1 AND w.user_id = $2`,
+     JOIN cannons c ON c.cannon_id = s.cannon_id
+     WHERE s.story_id = $1 AND c.user_id = $2`,
     [storyId, userId],
   );
 }
@@ -82,7 +82,7 @@ export function deleteByIdAndUser(q: Queryable, storyId: string, userId: string)
   return q.query(
     `DELETE FROM stories
      WHERE story_id = $1
-       AND cannon_id IN (SELECT cannon_id FROM cannons WHERE user_id = $2)`,
+       AND cannon_id IN (SELECT c.cannon_id FROM cannons c WHERE c.user_id = $2)`,
     [storyId, userId],
   );
 }

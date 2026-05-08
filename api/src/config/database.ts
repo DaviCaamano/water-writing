@@ -2,12 +2,16 @@ import { Pool } from 'pg';
 import { env } from '#config/env';
 import logger from '#config/logger';
 
+const POOL_MAX_CONNECTIONS = 20;
+const POOL_IDLE_TIMEOUT_MS = 30_000;
+const POOL_CONNECTION_TIMEOUT_MS = 5_000;
+
 const pool = new Pool({
   connectionString: env.DATABASE_URL,
   ssl: env.NODE_ENV === 'production' ? { rejectUnauthorized: true } : undefined,
-  max: 20,
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 5000,
+  max: POOL_MAX_CONNECTIONS,
+  idleTimeoutMillis: POOL_IDLE_TIMEOUT_MS,
+  connectionTimeoutMillis: POOL_CONNECTION_TIMEOUT_MS,
 });
 
 pool.on('error', (err) => {

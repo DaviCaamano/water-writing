@@ -18,6 +18,7 @@ import { useDeleteDocumentMutation, useUpsertDocumentMutation } from '~lib/mutat
 import { useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '~types/lib/tanstack-query/query-keys';
 import Image from 'next/image';
+import { promptForTitle, generateUntitledName } from '~utils/catalog-helpers';
 
 function summarizeDocument(body: string): string {
   const trimmed = body.trim();
@@ -31,22 +32,6 @@ function summarizeDocument(body: string): string {
   }
 
   return `${trimmed.slice(0, 117)}...`;
-}
-
-function promptForTitle(kind: string, currentTitle: string): string | null {
-  const nextTitle = window.prompt(`Rename ${kind}`, currentTitle);
-
-  if (nextTitle === null) {
-    return null;
-  }
-
-  return nextTitle.trim() || currentTitle;
-}
-
-function generateUntitledDocument(existing: string[]): string {
-  let i = 1;
-  while (existing.includes(`Untitled Document ${i}`)) i += 1;
-  return `Untitled Document ${i}`;
 }
 
 export function StoryView() {
@@ -63,7 +48,7 @@ export function StoryView() {
     if (!currentStory) return;
     upsertDocument.mutate({
       storyId: currentStory.storyId,
-      title: generateUntitledDocument(documents.map((d) => d.title)),
+      title: generateUntitledName('Untitled Document', documents.map((d) => d.title)),
       body: '',
     });
   };
