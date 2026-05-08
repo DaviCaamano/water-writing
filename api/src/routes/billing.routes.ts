@@ -4,7 +4,7 @@ import { Router } from 'express';
 import { generalLimiter } from '#config/rate-limiters';
 import { validateParams } from '#middleware/validate';
 import { BillingHistoryParams, BillingHistoryParamsSchema } from '#schemas/user.schemas';
-import { AuthRequest } from '#types/request';
+import { AuthRequest, assertAuthenticated } from '#types/request';
 import { BillingResponse, RouteResponse } from '#types/shared/response';
 
 const router = Router();
@@ -16,6 +16,7 @@ router.get(
   generalLimiter,
   validateParams(BillingHistoryParamsSchema),
   async (req: AuthRequest, res: RouteResponse<BillingResponse[]>): Promise<void> => {
+    assertAuthenticated(req);
     const params = req.params as BillingHistoryParams;
 
     // Ensure the authenticated user can only access their own billing history

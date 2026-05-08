@@ -33,8 +33,8 @@ interface ToolButtonProps {
   icon: React.ReactNode;
   label: string;
   shortcut?: string;
-  active?: boolean;
-  disabled?: boolean;
+  active?: boolean | undefined;
+  disabled?: boolean | undefined;
   onClick: () => void;
 }
 

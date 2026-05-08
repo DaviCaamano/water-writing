@@ -18,7 +18,7 @@ import {
   SubscribeBody,
 } from '#schemas/user.schemas';
 import { createUser, updateUser, deleteUser, subscribe } from '#services/user/user.service';
-import { AuthRequest } from '#types/request';
+import { AuthRequest, assertAuthenticated } from '#types/request';
 import { getSession, login, logout } from '#services/user/login.service';
 import { EmailTakenError } from '#constants/error/custom-errors';
 import {
@@ -45,7 +45,8 @@ router.post(
   '/logout',
   authMiddleware,
   async (req: AuthRequest, res: RouteResponse<LogoutResponse>) => {
-    await logout(req.token!);
+    assertAuthenticated(req);
+    await logout(req.token);
     res.json({ status: 'ok' });
   },
 );
@@ -54,7 +55,8 @@ router.get(
   '/session',
   authMiddleware,
   async (req: AuthRequest, res: RouteResponse<LoginResponse>): Promise<void> => {
-    res.json(await getSession(req.userId!, req.token!));
+    assertAuthenticated(req);
+    res.json(await getSession(req.userId, req.token));
   },
 );
 
@@ -84,7 +86,8 @@ router.post(
   generalLimiter,
   validate(UpdateUserSchema),
   async (req: AuthRequest, res: RouteResponse<UserResponse>): Promise<void> => {
-    res.json(await updateUser(req.userId!, req.body as UpdateUserBody));
+    assertAuthenticated(req);
+    res.json(await updateUser(req.userId, req.body as UpdateUserBody));
   },
 );
 
@@ -92,7 +95,8 @@ router.delete(
   '/deleteme',
   authMiddleware,
   async (req: AuthRequest, res: RouteResponse<{ status: 'ok' }>): Promise<void> => {
-    await deleteUser(req.userId!);
+    assertAuthenticated(req);
+    await deleteUser(req.userId);
     res.json({ status: 'ok' });
   },
 );
@@ -106,7 +110,8 @@ router.post(
     req: AuthRequest,
     res: RouteResponse<{ status: string } & SubscriptionResponse>,
   ): Promise<void> => {
-    res.json({ status: 'ok', ...(await subscribe(req.userId!, req.body as SubscribeBody)) });
+    assertAuthenticated(req);
+    res.json({ status: 'ok', ...(await subscribe(req.userId, req.body as SubscribeBody)) });
   },
 );
 

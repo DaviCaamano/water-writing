@@ -1,8 +1,10 @@
-export enum SettingsSection {
-  general = 'general',
-  plan = 'plan',
-  billing = 'billing',
-}
+export const SettingsSection = {
+  general: 'general',
+  plan: 'plan',
+  billing: 'billing',
+} as const;
+
+export type SettingsSection = (typeof SettingsSection)[keyof typeof SettingsSection];
 
 export type SettingsColorMap = {
   default: string;

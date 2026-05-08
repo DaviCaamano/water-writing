@@ -75,7 +75,6 @@ export const mockStripeAccount: Stripe.Account = {
     owners_provided: false,
     ownership_declaration: null,
     phone: null,
-    structure: undefined,
     tax_id_provided: false,
     verification: { document: { back: null, details: null, details_code: null, front: null } },
   },
@@ -150,7 +149,7 @@ export const mockStripeAccount: Stripe.Account = {
   tos_acceptance: {
     date: MOCK_DATE.getTime(),
     ip: '127.0.0.1',
-    user_agent: undefined,
+    user_agent: null,
   },
   type: 'standard',
 };

@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { ViewMode } from '~types/story';
+import { assertNever } from '~utils/assert-never';
 import { Editor } from '~components/home/views/Editor';
 import { StoryView } from '~components/home/views/StoryView';
 import { WorldView } from '~components/home/views/WorldView';
@@ -89,6 +90,6 @@ function renderView(view: ViewMode) {
     case ViewMode.legacy:
       return <LegacyView />;
     default:
-      return null;
+      return assertNever(view);
   }
 }

@@ -25,7 +25,7 @@ import {
   upsertGenre,
   upsertStory,
 } from '#services/story/story.service';
-import { AuthRequest } from '#types/request';
+import { AuthRequest, assertAuthenticated } from '#types/request';
 import {
   deleteDocument,
   fetchUserDocument,
@@ -55,8 +55,9 @@ router.get(
   generalLimiter,
   validateParams(DocumentParamsSchema),
   async (req: AuthRequest, res: RouteResponse<DocumentResponse>): Promise<void> => {
+    assertAuthenticated(req);
     const { documentId } = req.params as DocumentParams;
-    const document = await fetchUserDocument(req.userId!, documentId);
+    const document = await fetchUserDocument(req.userId, documentId);
     res.json(document);
   },
 );
@@ -67,8 +68,9 @@ router.get(
   generalLimiter,
   validateParams(StoryParamsSchema),
   async (req: AuthRequest, res: RouteResponse<StoryResponse>): Promise<void> => {
+    assertAuthenticated(req);
     const { storyId } = req.params as StoryParams;
-    const story = await fetchUserStoryWithDocuments(req.userId!, storyId);
+    const story = await fetchUserStoryWithDocuments(req.userId, storyId);
     res.json(mapStoryResponse(story));
   },
 );
@@ -78,7 +80,8 @@ router.get(
   authMiddleware,
   generalLimiter,
   async (req: AuthRequest, res: RouteResponse<StoryResponse[]>): Promise<void> => {
-    const stories = await fetchUserStories(req.userId!);
+    assertAuthenticated(req);
+    const stories = await fetchUserStories(req.userId);
     res.json(stories);
   },
 );
@@ -89,8 +92,9 @@ router.get(
   generalLimiter,
   validateParams(CannonParamsSchema),
   async (req: AuthRequest, res: RouteResponse<CannonResponse>): Promise<void> => {
+    assertAuthenticated(req);
     const { cannonId } = req.params as CannonParams;
-    const cannon = await fetchUserCannon(req.userId!, cannonId);
+    const cannon = await fetchUserCannon(req.userId, cannonId);
     res.json(cannon);
   },
 );
@@ -100,7 +104,8 @@ router.get(
   authMiddleware,
   generalLimiter,
   async (req: AuthRequest, res: RouteResponse<CannonResponse[]>): Promise<void> => {
-    const cannon = await fetchLegacy(req.userId!);
+    assertAuthenticated(req);
+    const cannon = await fetchLegacy(req.userId);
     res.json(cannon);
   },
 );
@@ -111,7 +116,8 @@ router.post(
   generalLimiter,
   validate(UpsertDocumentSchema),
   async (req: AuthRequest, res: RouteResponse<CannonResponse | null>): Promise<void> => {
-    const cannon = await upsertDocument(req.userId!, req.body as UpsertDocumentBody);
+    assertAuthenticated(req);
+    const cannon = await upsertDocument(req.userId, req.body as UpsertDocumentBody);
     res.json(cannon);
   },
 );
@@ -122,7 +128,8 @@ router.post(
   generalLimiter,
   validate(UpsertStorySchema),
   async (req: AuthRequest, res: RouteResponse<StoryResponse>): Promise<void> => {
-    const story = await upsertStory(req.userId!, req.body as UpsertStoryBody);
+    assertAuthenticated(req);
+    const story = await upsertStory(req.userId, req.body as UpsertStoryBody);
     res.json(story);
   },
 );
@@ -133,7 +140,8 @@ router.post(
   generalLimiter,
   validate(UpsertCannonSchema),
   async (req: AuthRequest, res: RouteResponse<CannonResponse | null>): Promise<void> => {
-    const cannon = await upsertCannon(req.userId!, req.body as UpsertCannonBody);
+    assertAuthenticated(req);
+    const cannon = await upsertCannon(req.userId, req.body as UpsertCannonBody);
     res.json(cannon);
   },
 );
@@ -144,8 +152,9 @@ router.delete(
   generalLimiter,
   validateParams(CannonParamsSchema),
   async (req: AuthRequest, res: RouteResponse<{ status: 'ok' }>): Promise<void> => {
+    assertAuthenticated(req);
     const { cannonId } = req.params as CannonParams;
-    await deleteCannon(req.userId!, cannonId);
+    await deleteCannon(req.userId, cannonId);
     res.json({ status: 'ok' });
   },
 );
@@ -156,8 +165,9 @@ router.delete(
   generalLimiter,
   validateParams(StoryParamsSchema),
   async (req: AuthRequest, res: RouteResponse<{ status: 'ok' }>): Promise<void> => {
+    assertAuthenticated(req);
     const { storyId } = req.params as StoryParams;
-    await deleteStory(req.userId!, storyId);
+    await deleteStory(req.userId, storyId);
     res.json({ status: 'ok' });
   },
 );
@@ -168,8 +178,9 @@ router.delete(
   generalLimiter,
   validateParams(DocumentParamsSchema),
   async (req: AuthRequest, res: RouteResponse<{ status: 'ok' }>): Promise<void> => {
+    assertAuthenticated(req);
     const { documentId } = req.params as DocumentParams;
-    await deleteDocument(req.userId!, documentId);
+    await deleteDocument(req.userId, documentId);
     res.json({ status: 'ok' });
   },
 );
@@ -180,8 +191,9 @@ router.post(
   aiLimiter,
   validate(EditorSchema),
   async (req: AuthRequest, res: RouteResponse<never>): Promise<void> => {
+    assertAuthenticated(req);
     const body = req.body as EditorBody;
-    const stream = await waterWrite(req.userId!, body.documentId, body.selection, body.prompt);
+    const stream = await waterWrite(req.userId, body.documentId, body.selection, body.prompt);
 
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
@@ -201,8 +213,9 @@ router.post(
   generalLimiter,
   validate(GenresSchema),
   async (req: AuthRequest, res: RouteResponse<{ genres: string[] }>): Promise<void> => {
+    assertAuthenticated(req);
     const { story_id, genres } = req.body as GenresBody;
-    res.json({ genres: await upsertGenre(req.userId!, story_id, genres) });
+    res.json({ genres: await upsertGenre(req.userId, story_id, genres) });
   },
 );
 

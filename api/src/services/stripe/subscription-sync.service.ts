@@ -4,7 +4,7 @@ import { Pool } from 'pg';
 import { Plan } from '#types/shared/enum/plan';
 import type { PlanRow } from '#types/database';
 import { RenewOn } from '#types/shared/enum/renew-on';
-import { StripeSubscriptionStatus } from '#types/enum/stripe';
+import { StripeSubscriptionStatus, toStripeSubscriptionStatus } from '#types/enum/stripe';
 import { StripePaymentFailed } from '#constants/error/custom-errors';
 
 export async function syncPlanSnapshot(
@@ -60,7 +60,7 @@ export async function syncPlanSnapshot(
       currentPeriodEnd,
       priceId,
       subscription.id,
-      subscription.status as StripeSubscriptionStatus,
+      toStripeSubscriptionStatus(subscription.status),
       subscription.cancel_at_period_end,
       currentPeriodStart,
       canceledAt,
@@ -68,7 +68,7 @@ export async function syncPlanSnapshot(
   );
 }
 
-export function getStripePriceId(planType: Plan.pro | Plan.max, yearPlan: boolean): string {
+export function getStripePriceId(planType: typeof Plan.pro | typeof Plan.max, yearPlan: boolean): string {
   const envKey =
     planType === Plan.pro
       ? yearPlan
@@ -111,11 +111,11 @@ export function getAmountCentsFromSubscription(
 }
 
 export function assertBillableSubscription(subscription: Stripe.Subscription) {
-  if (
-    ![StripeSubscriptionStatus.active, StripeSubscriptionStatus.trialing].includes(
-      subscription.status as StripeSubscriptionStatus,
-    )
-  ) {
+  const billableStatuses: readonly StripeSubscriptionStatus[] = [
+    StripeSubscriptionStatus.active,
+    StripeSubscriptionStatus.trialing,
+  ];
+  if (!billableStatuses.includes(toStripeSubscriptionStatus(subscription.status))) {
     throw new StripePaymentFailed();
   }
 }
@@ -133,7 +133,7 @@ export function inferPlanTypeFromPriceId(priceId: string | null, fallback: Plan 
 export function inferRenewOnFromSubscription(subscription: Stripe.Subscription): RenewOn | null {
   if (
     subscription.cancel_at_period_end ||
-    (subscription.status as StripeSubscriptionStatus) === StripeSubscriptionStatus.canceled
+    (toStripeSubscriptionStatus(subscription.status)) === StripeSubscriptionStatus.canceled
   ) {
     return null;
   }
@@ -148,17 +148,16 @@ export function inferYearPlanFromSubscription(subscription: Stripe.Subscription)
   return subscription.items.data[0]?.price?.recurring?.interval === 'year';
 }
 
+const accessibleStatuses: readonly StripeSubscriptionStatus[] = [
+  StripeSubscriptionStatus.active,
+  StripeSubscriptionStatus.trialing,
+  StripeSubscriptionStatus.past_due,
+];
+
 export function isAccessibleSubscriptionStatus(
   status: StripeSubscriptionStatus | null | undefined,
 ): boolean {
-  return (
-    !!status &&
-    [
-      StripeSubscriptionStatus.active,
-      StripeSubscriptionStatus.trialing,
-      StripeSubscriptionStatus.past_due,
-    ].includes(status)
-  );
+  return !!status && accessibleStatuses.includes(status);
 }
 
 export function getStoredPlanType(plan: PlanRow | null): Plan {
@@ -170,9 +169,10 @@ export async function getUserPlan(queryable: PoolClient | Pool, userId: string):
     `SELECT plan_type, subscription_status FROM plans WHERE user_id = $1 LIMIT 1`,
     [userId],
   );
-  if (result.rows.length === 0) return null;
-  return isAccessibleSubscriptionStatus(result.rows[0].subscription_status)
-    ? result.rows[0].plan_type
+  const row = result.rows[0];
+  if (!row) return null;
+  return isAccessibleSubscriptionStatus(row.subscription_status)
+    ? row.plan_type
     : null;
 }
 

@@ -41,7 +41,9 @@ export const upsertCannon = async (
       'INSERT INTO cannons (user_id, title) VALUES ($1, $2) RETURNING cannon_id',
       [userId, title],
     );
-    return fetchCannonFn(newCannon.rows[0].cannon_id);
+    const created = newCannon.rows[0];
+    if (!created) throw new CannonNotFoundError();
+    return fetchCannonFn(created.cannon_id);
   }
 };
 
@@ -56,7 +58,7 @@ export async function fetchCannon(cannonId: string, userId?: string): Promise<Ca
     throw new CannonNotFoundError();
   }
 
-  const cannon = cannonResult.rows[0];
+  const cannon = cannonResult.rows[0]!;
 
   const storiesResult = await pool.query<StoryRow>(
     'SELECT * FROM stories WHERE cannon_id = $1 ORDER BY created_at',

@@ -31,7 +31,7 @@ export async function fetchDocument(documentId: string): Promise<DocumentRespons
   if (result.rows.length === 0) {
     throw new DocumentNotFoundError();
   }
-  return toDocumentResponse(result.rows[0]);
+  return toDocumentResponse(result.rows[0]!);
 }
 
 export async function fetchUserDocument(
@@ -50,7 +50,7 @@ export async function fetchUserDocument(
   if (result.rows.length === 0) {
     throw new DocumentNotFoundError();
   }
-  return toDocumentResponse(result.rows[0]);
+  return toDocumentResponse(result.rows[0]!);
 }
 
 export async function deleteDocument(userId: string, documentId: string): Promise<void> {
@@ -66,7 +66,7 @@ export async function deleteDocument(userId: string, documentId: string): Promis
     if (existing.rows.length === 0) {
       throw new DocumentNotFoundError();
     }
-    const { predecessor_id, successor_id } = existing.rows[0];
+    const { predecessor_id, successor_id } = existing.rows[0]!;
 
     if (predecessor_id && successor_id) {
       await client.query(
@@ -127,7 +127,7 @@ async function updateExistingDocument(
     );
   }
 
-  return existingDoc.rows[0].cannon_id;
+  return existingDoc.rows[0]!.cannon_id;
 }
 
 async function createNewDocument(
@@ -145,12 +145,12 @@ async function createNewDocument(
       'INSERT INTO cannons (user_id, title) VALUES ($1, $2) RETURNING cannon_id',
       [userId, 'Untitled Cannon'],
     );
-    cannonId = cannonResult.rows[0].cannon_id;
+    cannonId = cannonResult.rows[0]!.cannon_id;
     const storyResult = await client.query(
       'INSERT INTO stories (cannon_id, title) VALUES ($1, $2) RETURNING story_id',
       [cannonId, 'Untitled Story'],
     );
-    targetStoryId = storyResult.rows[0].story_id;
+    targetStoryId = storyResult.rows[0]!.story_id;
   } else {
     const storyResult = await client.query<StoryRow>(
       `SELECT s.* FROM stories s
@@ -161,7 +161,7 @@ async function createNewDocument(
     if (storyResult.rows.length === 0) {
       throw new StoryNotFoundError();
     }
-    cannonId = storyResult.rows[0].cannon_id;
+    cannonId = storyResult.rows[0]!.cannon_id;
   }
 
   const lastDocResult = await client.query<DocumentRowWithBody>(
@@ -169,14 +169,14 @@ async function createNewDocument(
      ORDER BY created_at DESC LIMIT 1 FOR UPDATE`,
     [targetStoryId],
   );
-  const predecessorId = lastDocResult.rows.length > 0 ? lastDocResult.rows[0].document_id : null;
+  const predecessorId = lastDocResult.rows.length > 0 ? lastDocResult.rows[0]!.document_id : null;
 
   const result = await client.query(
     `INSERT INTO documents (story_id, title, predecessor_id)
      VALUES ($1, $2, $3) RETURNING document_id`,
     [targetStoryId, title, predecessorId],
   );
-  const newDocId = result.rows[0].document_id;
+  const newDocId = result.rows[0]!.document_id;
 
   const compressed = await compressBody(body ?? '');
   await client.query(

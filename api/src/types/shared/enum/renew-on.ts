@@ -1,4 +1,6 @@
-export enum RenewOn {
-  monthly = 'monthly',
-  yearly = 'yearly',
-}
+export const RenewOn = {
+  monthly: 'monthly',
+  yearly: 'yearly',
+} as const;
+
+export type RenewOn = (typeof RenewOn)[keyof typeof RenewOn];

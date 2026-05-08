@@ -21,7 +21,7 @@ export const login = async (data: LoginBody): Promise<LoginResponse> => {
     throw new InvalidCredentialsError();
   }
 
-  const user = userResult.rows[0];
+  const user = userResult.rows[0]!;
   const passwordMatch = await bcrypt.compare(data.password, user.password_hash);
   if (!passwordMatch) {
     logger.info({ userId: user.user_id }, 'Login failed: wrong password');
@@ -65,7 +65,7 @@ export const logout = async (token: string) => {
     [token],
   );
   if (result.rows.length > 0) {
-    logger.info({ userId: result.rows[0].user_id }, 'User logged out');
+    logger.info({ userId: result.rows[0]!.user_id }, 'User logged out');
   }
 };
 
@@ -79,7 +79,7 @@ export const getSession = async (userId: string, token: string): Promise<LoginRe
     throw new UserNotFoundError();
   }
 
-  const user = userResult.rows[0];
+  const user = userResult.rows[0]!;
   const [plan, legacy] = await Promise.all([
     getUserPlan(pool, user.user_id),
     fetchLegacy(user.user_id),

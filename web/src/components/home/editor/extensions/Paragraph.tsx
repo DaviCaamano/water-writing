@@ -45,25 +45,29 @@ export const Paragraph = Node.create<ParagraphOptions>({
   parseMarkdown: (token, helpers) => {
     const tokens = token.tokens || [];
 
-    if (tokens.length === 1 && tokens[0].type === 'image') {
-      return helpers.parseChildren([tokens[0]]);
+    const firstToken = tokens[0];
+    if (tokens.length === 1 && firstToken && firstToken.type === 'image') {
+      return helpers.parseChildren([firstToken]);
     }
 
     const content = helpers.parseInline(tokens);
 
     const hasExplicitEmptyParagraphMarker =
       tokens.length === 1 &&
-      tokens[0].type === 'text' &&
-      (tokens[0].raw === EMPTY_PARAGRAPH_MARKDOWN ||
-        tokens[0].text === EMPTY_PARAGRAPH_MARKDOWN ||
-        tokens[0].raw === NBSP_CHAR ||
-        tokens[0].text === NBSP_CHAR);
+      firstToken &&
+      firstToken.type === 'text' &&
+      (firstToken.raw === EMPTY_PARAGRAPH_MARKDOWN ||
+        firstToken.text === EMPTY_PARAGRAPH_MARKDOWN ||
+        firstToken.raw === NBSP_CHAR ||
+        firstToken.text === NBSP_CHAR);
 
+    const firstContent = content[0];
     if (
       hasExplicitEmptyParagraphMarker &&
       content.length === 1 &&
-      content[0].type === 'text' &&
-      (content[0].text === EMPTY_PARAGRAPH_MARKDOWN || content[0].text === NBSP_CHAR)
+      firstContent &&
+      firstContent.type === 'text' &&
+      (firstContent.text === EMPTY_PARAGRAPH_MARKDOWN || firstContent.text === NBSP_CHAR)
     ) {
       return helpers.createNode('paragraph', undefined, []);
     }

@@ -81,8 +81,8 @@ export function mockStoryList(
     const storyId = `${docType}-${cannonId}-${i}`;
     const documents =
       docType === DocType.storyRow
-        ? mockDocList(DocType.documentRow, documentCounts[i], storyId)
-        : mockDocList(DocType.documentResponse, documentCounts[i], storyId);
+        ? mockDocList(DocType.documentRow, documentCounts[i]!, storyId)
+        : mockDocList(DocType.documentResponse, documentCounts[i]!, storyId);
     return {
       ...DocTypeMap[docType],
       [cannonIdKey]: cannonId,

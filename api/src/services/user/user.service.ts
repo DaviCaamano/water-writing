@@ -26,7 +26,7 @@ import {
 import { withTransaction } from '#utils/database/with-transaction';
 import { PoolClient } from 'pg';
 import { RenewOn } from '#types/shared/enum/renew-on';
-import { StripeSubscriptionStatus } from '#types/enum/stripe';
+import { StripeSubscriptionStatus, toStripeSubscriptionStatus } from '#types/enum/stripe';
 
 const SALT_ROUNDS = 12;
 
@@ -212,7 +212,7 @@ export async function subscribe(
       cancelAtPeriodEnd: subscription.cancel_at_period_end,
       planType,
       renewDate: getSubscriptionDate(subscription.current_period_end),
-      subscriptionStatus: subscription.status as StripeSubscriptionStatus,
+      subscriptionStatus: toStripeSubscriptionStatus(subscription.status),
       yearPlan,
     };
   });
@@ -258,7 +258,7 @@ async function cancelSubscription(
     cancelAtPeriodEnd: subscription.cancel_at_period_end,
     planType: getStoredPlanType(existingPlan),
     renewDate: getSubscriptionDate(subscription.current_period_end),
-    subscriptionStatus: subscription.status as StripeSubscriptionStatus,
+    subscriptionStatus: toStripeSubscriptionStatus(subscription.status),
     yearPlan: existingPlan.is_year_plan,
   };
 }
@@ -277,8 +277,8 @@ async function createOrUpdateSubscription(args: {
     );
 
     if (
-      [StripeSubscriptionStatus.canceled, StripeSubscriptionStatus.incompleteExpired].includes(
-        existingSubscription.status as StripeSubscriptionStatus,
+      ([StripeSubscriptionStatus.canceled, StripeSubscriptionStatus.incompleteExpired] as readonly StripeSubscriptionStatus[]).includes(
+        toStripeSubscriptionStatus(existingSubscription.status),
       )
     ) {
       return stripe.subscriptions.create({

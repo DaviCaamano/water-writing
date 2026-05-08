@@ -18,7 +18,7 @@ export const fetchStory = async (storyId: string): Promise<StoryRowWithDocuments
   if (result.rows.length === 0) {
     throw new StoryNotFoundError();
   }
-  return result.rows[0];
+  return result.rows[0]!;
 };
 
 async function decompressDocumentRows(rows: DocumentRowWithBody[]): Promise<StoryRowWithDocuments['documents']> {
@@ -45,7 +45,7 @@ export const fetchStoryWithDocuments = async (storyId: string): Promise<StoryRow
     [storyId],
   );
   return {
-    ...storyResult.rows[0],
+    ...storyResult.rows[0]!,
     documents: await decompressDocumentRows(docsResult.rows),
   };
 };
@@ -70,7 +70,7 @@ export const fetchUserStoryWithDocuments = async (
     [storyId],
   );
   return {
-    ...storyResult.rows[0],
+    ...storyResult.rows[0]!,
     documents: await decompressDocumentRows(docsResult.rows),
   };
 };
@@ -93,14 +93,14 @@ async function updateExistingStory(
     throw new StoryNotFoundError();
   }
 
-  if (title && title !== existing.rows[0].title) {
+  if (title && title !== existing.rows[0]!.title) {
     await client.query(
       'UPDATE stories SET title = $1, updated_at = NOW() WHERE story_id = $2',
       [title, storyId],
     );
   }
 
-  if (cannonId && cannonId !== existing.rows[0].cannon_id) {
+  if (cannonId && cannonId !== existing.rows[0]!.cannon_id) {
     const targetCannon = await client.query(
       'SELECT 1 FROM cannons WHERE cannon_id = $1 AND user_id = $2',
       [cannonId, userId],
@@ -138,14 +138,14 @@ async function createNewStory(
       'INSERT INTO cannons (user_id, title) VALUES ($1, $2) RETURNING cannon_id',
       [userId, 'Untitled Cannon'],
     );
-    resolvedCannonId = newCannon.rows[0].cannon_id;
+    resolvedCannonId = newCannon.rows[0]!.cannon_id;
   }
 
   const newStory = await client.query(
     'INSERT INTO stories (cannon_id, title) VALUES ($1, $2) RETURNING story_id',
     [resolvedCannonId, title],
   );
-  return newStory.rows[0].story_id;
+  return newStory.rows[0]!.story_id;
 }
 
 export async function upsertStory(userId: string, data: UpsertStoryBody): Promise<StoryResponse> {

@@ -15,7 +15,7 @@ interface WaterRippleProps {
   children: ReactNode;
   className?: string;
   contentClassName?: string;
-  disabled?: boolean;
+  disabled?: boolean | undefined;
   effectColor?: string;
   maxTilt?: number;
 }

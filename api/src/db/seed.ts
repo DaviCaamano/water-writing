@@ -84,13 +84,13 @@ function buildLegacySeedRows(seedUserId: string): {
     const storyIds: string[] = [];
 
     for (let si = 0; si < storyDirs.length; si++) {
-      const storyDir = storyDirs[si];
+      const storyDir = storyDirs[si]!;
       const storyId = deterministicUuid('story', `${seedUserId}:${cannonDir.name}:${storyDir.name}`);
       storyIds.push(storyId);
 
       const nextStoryId =
         si < storyDirs.length - 1
-          ? deterministicUuid('story', `${seedUserId}:${cannonDir.name}:${storyDirs[si + 1].name}`)
+          ? deterministicUuid('story', `${seedUserId}:${cannonDir.name}:${storyDirs[si + 1]!.name}`)
           : null;
 
       storiesToInsert.push({
@@ -103,7 +103,7 @@ function buildLegacySeedRows(seedUserId: string): {
 
       prevStoryId = storyId;
 
-      const storyPath = path.join(cannonPath, storyDir.name);
+      const storyPath = path.join(cannonPath, storyDir!.name);
       const docFiles = fs
         .readdirSync(storyPath, { withFileTypes: true })
         .filter((f) => f.isFile() && f.name.endsWith('.txt'))
@@ -112,17 +112,17 @@ function buildLegacySeedRows(seedUserId: string): {
       let prevDocId: string | null = null;
 
       for (let di = 0; di < docFiles.length; di++) {
-        const docFile = docFiles[di];
+        const docFile = docFiles[di]!;
         const docId = deterministicUuid(
           'document',
-          `${seedUserId}:${cannonDir.name}:${storyDir.name}:${docFile.name}`,
+          `${seedUserId}:${cannonDir.name}:${storyDir!.name}:${docFile.name}`,
         );
 
         const nextDocId =
           di < docFiles.length - 1
             ? deterministicUuid(
                 'document',
-                `${seedUserId}:${cannonDir.name}:${storyDir.name}:${docFiles[di + 1].name}`,
+                `${seedUserId}:${cannonDir.name}:${storyDir!.name}:${docFiles[di + 1]!.name}`,
               )
             : null;
 
@@ -134,7 +134,7 @@ function buildLegacySeedRows(seedUserId: string): {
           successorId: nextDocId,
         });
 
-        const body = fs.readFileSync(path.join(storyPath, docFile.name), 'utf-8');
+        const body = fs.readFileSync(path.join(storyPath, docFile!.name), 'utf-8');
         documentContentsToInsert.push({ documentId: docId, body });
 
         prevDocId = docId;
@@ -162,9 +162,9 @@ async function seed() {
     .where(eq(users.email, seedEmail))
     .limit(1);
 
-  if (existingEmailUser.length > 0 && existingEmailUser[0].userId !== seedUserId) {
+  if (existingEmailUser.length > 0 && existingEmailUser[0]!.userId !== seedUserId) {
     throw new Error(
-      `Cannot seed user_id=${seedUserId} because email ${seedEmail} is already used by user_id=${existingEmailUser[0].userId}.`,
+      `Cannot seed user_id=${seedUserId} because email ${seedEmail} is already used by user_id=${existingEmailUser[0]!.userId}.`,
     );
   }
 

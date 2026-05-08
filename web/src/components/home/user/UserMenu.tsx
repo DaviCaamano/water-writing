@@ -14,6 +14,7 @@ import { WaterRippleFade } from '~components/visual-effects/WaterRippleFade';
 import { useRef, useState } from 'react';
 import { useSticky } from '~hooks/useSticky';
 import { cn } from '~utils/merge-css-classes';
+import { assertNever } from '~utils/assert-never';
 
 const WATER_RIPPLE_FADE_DURATION_MS = 600;
 
@@ -90,6 +91,8 @@ export function UserMenu({ onOpenAuth, onOpenSettings }: UserMenuProps) {
       case 'sign-in':
         handleOpenAuth();
         return;
+      default:
+        return assertNever(action);
     }
   };
 

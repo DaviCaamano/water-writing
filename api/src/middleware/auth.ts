@@ -15,10 +15,10 @@ export const authMiddleware = async (
     return;
   }
 
-  const token = authHeader.split(' ')[1];
+  const token = authHeader.split(' ')[1] ?? '';
 
   try {
-    const decoded = jwt.verify(token, authConfig.jwtSecret) as { userId: string };
+    const decoded = jwt.verify(token, authConfig.jwtSecret) as unknown as { userId: string };
 
     // Cross-check: the token must exist in the DB AND belong to the claimed userId
     const result = await pool.query(

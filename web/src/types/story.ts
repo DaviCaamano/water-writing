@@ -35,11 +35,13 @@ export interface BillingResponse {
   card: CardInfo;
 }
 
-export enum ViewMode {
-  editor = 'editor',
-  storyView = 'story-view',
-  cannonView = 'cannon-view',
-  legacy = 'legacy',
-}
+export const ViewMode = {
+  editor: 'editor',
+  storyView: 'story-view',
+  cannonView: 'cannon-view',
+  legacy: 'legacy',
+} as const;
+
+export type ViewMode = (typeof ViewMode)[keyof typeof ViewMode];
 
 export type EditorTheme = 'light' | 'dark' | 'sepia';

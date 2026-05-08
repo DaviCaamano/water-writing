@@ -16,10 +16,10 @@ interface UpsertStoryVariables {
 }
 
 interface UpsertDocumentVariables {
-  documentId?: string;
-  storyId?: string;
+  documentId?: string | undefined;
+  storyId?: string | undefined;
   title: string;
-  body?: string;
+  body?: string | undefined;
 }
 
 export function useUpsertCannonMutation() {

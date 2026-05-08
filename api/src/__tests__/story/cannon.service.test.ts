@@ -136,7 +136,7 @@ describe(
       ]);
 
       // fetchCannon handles one cannon at a time — provide only the first cannon's stories/docs
-      const singleCannon = cannons[0];
+      const singleCannon = cannons[0]!;
       const cannonList = [{ ...singleCannon, stories: undefined }];
       const storyList = (singleCannon.stories as StoryRowWithDocuments[]).map(
         ({ documents: _, ...story }) => story,
@@ -282,8 +282,8 @@ describe(
       const result = await fetchLegacy(MOCK_USER_ID);
 
       expect(result).toHaveLength(2);
-      expect(result[0].stories).toHaveLength(2);
-      expect(result[1].stories).toHaveLength(3);
+      expect(result[0]!.stories).toHaveLength(2);
+      expect(result[1]!.stories).toHaveLength(3);
       expect(checkLegacyStructure(result, DocType.cannonResponse)).toBe(true);
     });
 
@@ -294,7 +294,7 @@ describe(
 
       const result = await fetchLegacy(MOCK_USER_ID);
 
-      expect(result[0].stories).toEqual([]);
+      expect(result[0]!.stories).toEqual([]);
       expect(mockPool.query).toHaveBeenCalledTimes(2);
     });
   }),

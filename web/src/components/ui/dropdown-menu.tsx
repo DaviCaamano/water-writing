@@ -172,11 +172,11 @@ function DropdownMenuSubContent({
 function DropdownMenuCheckboxItem({
   className,
   children,
-  checked,
+  checked = false,
   inset,
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.CheckboxItem> & {
-  inset?: boolean;
+  inset?: boolean | undefined;
 }) {
   return (
     <DropdownMenuPrimitive.CheckboxItem
