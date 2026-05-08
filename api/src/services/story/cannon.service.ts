@@ -2,15 +2,14 @@ import { CannonNotFoundError } from '#constants/error/custom-errors';
 import { UpsertCannonBody } from '#schemas/story.schemas';
 import { CannonResponse } from '#types/shared/response';
 import pool from '#config/database';
-import { StoryRow, StoryRowWithDocuments, CannonRow } from '#types/database';
+import { StoryRowWithDocuments } from '#types/database';
 import { mapCannonResponse } from '#utils/story/map-story';
 import { fetchDocumentsForStories } from '#utils/story/fetch-documents';
+import * as cannonRepo from '#repositories/cannon.repository';
+import * as storyRepo from '#repositories/story.repository';
 
 export const deleteCannon = async (userId: string, cannonId: string): Promise<void> => {
-  const result = await pool.query('DELETE FROM cannons WHERE cannon_id = $1 AND user_id = $2', [
-    cannonId,
-    userId,
-  ]);
+  const result = await cannonRepo.deleteByIdAndUser(pool, cannonId, userId);
   if (result.rowCount === 0) {
     throw new CannonNotFoundError();
   }
@@ -24,23 +23,14 @@ export const upsertCannon = async (
   const { cannonId, title } = data;
 
   if (cannonId) {
-    const existing = await pool.query('SELECT 1 FROM cannons WHERE cannon_id = $1 AND user_id = $2', [
-      cannonId,
-      userId,
-    ]);
+    const existing = await cannonRepo.exists(pool, cannonId, userId);
     if (existing.rows.length === 0) {
       throw new CannonNotFoundError();
     }
-    await pool.query('UPDATE cannons SET title = $1, updated_at = NOW() WHERE cannon_id = $2', [
-      title,
-      cannonId,
-    ]);
+    await cannonRepo.updateTitle(pool, cannonId, title);
     return fetchCannonFn(cannonId);
   } else {
-    const newCannon = await pool.query<CannonRow>(
-      'INSERT INTO cannons (user_id, title) VALUES ($1, $2) RETURNING cannon_id',
-      [userId, title],
-    );
+    const newCannon = await cannonRepo.insert(pool, userId, title);
     const created = newCannon.rows[0];
     if (!created) throw new CannonNotFoundError();
     return fetchCannonFn(created.cannon_id);
@@ -48,11 +38,7 @@ export const upsertCannon = async (
 };
 
 export async function fetchCannon(cannonId: string, userId?: string): Promise<CannonResponse> {
-  const cannonResult = await pool.query<CannonRow>(
-    `SELECT * FROM cannons
-     WHERE cannon_id = $1${userId ? ' AND user_id = $2' : ''}`,
-    userId ? [cannonId, userId] : [cannonId],
-  );
+  const cannonResult = await cannonRepo.findById(pool, cannonId, userId);
 
   if (cannonResult.rows.length === 0) {
     throw new CannonNotFoundError();
@@ -60,10 +46,7 @@ export async function fetchCannon(cannonId: string, userId?: string): Promise<Ca
 
   const cannon = cannonResult.rows[0]!;
 
-  const storiesResult = await pool.query<StoryRow>(
-    'SELECT * FROM stories WHERE cannon_id = $1 ORDER BY created_at',
-    [cannonId],
-  );
+  const storiesResult = await storyRepo.findByCannonId(pool, cannonId);
 
   const storyIds = storiesResult.rows.map((s) => s.story_id);
   const docsByStory = await fetchDocumentsForStories(storyIds);
@@ -80,16 +63,13 @@ export const fetchUserCannon = (userId: string, cannonId: string): Promise<Canno
   fetchCannon(cannonId, userId);
 
 export async function fetchLegacy(userId: string): Promise<CannonResponse[]> {
-  const cannonsResult = await pool.query<CannonRow>(
-    'SELECT * FROM cannons WHERE user_id = $1 ORDER BY created_at',
-    [userId],
-  );
+  const cannonsResult = await cannonRepo.findByUserId(pool, userId);
 
   if (cannonsResult.rows.length === 0) return [];
 
-  const storiesResult = await pool.query<StoryRow>(
-    'SELECT * FROM stories WHERE cannon_id = ANY($1) ORDER BY created_at',
-    [cannonsResult.rows.map((w) => w.cannon_id)],
+  const storiesResult = await storyRepo.findByCannonIds(
+    pool,
+    cannonsResult.rows.map((w) => w.cannon_id),
   );
 
   const storyIds = storiesResult.rows.map((s) => s.story_id);

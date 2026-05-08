@@ -1,7 +1,10 @@
 // Database row types
+import type { Pool, PoolClient } from 'pg';
 import { Plan } from '#types/shared/enum/plan';
 import { RenewOn } from '#types/shared/enum/renew-on';
 import { StripeSubscriptionStatus } from '#types/enum/stripe';
+
+export type Queryable = Pool | PoolClient;
 
 export interface UserRow {
   user_id: string;

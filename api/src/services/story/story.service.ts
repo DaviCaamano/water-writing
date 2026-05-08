@@ -1,24 +1,23 @@
 import type { UpsertStoryBody } from '#schemas/story.schemas';
 import { withTransaction } from '#utils/database/with-transaction';
-import { DocumentRowWithBody, GenreRow, StoryRow, StoryRowWithDocuments } from '#types/database';
+import { DocumentRowWithBody, StoryRowWithDocuments, Queryable } from '#types/database';
 import { StoryNotFoundError, CannonNotFoundError } from '#constants/error/custom-errors';
 import { StoryResponse } from '#types/shared/response';
 import { mapStoryResponse } from '#utils/story/map-story';
 import { fetchDocumentsForStories } from '#utils/story/fetch-documents';
 import { decompressBody } from '#utils/compression';
 import pool from '#config/database';
+import * as storyRepo from '#repositories/story.repository';
+import * as cannonRepo from '#repositories/cannon.repository';
+import * as documentRepo from '#repositories/document.repository';
+import * as genreRepo from '#repositories/genre.repository';
 
 export const fetchStory = async (storyId: string): Promise<StoryRowWithDocuments> => {
-  const result = await pool.query<StoryRowWithDocuments>(
-    `SELECT *
-      FROM stories s
-      WHERE s.story_id = $1;`,
-    [storyId],
-  );
+  const result = await storyRepo.findById(pool, storyId);
   if (result.rows.length === 0) {
     throw new StoryNotFoundError();
   }
-  return result.rows[0]!;
+  return result.rows[0]! as StoryRowWithDocuments;
 };
 
 async function decompressDocumentRows(rows: DocumentRowWithBody[]): Promise<StoryRowWithDocuments['documents']> {
@@ -31,19 +30,11 @@ async function decompressDocumentRows(rows: DocumentRowWithBody[]): Promise<Stor
 }
 
 export const fetchStoryWithDocuments = async (storyId: string): Promise<StoryRowWithDocuments> => {
-  const storyResult = await pool.query<StoryRow>(
-    'SELECT * FROM stories WHERE story_id = $1',
-    [storyId],
-  );
+  const storyResult = await storyRepo.findById(pool, storyId);
   if (storyResult.rows.length === 0) {
     throw new StoryNotFoundError();
   }
-  const docsResult = await pool.query<DocumentRowWithBody>(
-    `SELECT d.*, dc.body FROM documents d
-     LEFT JOIN document_content dc ON dc.document_id = d.document_id
-     WHERE d.story_id = $1 ORDER BY d.created_at`,
-    [storyId],
-  );
+  const docsResult = await documentRepo.findByStoryId(pool, storyId);
   return {
     ...storyResult.rows[0]!,
     documents: await decompressDocumentRows(docsResult.rows),
@@ -54,21 +45,11 @@ export const fetchUserStoryWithDocuments = async (
   userId: string,
   storyId: string,
 ): Promise<StoryRowWithDocuments> => {
-  const storyResult = await pool.query<StoryRow>(
-    `SELECT s.* FROM stories s
-     JOIN cannons w ON w.cannon_id = s.cannon_id
-     WHERE s.story_id = $1 AND w.user_id = $2`,
-    [storyId, userId],
-  );
+  const storyResult = await storyRepo.findByIdWithUser(pool, storyId, userId);
   if (storyResult.rows.length === 0) {
     throw new StoryNotFoundError();
   }
-  const docsResult = await pool.query<DocumentRowWithBody>(
-    `SELECT d.*, dc.body FROM documents d
-     LEFT JOIN document_content dc ON dc.document_id = d.document_id
-     WHERE d.story_id = $1 ORDER BY d.created_at`,
-    [storyId],
-  );
+  const docsResult = await documentRepo.findByStoryId(pool, storyId);
   return {
     ...storyResult.rows[0]!,
     documents: await decompressDocumentRows(docsResult.rows),
@@ -76,49 +57,35 @@ export const fetchUserStoryWithDocuments = async (
 };
 
 async function updateExistingStory(
-  client: { query: InstanceType<typeof import('pg').Pool>['query'] },
+  client: Queryable,
   userId: string,
   storyId: string,
   title: string | undefined,
   cannonId: string | undefined,
 ): Promise<string> {
-  const existing = await client.query<StoryRow & { user_id: string }>(
-    `SELECT s.*, w.user_id FROM stories s
-     JOIN cannons w ON w.cannon_id = s.cannon_id
-     WHERE s.story_id = $1 AND w.user_id = $2`,
-    [storyId, userId],
-  );
+  const existing = await storyRepo.findByIdWithUserOwnership(client, storyId, userId);
 
   if (existing.rows.length === 0) {
     throw new StoryNotFoundError();
   }
 
   if (title && title !== existing.rows[0]!.title) {
-    await client.query(
-      'UPDATE stories SET title = $1, updated_at = NOW() WHERE story_id = $2',
-      [title, storyId],
-    );
+    await storyRepo.updateTitle(client, storyId, title);
   }
 
   if (cannonId && cannonId !== existing.rows[0]!.cannon_id) {
-    const targetCannon = await client.query(
-      'SELECT 1 FROM cannons WHERE cannon_id = $1 AND user_id = $2',
-      [cannonId, userId],
-    );
+    const targetCannon = await cannonRepo.exists(client, cannonId, userId);
     if (targetCannon.rows.length === 0) {
       throw new CannonNotFoundError();
     }
-    await client.query(
-      'UPDATE stories SET cannon_id = $1, updated_at = NOW() WHERE story_id = $2',
-      [cannonId, storyId],
-    );
+    await storyRepo.updateCannonId(client, storyId, cannonId);
   }
 
   return storyId;
 }
 
 async function createNewStory(
-  client: { query: InstanceType<typeof import('pg').Pool>['query'] },
+  client: Queryable,
   userId: string,
   title: string | undefined,
   cannonId: string | undefined,
@@ -126,25 +93,16 @@ async function createNewStory(
   let resolvedCannonId = cannonId;
 
   if (resolvedCannonId) {
-    const cannonCheck = await client.query(
-      'SELECT 1 FROM cannons WHERE cannon_id = $1 AND user_id = $2',
-      [resolvedCannonId, userId],
-    );
+    const cannonCheck = await cannonRepo.exists(client, resolvedCannonId, userId);
     if (cannonCheck.rows.length === 0) {
       throw new CannonNotFoundError();
     }
   } else {
-    const newCannon = await client.query(
-      'INSERT INTO cannons (user_id, title) VALUES ($1, $2) RETURNING cannon_id',
-      [userId, 'Untitled Cannon'],
-    );
+    const newCannon = await cannonRepo.insert(client, userId, 'Untitled Cannon');
     resolvedCannonId = newCannon.rows[0]!.cannon_id;
   }
 
-  const newStory = await client.query(
-    'INSERT INTO stories (cannon_id, title) VALUES ($1, $2) RETURNING story_id',
-    [resolvedCannonId, title],
-  );
+  const newStory = await storyRepo.insert(client, resolvedCannonId!, title ?? null);
   return newStory.rows[0]!.story_id;
 }
 
@@ -162,26 +120,14 @@ export async function upsertStory(userId: string, data: UpsertStoryBody): Promis
 }
 
 export async function deleteStory(userId: string, storyId: string): Promise<void> {
-  const result = await pool.query(
-    `DELETE FROM stories
-     WHERE story_id = $1
-       AND cannon_id IN (SELECT cannon_id FROM cannons WHERE user_id = $2)`,
-    [storyId, userId],
-  );
+  const result = await storyRepo.deleteByIdAndUser(pool, storyId, userId);
   if (result.rowCount === 0) {
     throw new StoryNotFoundError();
   }
 }
 
 export async function fetchUserStories(userId: string): Promise<StoryResponse[]> {
-  const storiesResult = await pool.query<StoryRow>(
-    `SELECT s.*
-     FROM stories s
-     JOIN cannons w ON w.cannon_id = s.cannon_id
-     WHERE w.user_id = $1
-     ORDER BY s.created_at`,
-    [userId],
-  );
+  const storiesResult = await storyRepo.findByUserId(pool, userId);
 
   if (storiesResult.rows.length === 0) return [];
 
@@ -193,30 +139,17 @@ export async function fetchUserStories(userId: string): Promise<StoryResponse[]>
   );
 }
 
-// Genres
 export async function upsertGenre(userId: string, storyId: string, genres: string[]) {
-  const storyResult = await pool.query(
-    `SELECT 1
-     FROM stories s
-     JOIN cannons w ON w.cannon_id = s.cannon_id
-     WHERE s.story_id = $1 AND w.user_id = $2`,
-    [storyId, userId],
-  );
+  const storyResult = await storyRepo.userOwnsStory(pool, storyId, userId);
 
   if (storyResult.rows.length === 0) {
     throw new StoryNotFoundError();
   }
 
   for (const genre of genres) {
-    await pool.query(
-      'INSERT INTO genres (story_id, genre) VALUES ($1, $2) ON CONFLICT (story_id, genre) DO NOTHING',
-      [storyId, genre],
-    );
+    await genreRepo.insertGenre(pool, storyId, genre);
   }
 
-  const result = await pool.query<GenreRow>(
-    'SELECT genre FROM genres WHERE story_id = $1 ORDER BY genre',
-    [storyId],
-  );
+  const result = await genreRepo.findByStoryId(pool, storyId);
   return result.rows.map((r) => r.genre as string);
 }

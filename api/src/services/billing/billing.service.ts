@@ -1,15 +1,9 @@
 import pool from '#config/database';
-import { BillingRow } from '#types/database';
 import { BillingResponse } from '#types/shared/response';
 import { mapBilling } from '#utils/user/map-user';
+import * as billingRepo from '#repositories/billing.repository';
 
 export async function getBillingHistory(userId: string): Promise<BillingResponse[]> {
-  const result = await pool.query<BillingRow>(
-    `SELECT * FROM billing
-     WHERE user_id = $1 AND billed_at >= NOW() - INTERVAL '2 years'
-     ORDER BY billed_at DESC`,
-    [userId],
-  );
-
+  const result = await billingRepo.getHistory(pool, userId);
   return result.rows.map(mapBilling);
 }

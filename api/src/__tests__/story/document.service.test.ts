@@ -116,8 +116,8 @@ describe(
 
       expect(mockClient.query).toHaveBeenNthCalledWith(
         2,
-        'UPDATE documents SET successor_id = NULL, updated_at = NOW() WHERE document_id = $1',
-        ['pred-id'],
+        'UPDATE documents SET successor_id = $1, updated_at = NOW() WHERE document_id = $2',
+        [null, 'pred-id'],
       );
     });
 
@@ -134,8 +134,8 @@ describe(
 
       expect(mockClient.query).toHaveBeenNthCalledWith(
         2,
-        'UPDATE documents SET predecessor_id = NULL, updated_at = NOW() WHERE document_id = $1',
-        ['succ-id'],
+        'UPDATE documents SET predecessor_id = $1, updated_at = NOW() WHERE document_id = $2',
+        [null, 'succ-id'],
       );
     });
 

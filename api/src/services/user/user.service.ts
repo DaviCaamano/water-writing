@@ -20,13 +20,15 @@ import {
   getStripePriceId,
   getSubscriptionDate,
   getUserPlan,
-  resetPlanToNone,
   syncPlanSnapshot,
 } from '#services/stripe/subscription-sync.service';
 import { withTransaction } from '#utils/database/with-transaction';
 import { PoolClient } from 'pg';
 import { RenewOn } from '#types/shared/enum/renew-on';
 import { StripeSubscriptionStatus, toStripeSubscriptionStatus } from '#types/enum/stripe';
+import * as userRepo from '#repositories/user.repository';
+import * as planRepo from '#repositories/plan.repository';
+import * as billingRepo from '#repositories/billing.repository';
 
 const SALT_ROUNDS = 12;
 
@@ -34,19 +36,13 @@ function isUniqueViolation(error: unknown): boolean {
   return typeof error === 'object' && error !== null && 'code' in error && error.code === '23505';
 }
 
-// Create user
 export async function createUser(data: CreateUserBody): Promise<void> {
-  const existing = await pool.query('SELECT 1 FROM users WHERE email = $1', [data.email]);
+  const existing = await userRepo.emailExists(pool, data.email);
   if (existing.rows.length > 0) throw new EmailTakenError();
 
   const passwordHash = await bcrypt.hash(data.password, SALT_ROUNDS);
   try {
-    await pool.query(
-      `INSERT INTO users 
-      (first_name, last_name, email, password_hash) 
-      VALUES ($1, $2, $3, $4)`,
-      [data.firstName, data.lastName, data.email, passwordHash],
-    );
+    await userRepo.insert(pool, data.firstName, data.lastName, data.email, passwordHash);
   } catch (error) {
     if (isUniqueViolation(error)) {
       throw new EmailTakenError();
@@ -56,7 +52,6 @@ export async function createUser(data: CreateUserBody): Promise<void> {
   logger.info({ email: data.email }, 'User account created');
 }
 
-// Update user
 export const updateUser = async (userId: string, data: UpdateUserBody): Promise<UserResponse> => {
   return withTransaction(async (client: PoolClient) => {
     const updates: string[] = [];
@@ -82,14 +77,11 @@ export const updateUser = async (userId: string, data: UpdateUserBody): Promise<
       updates.push(`updated_at = $${paramIdx++}`);
       values.push(new Date());
       values.push(userId);
-      await client.query(
-        `UPDATE users SET ${updates.join(', ')} WHERE user_id = $${paramIdx}`,
-        values,
-      );
+      await userRepo.update(client, updates, values);
     }
 
     const [userResult, plan] = await Promise.all([
-      client.query<UserRow>('SELECT * FROM users WHERE user_id = $1', [userId]),
+      userRepo.findById(client, userId),
       getUserPlan(client, userId),
     ]);
     const user = userResult.rows[0];
@@ -107,12 +99,9 @@ export const updateUser = async (userId: string, data: UpdateUserBody): Promise<
     };
   });
 };
-// Delete user (GDPR / account deletion)
+
 export async function deleteUser(userId: string): Promise<void> {
-  const result = await pool.query(
-    'DELETE FROM users WHERE user_id = $1 RETURNING user_id',
-    [userId],
-  );
+  const result = await userRepo.deleteById(pool, userId);
 
   if (result.rows.length === 0) {
     throw new UserNotFoundError();
@@ -131,10 +120,7 @@ async function ensureStripeCustomer(
     email: user.email,
     name: `${user.first_name} ${user.last_name}`,
   });
-  await client.query('UPDATE users SET stripe_customer_id = $1 WHERE user_id = $2', [
-    customer.id,
-    user.user_id,
-  ]);
+  await userRepo.setStripeCustomerId(client, user.user_id, customer.id);
   return customer.id;
 }
 
@@ -146,31 +132,21 @@ async function recordBilling(
   amountCents: number,
   subscription: Stripe.Subscription,
 ): Promise<void> {
-  await client.query(
-    `INSERT INTO billing (user_id, plan_type, is_year_plan, amount_cents, stripe_payment_intent_id)
-     VALUES ($1, $2, $3, $4, $5)`,
-    [userId, planType, yearPlan, amountCents, extractPaymentIntentId(subscription)],
-  );
+  await billingRepo.insert(client, userId, planType, yearPlan, amountCents, extractPaymentIntentId(subscription));
 }
 
-// Subscribe
 export async function subscribe(
   userId: string,
   data: SubscribeBody,
 ): Promise<SubscriptionResponse> {
   return withTransaction(async (client: PoolClient) => {
-    const userResult = await client.query<UserRow>('SELECT * FROM users WHERE user_id = $1', [
-      userId,
-    ]);
+    const userResult = await userRepo.findById(client, userId);
     const user = userResult.rows[0];
     if (!user) {
       throw new UserNotFoundError();
     }
 
-    const existingPlanResult = await client.query<PlanRow>(
-      'SELECT * FROM plans WHERE user_id = $1',
-      [userId],
-    );
+    const existingPlanResult = await planRepo.findByUserId(client, userId);
     const existingPlan = existingPlanResult.rows[0] ?? null;
 
     if (data.planType === Plan.none) {
@@ -218,14 +194,13 @@ export async function subscribe(
   });
 }
 
-// Private helpers
 async function cancelSubscription(
   client: PoolClient,
   userId: string,
   existingPlan: PlanRow | null,
 ): Promise<SubscriptionResponse> {
   if (!existingPlan?.stripe_subscription_id) {
-    await resetPlanToNone(client, userId);
+    await planRepo.resetToNone(client, userId);
 
     return {
       action: 'already_canceled',

@@ -1,5 +1,4 @@
 import Stripe from 'stripe';
-import type { PoolClient } from 'pg';
 import pool from '#config/database';
 import logger from '#config/logger';
 import stripe from '#config/stripe';
@@ -11,7 +10,10 @@ import {
   inferYearPlanFromSubscription,
   syncPlanSnapshot,
 } from '#services/stripe/subscription-sync.service';
-import type { PlanRow, UserRow } from '#types/database';
+import type { PlanRow, Queryable, UserRow } from '#types/database';
+import * as userRepo from '#repositories/user.repository';
+import * as planRepo from '#repositories/plan.repository';
+import * as billingRepo from '#repositories/billing.repository';
 
 export async function handleStripeWebhook(event: Stripe.Event): Promise<void> {
   switch (event.type) {
@@ -83,32 +85,18 @@ async function handleInvoicePaid(invoice: Stripe.Invoice): Promise<void> {
       yearPlan: inferYearPlanFromSubscription(subscription),
     });
 
-    const existingBilling = await client.query<{ billing_id: string }>(
-      'SELECT billing_id FROM billing WHERE stripe_invoice_id = $1 LIMIT 1',
-      [invoice.id],
-    );
+    const existingBilling = await billingRepo.findByInvoiceId(client, invoice.id);
 
     if (existingBilling.rows.length === 0) {
-      await client.query(
-        `INSERT INTO billing (
-           user_id,
-           plan_type,
-           is_year_plan,
-           amount_cents,
-           stripe_payment_intent_id,
-           stripe_invoice_id,
-           billed_at
-         )
-         VALUES ($1, $2, $3, $4, $5, $6, TO_TIMESTAMP($7))`,
-        [
-          user.user_id,
-          planType,
-          inferYearPlanFromSubscription(subscription),
-          invoice.amount_paid,
-          getPaymentIntentId(invoice.payment_intent),
-          invoice.id,
-          invoice.status_transitions.paid_at ?? invoice.created,
-        ],
+      await billingRepo.insertFromInvoice(
+        client,
+        user.user_id,
+        planType,
+        inferYearPlanFromSubscription(subscription),
+        invoice.amount_paid,
+        getPaymentIntentId(invoice.payment_intent),
+        invoice.id,
+        invoice.status_transitions.paid_at ?? invoice.created,
       );
     }
   });
@@ -150,22 +138,15 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice): Promise<void
 
 async function findUserByStripeCustomerId(customerId: string | null): Promise<UserRow | null> {
   if (!customerId) return null;
-
-  const result = await pool.query<UserRow>(
-    'SELECT * FROM users WHERE stripe_customer_id = $1 LIMIT 1',
-    [customerId],
-  );
-
+  const result = await userRepo.findByStripeCustomerId(pool, customerId);
   return result.rows[0] ?? null;
 }
 
 async function getExistingPlan(
-  client: { query: PoolClient['query'] },
+  client: Queryable,
   userId: string,
 ): Promise<PlanRow | null> {
-  const result = await client.query<PlanRow>('SELECT * FROM plans WHERE user_id = $1 LIMIT 1', [
-    userId,
-  ]);
+  const result = await planRepo.findByUserId(client, userId);
   return result.rows[0] ?? null;
 }
 

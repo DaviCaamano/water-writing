@@ -1,6 +1,7 @@
 import pool from '#config/database';
-import { DecompressedDocumentRow, DocumentRowWithBody } from '#types/database';
+import { DecompressedDocumentRow } from '#types/database';
 import { decompressBody } from '#utils/compression';
+import * as documentRepo from '#repositories/document.repository';
 
 export async function fetchDocumentsForStories(
   storyIds: string[],
@@ -8,12 +9,7 @@ export async function fetchDocumentsForStories(
   const docsByStory = new Map<string, DecompressedDocumentRow[]>();
   if (storyIds.length === 0) return docsByStory;
 
-  const docsResult = await pool.query<DocumentRowWithBody>(
-    `SELECT d.*, dc.body FROM documents d
-     LEFT JOIN document_content dc ON dc.document_id = d.document_id
-     WHERE d.story_id = ANY($1) ORDER BY d.created_at`,
-    [storyIds],
-  );
+  const docsResult = await documentRepo.findByStoryIds(pool, storyIds);
 
   const decompressedDocs = await Promise.all(
     docsResult.rows.map(async (doc) => ({
