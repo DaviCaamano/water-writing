@@ -106,10 +106,7 @@ export async function deleteUser(userId: string): Promise<void> {
   logger.info({ userId }, 'User account deleted');
 }
 
-async function ensureStripeCustomer(
-  client: PoolClient,
-  user: UserRow,
-): Promise<string> {
+async function ensureStripeCustomer(client: PoolClient, user: UserRow): Promise<string> {
   if (user.stripe_customer_id) return user.stripe_customer_id;
 
   const customer = await stripe.customers.create({
@@ -128,7 +125,14 @@ async function recordBilling(
   amountCents: number,
   subscription: Stripe.Subscription,
 ): Promise<void> {
-  await billingRepo.insert(client, userId, planType, isYearPlan, amountCents, extractPaymentIntentId(subscription));
+  await billingRepo.insert(
+    client,
+    userId,
+    planType,
+    isYearPlan,
+    amountCents,
+    extractPaymentIntentId(subscription),
+  );
 }
 
 export async function subscribe(
@@ -248,9 +252,12 @@ async function createOrUpdateSubscription(args: {
     );
 
     if (
-      ([StripeSubscriptionStatus.canceled, StripeSubscriptionStatus.incompleteExpired] as readonly StripeSubscriptionStatus[]).includes(
-        toStripeSubscriptionStatus(existingSubscription.status),
-      )
+      (
+        [
+          StripeSubscriptionStatus.canceled,
+          StripeSubscriptionStatus.incompleteExpired,
+        ] as readonly StripeSubscriptionStatus[]
+      ).includes(toStripeSubscriptionStatus(existingSubscription.status))
     ) {
       return stripe.subscriptions.create({
         customer: stripeCustomerId,

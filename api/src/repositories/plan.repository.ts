@@ -7,10 +7,7 @@ export function findByUserId(q: Queryable, userId: string) {
   return q.query<PlanRow>('SELECT * FROM plans WHERE user_id = $1 LIMIT 1', [userId]);
 }
 
-export function findStatusByUserId(
-  q: Queryable,
-  userId: string,
-) {
+export function findStatusByUserId(q: Queryable, userId: string) {
   return q.query<Pick<PlanRow, 'plan_type' | 'subscription_status'>>(
     'SELECT plan_type, subscription_status FROM plans WHERE user_id = $1 LIMIT 1',
     [userId],

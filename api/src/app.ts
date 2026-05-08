@@ -91,22 +91,29 @@ app.get('/health', async (_req, res) => {
 
 // Global error handler
 // Express 5 natively forwards async errors to this handler — no monkey-patching needed.
-app.use((err: Error & { status?: number; type?: string }, _req: Request, res: Response, _next: NextFunction) => {
-  if (err instanceof SyntaxError && err.status === 400 && err.type === 'entity.parse.failed') {
-    res.status(400).json({ error: 'Malformed JSON' });
-    return;
-  }
-
-  if (err instanceof AppError) {
-    if (!err.isOperational) {
-      logger.fatal({ err }, 'Non-operational error');
+app.use(
+  (
+    err: Error & { status?: number; type?: string },
+    _req: Request,
+    res: Response,
+    _next: NextFunction,
+  ) => {
+    if (err instanceof SyntaxError && err.status === 400 && err.type === 'entity.parse.failed') {
+      res.status(400).json({ error: 'Malformed JSON' });
+      return;
     }
-    res.status(err.statusCode).json({ error: err.message });
-    return;
-  }
 
-  logger.error({ err }, 'Unhandled error');
-  res.status(500).json({ error: 'Internal server error' });
-});
+    if (err instanceof AppError) {
+      if (!err.isOperational) {
+        logger.fatal({ err }, 'Non-operational error');
+      }
+      res.status(err.statusCode).json({ error: err.message });
+      return;
+    }
+
+    logger.error({ err }, 'Unhandled error');
+    res.status(500).json({ error: 'Internal server error' });
+  },
+);
 
 export default app;

@@ -6,7 +6,12 @@ import {
   MOCK_CANNON,
   MOCK_CANNON_RESPONSE,
 } from '#__tests__/constants/mock-story';
-import { DecompressedDocumentRow, StoryRow, StoryRowWithDocuments, CannonRowWithStories } from '#types/database';
+import {
+  DecompressedDocumentRow,
+  StoryRow,
+  StoryRowWithDocuments,
+  CannonRowWithStories,
+} from '#types/database';
 import { DocumentResponse, StoryResponse, CannonResponse } from '#types/shared/response';
 
 export enum DocType {

@@ -142,10 +142,7 @@ async function findUserByStripeCustomerId(customerId: string | null): Promise<Us
   return result.rows[0] ?? null;
 }
 
-async function getExistingPlan(
-  client: Queryable,
-  userId: string,
-): Promise<PlanRow | null> {
+async function getExistingPlan(client: Queryable, userId: string): Promise<PlanRow | null> {
   const result = await planRepo.findByUserId(client, userId);
   return result.rows[0] ?? null;
 }

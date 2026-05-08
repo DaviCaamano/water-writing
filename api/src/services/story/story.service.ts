@@ -3,7 +3,6 @@ import { withTransaction } from '#utils/database/with-transaction';
 import { DocumentRowWithBody, StoryRowWithDocuments, Queryable } from '#types/database';
 import { StoryNotFoundError, CannonNotFoundError } from '#constants/error/custom-errors';
 import { StoryResponse } from '#types/shared/response';
-import { mapStoryResponse } from '#utils/story/map-story';
 import { fetchDocumentsForStories } from '#utils/story/fetch-documents';
 import { decompressBody } from '#utils/compression';
 import pool from '#config/database';
@@ -12,13 +11,16 @@ import * as storyRepo from '#repositories/story.repository';
 import * as cannonRepo from '#repositories/cannon.repository';
 import * as documentRepo from '#repositories/document.repository';
 import * as genreRepo from '#repositories/genre.repository';
+import { mapStoryResponse } from '#utils/database/map-db-row';
 
 export const fetchStory = async (storyId: string): Promise<StoryRowWithDocuments> => {
   const result = await storyRepo.findById(pool, storyId);
   return assertFound(result, StoryNotFoundError) as StoryRowWithDocuments;
 };
 
-async function decompressDocumentRows(rows: DocumentRowWithBody[]): Promise<StoryRowWithDocuments['documents']> {
+async function decompressDocumentRows(
+  rows: DocumentRowWithBody[],
+): Promise<StoryRowWithDocuments['documents']> {
   return Promise.all(
     rows.map(async (doc) => ({
       ...doc,
@@ -40,7 +42,10 @@ export const fetchUserStoryWithDocuments = async (
   userId: string,
   storyId: string,
 ): Promise<StoryRowWithDocuments> => {
-  const story = assertFound(await storyRepo.findByIdWithUser(pool, storyId, userId), StoryNotFoundError);
+  const story = assertFound(
+    await storyRepo.findByIdWithUser(pool, storyId, userId),
+    StoryNotFoundError,
+  );
   const docsResult = await documentRepo.findByStoryId(pool, storyId);
   return {
     ...story,

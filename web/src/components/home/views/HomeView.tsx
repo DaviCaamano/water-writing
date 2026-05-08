@@ -8,10 +8,10 @@ import { StoryView } from '~components/home/views/StoryView';
 import { WorldView } from '~components/home/views/WorldView';
 import { LegacyView } from '~components/home/views/LegacyView';
 
-const DynamicEditor = dynamic(
-  () => import('~components/home/views/Editor').then((m) => m.Editor),
-  { ssr: false, loading: () => <div className='h-full' /> },
-);
+const DynamicEditor = dynamic(() => import('~components/home/views/Editor').then((m) => m.Editor), {
+  ssr: false,
+  loading: () => <div className='h-full' />,
+});
 
 const VIEW_DEPTH: Record<ViewMode, number> = {
   legacy: 0,

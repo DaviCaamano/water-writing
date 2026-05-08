@@ -40,7 +40,9 @@ export function useDeleteCannonMutation() {
       queryApi<{ status: 'ok' }>(apiRoutes.story.deleteCannon(cannonId)),
     onMutate: async (cannonId) => {
       await queryClient.cancelQueries({ queryKey: queryKeys.cannons.all });
-      const snapshot = queryClient.getQueriesData<CannonResponse[]>({ queryKey: queryKeys.cannons.all });
+      const snapshot = queryClient.getQueriesData<CannonResponse[]>({
+        queryKey: queryKeys.cannons.all,
+      });
       queryClient.setQueriesData<CannonResponse[]>({ queryKey: queryKeys.cannons.all }, (old) => {
         if (!old || !Array.isArray(old)) return old;
         return old.filter((c) => c.cannonId !== cannonId);
@@ -77,8 +79,12 @@ export function useDeleteStoryMutation() {
     onMutate: async (storyId) => {
       await queryClient.cancelQueries({ queryKey: queryKeys.cannons.all });
       await queryClient.cancelQueries({ queryKey: queryKeys.stories.all });
-      const cannonSnapshot = queryClient.getQueriesData<CannonResponse | CannonResponse[]>({ queryKey: queryKeys.cannons.all });
-      const storySnapshot = queryClient.getQueriesData<StoryResponse>({ queryKey: queryKeys.stories.all });
+      const cannonSnapshot = queryClient.getQueriesData<CannonResponse | CannonResponse[]>({
+        queryKey: queryKeys.cannons.all,
+      });
+      const storySnapshot = queryClient.getQueriesData<StoryResponse>({
+        queryKey: queryKeys.stories.all,
+      });
 
       queryClient.setQueriesData<CannonResponse[]>({ queryKey: queryKeys.cannons.all }, (old) => {
         if (!old || !Array.isArray(old)) return old;
@@ -128,8 +134,12 @@ export function useDeleteDocumentMutation() {
       await queryClient.cancelQueries({ queryKey: queryKeys.cannons.all });
       await queryClient.cancelQueries({ queryKey: queryKeys.stories.all });
       await queryClient.cancelQueries({ queryKey: queryKeys.documents.all });
-      const cannonSnapshot = queryClient.getQueriesData<CannonResponse | CannonResponse[]>({ queryKey: queryKeys.cannons.all });
-      const storySnapshot = queryClient.getQueriesData<StoryResponse>({ queryKey: queryKeys.stories.all });
+      const cannonSnapshot = queryClient.getQueriesData<CannonResponse | CannonResponse[]>({
+        queryKey: queryKeys.cannons.all,
+      });
+      const storySnapshot = queryClient.getQueriesData<StoryResponse>({
+        queryKey: queryKeys.stories.all,
+      });
 
       const filterDoc = (docs: DocumentResponse[]) =>
         docs.filter((d) => d.documentId !== documentId);

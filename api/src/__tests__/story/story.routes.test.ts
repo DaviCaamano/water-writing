@@ -325,7 +325,9 @@ describe(
     it('returns 200 on success', async () => {
       mockDeleteCannon.mockResolvedValueOnce(undefined);
 
-      const res = await request(app).delete(`/story/cannon/${MOCK_CANNON_ID}`).set(mockAuthHeaders());
+      const res = await request(app)
+        .delete(`/story/cannon/${MOCK_CANNON_ID}`)
+        .set(mockAuthHeaders());
 
       expect(res.status).toBe(200);
       expect(res.body).toEqual({ status: 'ok' });
@@ -335,7 +337,9 @@ describe(
     it('returns 404 when the cannon is not found', async () => {
       mockDeleteCannon.mockRejectedValueOnce(new CannonNotFoundError());
 
-      const res = await request(app).delete(`/story/cannon/${MOCK_CANNON_ID}`).set(mockAuthHeaders());
+      const res = await request(app)
+        .delete(`/story/cannon/${MOCK_CANNON_ID}`)
+        .set(mockAuthHeaders());
 
       expect(res.status).toBe(404);
       expect(res.body.error).toBe('Cannon not found');

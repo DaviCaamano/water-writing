@@ -66,7 +66,9 @@ describe(
       expect(cookies).toBeDefined();
       const tokenCookie = Array.isArray(cookies)
         ? cookies.find((c: string) => c.startsWith('token='))
-        : typeof cookies === 'string' && cookies.startsWith('token=') ? cookies : undefined;
+        : typeof cookies === 'string' && cookies.startsWith('token=')
+          ? cookies
+          : undefined;
       expect(tokenCookie).toBeDefined();
       expect(tokenCookie).toContain('HttpOnly');
       expect(tokenCookie).toContain('SameSite=Strict');
@@ -95,7 +97,9 @@ describe(
       expect(cookies).toBeDefined();
       const tokenCookie = Array.isArray(cookies)
         ? cookies.find((c: string) => c.startsWith('token='))
-        : typeof cookies === 'string' && cookies.startsWith('token=') ? cookies : undefined;
+        : typeof cookies === 'string' && cookies.startsWith('token=')
+          ? cookies
+          : undefined;
       expect(tokenCookie).toBeDefined();
     });
   }),

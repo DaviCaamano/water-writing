@@ -3,11 +3,11 @@ import { UpsertCannonBody } from '#schemas/story.schemas';
 import { CannonResponse } from '#types/shared/response';
 import pool from '#config/database';
 import { StoryRowWithDocuments } from '#types/database';
-import { mapCannonResponse } from '#utils/story/map-story';
 import { fetchDocumentsForStories } from '#utils/story/fetch-documents';
 import { assertFound } from '#utils/database/assert-found';
 import * as cannonRepo from '#repositories/cannon.repository';
 import * as storyRepo from '#repositories/story.repository';
+import { mapCannonResponse } from '#utils/database/map-db-row';
 
 export const deleteCannon = async (userId: string, cannonId: string): Promise<void> => {
   const result = await cannonRepo.deleteByIdAndUser(pool, cannonId, userId);

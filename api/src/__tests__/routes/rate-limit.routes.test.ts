@@ -1,8 +1,10 @@
 import request from 'supertest';
 
 const allow = (_req: unknown, _res: unknown, next: () => void) => next();
-const deny = (error: string) => (_req: unknown, res: { status: (code: number) => { json: (body: unknown) => void } }) =>
-  res.status(429).json({ error });
+const deny =
+  (error: string) =>
+  (_req: unknown, res: { status: (code: number) => { json: (body: unknown) => void } }) =>
+    res.status(429).json({ error });
 
 async function buildUserApp(rateLimiters: Partial<Record<string, unknown>>, withAuth = false) {
   jest.resetModules();
@@ -28,7 +30,11 @@ async function buildUserApp(rateLimiters: Partial<Record<string, unknown>>, with
 
   if (withAuth) {
     jest.doMock('#middleware/auth', () => ({
-      authMiddleware: (req: { userId?: string; token?: string }, _res: unknown, next: () => void) => {
+      authMiddleware: (
+        req: { userId?: string; token?: string },
+        _res: unknown,
+        next: () => void,
+      ) => {
         req.userId = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11';
         req.token = 'test-token';
         next();
@@ -82,7 +88,11 @@ async function buildStoryApp(rateLimiters: Partial<Record<string, unknown>>, wit
 
   if (withAuth) {
     jest.doMock('#middleware/auth', () => ({
-      authMiddleware: (req: { userId?: string; token?: string }, _res: unknown, next: () => void) => {
+      authMiddleware: (
+        req: { userId?: string; token?: string },
+        _res: unknown,
+        next: () => void,
+      ) => {
         req.userId = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11';
         req.token = 'test-token';
         next();
@@ -183,11 +193,13 @@ describe('route limiters', () => {
       true,
     );
 
-    const res = await request(app).post('/story/water-write').send({
-      documentId: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
-      selection: { start: 0, end: 5 },
-      prompt: 'rewrite this',
-    });
+    const res = await request(app)
+      .post('/story/water-write')
+      .send({
+        documentId: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
+        selection: { start: 0, end: 5 },
+        prompt: 'rewrite this',
+      });
 
     expect(res.status).toBe(429);
     expect(res.body.error).toBe('Too many AI generation attempts, please try again later');

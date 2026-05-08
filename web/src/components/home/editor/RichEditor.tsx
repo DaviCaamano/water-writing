@@ -130,7 +130,10 @@ export function RichEditor({
 
   return (
     <div
-      className={cn('-rich-editor- relative flex-1 flex flex-col min-h-0 bg-background', 'tiptap-host')}
+      className={cn(
+        '-rich-editor- relative flex-1 flex flex-col min-h-0 bg-background',
+        'tiptap-host',
+      )}
       style={{ fontSize, fontFamily, lineHeight: 'var(--lh)' }}
     >
       <EditorContent editor={editor} className='editor-content flex-1 flex flex-col min-h-0' />

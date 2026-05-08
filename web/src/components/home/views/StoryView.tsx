@@ -48,7 +48,10 @@ export function StoryView() {
     if (!currentStory) return;
     upsertDocument.mutate({
       storyId: currentStory.storyId,
-      title: generateUntitledName('Untitled Document', documents.map((d) => d.title)),
+      title: generateUntitledName(
+        'Untitled Document',
+        documents.map((d) => d.title),
+      ),
       body: '',
     });
   };

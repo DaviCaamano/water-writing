@@ -77,7 +77,10 @@ describe(
               ...mockStripeSubscription.items.data[0],
               price: {
                 ...mockStripeSubscription.items.data[0]!.price,
-                recurring: { ...mockStripeSubscription.items.data[0]!.price.recurring, interval: 'year' },
+                recurring: {
+                  ...mockStripeSubscription.items.data[0]!.price.recurring,
+                  interval: 'year',
+                },
               },
             },
           ],
@@ -121,7 +124,10 @@ describe(
               ...mockStripeSubscription.items.data[0],
               price: {
                 ...mockStripeSubscription.items.data[0]!.price,
-                recurring: { ...mockStripeSubscription.items.data[0]!.price.recurring, interval: 'year' },
+                recurring: {
+                  ...mockStripeSubscription.items.data[0]!.price.recurring,
+                  interval: 'year',
+                },
               },
             },
           ],
@@ -140,17 +146,26 @@ describe(
     });
 
     it('does not throw for a trialing subscription', () => {
-      const trialing = { ...mockStripeSubscription, status: 'trialing' } as unknown as Stripe.Subscription;
+      const trialing = {
+        ...mockStripeSubscription,
+        status: 'trialing',
+      } as unknown as Stripe.Subscription;
       expect(() => assertBillableSubscription(trialing)).not.toThrow();
     });
 
     it('throws StripePaymentFailed for an incomplete subscription', () => {
-      const incomplete = { ...mockStripeSubscription, status: 'incomplete' } as unknown as Stripe.Subscription;
+      const incomplete = {
+        ...mockStripeSubscription,
+        status: 'incomplete',
+      } as unknown as Stripe.Subscription;
       expect(() => assertBillableSubscription(incomplete)).toThrow(StripePaymentFailed);
     });
 
     it('throws StripePaymentFailed for a canceled subscription', () => {
-      const canceled = { ...mockStripeSubscription, status: 'canceled' } as unknown as Stripe.Subscription;
+      const canceled = {
+        ...mockStripeSubscription,
+        status: 'canceled',
+      } as unknown as Stripe.Subscription;
       expect(() => assertBillableSubscription(canceled)).toThrow(StripePaymentFailed);
     });
   }),
@@ -234,25 +249,37 @@ describe(
     it('returns string payment intent id directly', () => {
       const sub = {
         ...mockStripeSubscription,
-        latest_invoice: { ...(mockStripeSubscription.latest_invoice as object), payment_intent: 'pi_direct' },
+        latest_invoice: {
+          ...(mockStripeSubscription.latest_invoice as object),
+          payment_intent: 'pi_direct',
+        },
       } as unknown as Stripe.Subscription;
       expect(extractPaymentIntentId(sub)).toBe('pi_direct');
     });
 
     it('returns null when latest_invoice is null', () => {
-      const sub = { ...mockStripeSubscription, latest_invoice: null } as unknown as Stripe.Subscription;
+      const sub = {
+        ...mockStripeSubscription,
+        latest_invoice: null,
+      } as unknown as Stripe.Subscription;
       expect(extractPaymentIntentId(sub)).toBeNull();
     });
 
     it('returns null when latest_invoice is a string id', () => {
-      const sub = { ...mockStripeSubscription, latest_invoice: 'in_123' } as unknown as Stripe.Subscription;
+      const sub = {
+        ...mockStripeSubscription,
+        latest_invoice: 'in_123',
+      } as unknown as Stripe.Subscription;
       expect(extractPaymentIntentId(sub)).toBeNull();
     });
 
     it('returns null when payment_intent is null', () => {
       const sub = {
         ...mockStripeSubscription,
-        latest_invoice: { ...(mockStripeSubscription.latest_invoice as object), payment_intent: null },
+        latest_invoice: {
+          ...(mockStripeSubscription.latest_invoice as object),
+          payment_intent: null,
+        },
       } as unknown as Stripe.Subscription;
       expect(extractPaymentIntentId(sub)).toBeNull();
     });

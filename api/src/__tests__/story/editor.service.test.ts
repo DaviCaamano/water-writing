@@ -77,7 +77,12 @@ describe(
       });
       mockStream.mockReturnValueOnce(asyncIter([]));
 
-      const iterable = await waterWrite(MOCK_USER_ID, MOCK_DOC_ID, { start: 6, end: 11 }, 'make it louder');
+      const iterable = await waterWrite(
+        MOCK_USER_ID,
+        MOCK_DOC_ID,
+        { start: 6, end: 11 },
+        'make it louder',
+      );
       await collectStream(iterable);
 
       const args = mockStream.mock.calls[0][0];

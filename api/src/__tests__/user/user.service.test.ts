@@ -50,9 +50,7 @@ describe(
     });
 
     it('maps a database unique violation to EmailTakenError', async () => {
-      mockPool.query
-        .mockResolvedValueOnce({ rows: [] })
-        .mockRejectedValueOnce({ code: '23505' });
+      mockPool.query.mockResolvedValueOnce({ rows: [] }).mockRejectedValueOnce({ code: '23505' });
 
       await expect(createUser(MOCK_NEW_USER)).rejects.toThrow(EmailTakenError);
     });

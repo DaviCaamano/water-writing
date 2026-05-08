@@ -41,13 +41,19 @@ export function LegacyView() {
   const totalStories = cannons.reduce((sum, cannon) => sum + cannon.stories.length, 0);
   const totalDocuments = cannons.reduce(
     (sum, cannon) =>
-      sum + cannon.stories.reduce((storySum, story) => storySum + (story.documents?.length ?? 0), 0),
+      sum +
+      cannon.stories.reduce((storySum, story) => storySum + (story.documents?.length ?? 0), 0),
     0,
   );
 
   const handleAddCannon = () => {
     if (!userId) return;
-    upsertCannon.mutate({ title: generateUntitledName('Untitled Cannon', cannons.map((c) => c.title)) });
+    upsertCannon.mutate({
+      title: generateUntitledName(
+        'Untitled Cannon',
+        cannons.map((c) => c.title),
+      ),
+    });
   };
 
   const handleRenameCannon = (cannonId: string, currentTitle: string) => {

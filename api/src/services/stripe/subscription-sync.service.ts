@@ -34,7 +34,10 @@ export async function syncPlanSnapshot(
   });
 }
 
-export function getStripePriceId(planType: typeof Plan.pro | typeof Plan.max, isYearPlan: boolean): string {
+export function getStripePriceId(
+  planType: typeof Plan.pro | typeof Plan.max,
+  isYearPlan: boolean,
+): string {
   const priceId =
     planType === Plan.pro
       ? isYearPlan
@@ -44,7 +47,10 @@ export function getStripePriceId(planType: typeof Plan.pro | typeof Plan.max, is
         ? env.STRIPE_PRICE_MAX_YEARLY
         : env.STRIPE_PRICE_MAX_MONTHLY;
 
-  return priceId ?? `price_${planType.replace(/[^a-z0-9]/gi, '_')}_${isYearPlan ? RenewOn.yearly : RenewOn.monthly}`;
+  return (
+    priceId ??
+    `price_${planType.replace(/[^a-z0-9]/gi, '_')}_${isYearPlan ? RenewOn.yearly : RenewOn.monthly}`
+  );
 }
 
 export function getSubscriptionPriceId(subscription: Stripe.Subscription): string | null {
@@ -96,7 +102,7 @@ export function inferPlanTypeFromPriceId(priceId: string | null, fallback: Plan 
 export function inferRenewOnFromSubscription(subscription: Stripe.Subscription): RenewOn | null {
   if (
     subscription.cancel_at_period_end ||
-    (toStripeSubscriptionStatus(subscription.status)) === StripeSubscriptionStatus.canceled
+    toStripeSubscriptionStatus(subscription.status) === StripeSubscriptionStatus.canceled
   ) {
     return null;
   }
@@ -131,9 +137,7 @@ export async function getUserPlan(queryable: Queryable, userId: string): Promise
   const result = await planRepo.findStatusByUserId(queryable, userId);
   const row = result.rows[0];
   if (!row) return null;
-  return isAccessibleSubscriptionStatus(row.subscription_status)
-    ? row.plan_type
-    : null;
+  return isAccessibleSubscriptionStatus(row.subscription_status) ? row.plan_type : null;
 }
 
 export async function resetPlanToNone(client: Queryable, userId: string): Promise<void> {

@@ -9,10 +9,7 @@ const apiClient = ky.create({
   credentials: 'include',
 });
 
-export async function api<T>(
-  path: string,
-  options: RequestInit = {},
-): Promise<T> {
+export async function api<T>(path: string, options: RequestInit = {}): Promise<T> {
   const headers = new Headers(options.headers);
 
   if (!headers.has('Content-Type')) {

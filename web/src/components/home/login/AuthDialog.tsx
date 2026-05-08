@@ -52,7 +52,11 @@ interface AuthFormState {
 
 type AuthFormAction =
   | { type: 'SET_MODE'; mode: AuthMode }
-  | { type: 'SET_FIELD'; field: 'email' | 'password' | 'confirm' | 'firstName' | 'lastName'; value: string }
+  | {
+      type: 'SET_FIELD';
+      field: 'email' | 'password' | 'confirm' | 'firstName' | 'lastName';
+      value: string;
+    }
   | { type: 'SET_ERROR'; error: string }
   | { type: 'SUBMIT_START' }
   | { type: 'SUBMIT_END' }
@@ -114,7 +118,8 @@ export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
     } catch (err) {
       dispatch({
         type: 'SET_ERROR',
-        error: err instanceof Error ? err.message : mode === 'login' ? 'Login failed' : 'Signup failed',
+        error:
+          err instanceof Error ? err.message : mode === 'login' ? 'Login failed' : 'Signup failed',
       });
     } finally {
       dispatch({ type: 'SUBMIT_END' });
@@ -173,7 +178,9 @@ export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
                     <input
                       type='text'
                       value={firstName}
-                      onChange={(e) => dispatch({ type: 'SET_FIELD', field: 'firstName', value: e.target.value })}
+                      onChange={(e) =>
+                        dispatch({ type: 'SET_FIELD', field: 'firstName', value: e.target.value })
+                      }
                       placeholder='Jane'
                       required
                       className='rounded-full px-5 py-3.5 text-[15px] border-none outline-none w-full'
@@ -187,7 +194,9 @@ export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
                     <input
                       type='text'
                       value={lastName}
-                      onChange={(e) => dispatch({ type: 'SET_FIELD', field: 'lastName', value: e.target.value })}
+                      onChange={(e) =>
+                        dispatch({ type: 'SET_FIELD', field: 'lastName', value: e.target.value })
+                      }
                       placeholder='Doe'
                       required
                       className='rounded-full px-5 py-3.5 text-[15px] border-none outline-none w-full'
@@ -204,7 +213,9 @@ export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
                 <input
                   type='email'
                   value={email}
-                  onChange={(e) => dispatch({ type: 'SET_FIELD', field: 'email', value: e.target.value })}
+                  onChange={(e) =>
+                    dispatch({ type: 'SET_FIELD', field: 'email', value: e.target.value })
+                  }
                   placeholder='you@example.com'
                   autoComplete='email'
                   required
@@ -220,7 +231,9 @@ export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
                 <input
                   type='password'
                   value={password}
-                  onChange={(e) => dispatch({ type: 'SET_FIELD', field: 'password', value: e.target.value })}
+                  onChange={(e) =>
+                    dispatch({ type: 'SET_FIELD', field: 'password', value: e.target.value })
+                  }
                   placeholder='••••••••••'
                   autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
                   required
@@ -237,7 +250,9 @@ export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
                   <input
                     type='password'
                     value={confirm}
-                    onChange={(e) => dispatch({ type: 'SET_FIELD', field: 'confirm', value: e.target.value })}
+                    onChange={(e) =>
+                      dispatch({ type: 'SET_FIELD', field: 'confirm', value: e.target.value })
+                    }
                     placeholder='••••••••••'
                     autoComplete='new-password'
                     required

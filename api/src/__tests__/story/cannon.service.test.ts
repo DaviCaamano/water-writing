@@ -14,7 +14,12 @@ import {
 } from '#__tests__/constants/mock-story';
 
 import { CannonNotFoundError } from '#constants/error/custom-errors';
-import { DecompressedDocumentRow, StoryRow, StoryRowWithDocuments, CannonRowWithStories } from '#types/database';
+import {
+  DecompressedDocumentRow,
+  StoryRow,
+  StoryRowWithDocuments,
+  CannonRowWithStories,
+} from '#types/database';
 import { mockPool } from '#__tests__/constants/mock-database';
 import { MOCK_DATE } from '#__tests__/constants/mock-basic';
 import { mockClear } from '#__tests__/utils/test-wrappers';
@@ -62,7 +67,10 @@ describe(
       mockPool.query.mockResolvedValueOnce({ rows: [] });
 
       await expect(
-        cannonService.upsertCannon(MOCK_USER_ID, { cannonId: MOCK_CANNON_ID, title: 'Updated Cannon' }),
+        cannonService.upsertCannon(MOCK_USER_ID, {
+          cannonId: MOCK_CANNON_ID,
+          title: 'Updated Cannon',
+        }),
       ).rejects.toThrow(CannonNotFoundError);
     });
   }),
@@ -141,10 +149,9 @@ describe(
       const storyList = (singleCannon.stories as StoryRowWithDocuments[]).map(
         ({ documents: _, ...story }) => story,
       );
-      const documentList = (singleCannon.stories as StoryRowWithDocuments[]).reduce<DecompressedDocumentRow[]>(
-        (acc, story) => [...acc, ...story.documents],
-        [],
-      );
+      const documentList = (singleCannon.stories as StoryRowWithDocuments[]).reduce<
+        DecompressedDocumentRow[]
+      >((acc, story) => [...acc, ...story.documents], []);
 
       mockPool.query
         .mockResolvedValueOnce({ rows: cannonList })
@@ -171,7 +178,10 @@ describe(
         cannonId: MOCK_CANNON_ID,
         userId: MOCK_USER_ID,
       });
-      expect(mockPool.query).toHaveBeenCalledWith(expect.any(String), [MOCK_CANNON_ID, MOCK_USER_ID]);
+      expect(mockPool.query).toHaveBeenCalledWith(expect.any(String), [
+        MOCK_CANNON_ID,
+        MOCK_USER_ID,
+      ]);
     });
 
     it('throws CannonNotFoundError when the cannon is missing or owned by another user', async () => {

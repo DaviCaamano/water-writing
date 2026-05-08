@@ -33,6 +33,7 @@ function getRequiredEnv(name: string): string {
   return value;
 }
 
+// produce a UUID from a Sha1 hash.
 function deterministicUuid(scope: string, value: string): string {
   const hash = createHash('sha1').update(`${scope}:${value}`).digest('hex');
   const versioned = `${hash.slice(0, 8)}-${hash.slice(8, 12)}-5${hash.slice(13, 16)}`;
@@ -81,16 +82,20 @@ function buildLegacySeedRows(seedUserId: string): {
       .sort((a, b) => naturalSort(a.name, b.name));
 
     let prevStoryId: string | null = null;
-    const storyIds: string[] = [];
 
-    for (let si = 0; si < storyDirs.length; si++) {
-      const storyDir = storyDirs[si]!;
-      const storyId = deterministicUuid('story', `${seedUserId}:${cannonDir.name}:${storyDir.name}`);
-      storyIds.push(storyId);
+    for (let storyIndex = 0; storyIndex < storyDirs.length; storyIndex++) {
+      const storyDir = storyDirs[storyIndex]!;
+      const storyId = deterministicUuid(
+        'story',
+        `${seedUserId}:${cannonDir.name}:${storyDir.name}`,
+      );
 
       const nextStoryId =
-        si < storyDirs.length - 1
-          ? deterministicUuid('story', `${seedUserId}:${cannonDir.name}:${storyDirs[si + 1]!.name}`)
+        storyIndex < storyDirs.length - 1
+          ? deterministicUuid(
+              'story',
+              `${seedUserId}:${cannonDir.name}:${storyDirs[storyIndex + 1]!.name}`,
+            )
           : null;
 
       storiesToInsert.push({
@@ -111,18 +116,18 @@ function buildLegacySeedRows(seedUserId: string): {
 
       let prevDocId: string | null = null;
 
-      for (let di = 0; di < docFiles.length; di++) {
-        const docFile = docFiles[di]!;
+      for (let documentIndex = 0; documentIndex < docFiles.length; documentIndex++) {
+        const docFile = docFiles[documentIndex]!;
         const docId = deterministicUuid(
           'document',
           `${seedUserId}:${cannonDir.name}:${storyDir!.name}:${docFile.name}`,
         );
 
         const nextDocId =
-          di < docFiles.length - 1
+          documentIndex < docFiles.length - 1
             ? deterministicUuid(
                 'document',
-                `${seedUserId}:${cannonDir.name}:${storyDir!.name}:${docFiles[di + 1]!.name}`,
+                `${seedUserId}:${cannonDir.name}:${storyDir!.name}:${docFiles[documentIndex + 1]!.name}`,
               )
             : null;
 
@@ -171,11 +176,11 @@ async function seed() {
   const { cannonsToInsert, storiesToInsert, documentsToInsert, documentContentsToInsert } =
     buildLegacySeedRows(seedUserId);
 
-  await db.transaction(async (tx) => {
+  await db.transaction(async (transaction) => {
     if (existingUser.length === 0) {
       const passwordHash = await bcrypt.hash(seedPassword, SALT_ROUNDS);
 
-      await tx.insert(users).values({
+      await transaction.insert(users).values({
         userId: seedUserId,
         firstName: 'tester',
         lastName: 'mctester',
@@ -185,7 +190,7 @@ async function seed() {
       });
     }
 
-    await tx
+    await transaction
       .insert(plans)
       .values({
         userId: seedUserId,
@@ -212,14 +217,14 @@ async function seed() {
         },
       });
 
-    const existingBilling = await tx
+    const existingBilling = await transaction
       .select({ billingId: billing.billingId })
       .from(billing)
       .where(eq(billing.userId, seedUserId))
       .limit(1);
 
     if (existingBilling.length === 0) {
-      await tx.insert(billing).values({
+      await transaction.insert(billing).values({
         userId: seedUserId,
         planType: Plan.pro,
         isYearPlan: false,
@@ -227,11 +232,11 @@ async function seed() {
       });
     }
 
-    await tx.delete(cannons).where(eq(cannons.userId, seedUserId));
+    await transaction.delete(cannons).where(eq(cannons.userId, seedUserId));
 
-    await tx.insert(cannons).values(cannonsToInsert);
-    await tx.insert(stories).values(storiesToInsert);
-    await tx.insert(documents).values(documentsToInsert);
+    await transaction.insert(cannons).values(cannonsToInsert);
+    await transaction.insert(stories).values(storiesToInsert);
+    await transaction.insert(documents).values(documentsToInsert);
 
     if (documentContentsToInsert.length > 0) {
       const compressedContents: SeedDocumentContent[] = await Promise.all(
@@ -242,7 +247,9 @@ async function seed() {
       );
       const BATCH_SIZE = 50;
       for (let i = 0; i < compressedContents.length; i += BATCH_SIZE) {
-        await tx.insert(documentContent).values(compressedContents.slice(i, i + BATCH_SIZE));
+        await transaction
+          .insert(documentContent)
+          .values(compressedContents.slice(i, i + BATCH_SIZE));
       }
     }
   });

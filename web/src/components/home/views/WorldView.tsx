@@ -49,7 +49,10 @@ export function WorldView() {
     if (!currentCannon) return;
     upsertStory.mutate({
       cannonId: currentCannon.cannonId,
-      title: generateUntitledName('Untitled Story', stories.map((s) => s.title)),
+      title: generateUntitledName(
+        'Untitled Story',
+        stories.map((s) => s.title),
+      ),
     });
   };
 
@@ -134,7 +137,11 @@ export function WorldView() {
                               <DropdownMenuItem
                                 key={`${story.storyId}-${cannon.cannonId}`}
                                 onClick={() =>
-                                  handleMoveStoryToCannon(story.storyId, cannon.cannonId, story.title)
+                                  handleMoveStoryToCannon(
+                                    story.storyId,
+                                    cannon.cannonId,
+                                    story.title,
+                                  )
                                 }
                               >
                                 {cannon.title}

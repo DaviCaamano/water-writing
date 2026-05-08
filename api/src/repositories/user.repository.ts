@@ -9,10 +9,9 @@ export function findById(q: Queryable, userId: string) {
 }
 
 export function findByStripeCustomerId(q: Queryable, customerId: string) {
-  return q.query<UserRow>(
-    'SELECT * FROM users WHERE stripe_customer_id = $1 LIMIT 1',
-    [customerId],
-  );
+  return q.query<UserRow>('SELECT * FROM users WHERE stripe_customer_id = $1 LIMIT 1', [
+    customerId,
+  ]);
 }
 
 export function emailExists(q: Queryable, email: string) {
@@ -34,7 +33,10 @@ export function insert(
 }
 
 export function update(q: Queryable, updates: string[], values: (string | Date)[]) {
-  return q.query(`UPDATE users SET ${updates.join(', ')} WHERE user_id = $${values.length}`, values);
+  return q.query(
+    `UPDATE users SET ${updates.join(', ')} WHERE user_id = $${values.length}`,
+    values,
+  );
 }
 
 export function deleteById(q: Queryable, userId: string) {

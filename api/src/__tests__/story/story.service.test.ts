@@ -77,7 +77,10 @@ describe(
       await expect(
         storyService.fetchUserStoryWithDocuments(MOCK_USER_ID, MOCK_STORY_ID),
       ).resolves.toEqual(storyWithDocs);
-      expect(mockPool.query).toHaveBeenCalledWith(expect.any(String), [MOCK_STORY_ID, MOCK_USER_ID]);
+      expect(mockPool.query).toHaveBeenCalledWith(expect.any(String), [
+        MOCK_STORY_ID,
+        MOCK_USER_ID,
+      ]);
     });
 
     it('throws StoryNotFoundError when the story is missing or not owned by the user', async () => {
@@ -113,7 +116,9 @@ describe(
     it('updates an existing story and returns the refreshed response', async () => {
       const mockClient = createMockClient();
       mockClient.query
-        .mockResolvedValueOnce({ rows: [{ ...MOCK_STORY, title: 'Old Story', user_id: MOCK_USER_ID }] })
+        .mockResolvedValueOnce({
+          rows: [{ ...MOCK_STORY, title: 'Old Story', user_id: MOCK_USER_ID }],
+        })
         .mockResolvedValueOnce({});
       mockWithTransaction.mockImplementationOnce((callback) => callback(mockClient));
 
@@ -181,7 +186,10 @@ describe(
       mockPool.query.mockResolvedValueOnce({ rowCount: 1 });
 
       await expect(deleteStory(MOCK_USER_ID, MOCK_STORY_ID)).resolves.toBeUndefined();
-      expect(mockPool.query).toHaveBeenCalledWith(expect.any(String), [MOCK_STORY_ID, MOCK_USER_ID]);
+      expect(mockPool.query).toHaveBeenCalledWith(expect.any(String), [
+        MOCK_STORY_ID,
+        MOCK_USER_ID,
+      ]);
     });
 
     it('throws StoryNotFoundError when nothing is deleted', async () => {
@@ -243,7 +251,10 @@ describe(
       await expect(upsertGenre(MOCK_USER_ID, MOCK_STORY_ID, MOCK_GENRES)).resolves.toEqual(
         MOCK_GENRES,
       );
-      expect(mockPool.query).toHaveBeenCalledWith(expect.any(String), [MOCK_STORY_ID, MOCK_USER_ID]);
+      expect(mockPool.query).toHaveBeenCalledWith(expect.any(String), [
+        MOCK_STORY_ID,
+        MOCK_USER_ID,
+      ]);
     });
 
     it('throws StoryNotFoundError when the story is missing or not owned by the user', async () => {

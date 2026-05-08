@@ -35,7 +35,10 @@ export const authMiddleware = async (
     const result = await authRepo.validateToken(pool, token, decoded.userId);
 
     if (result.rows.length === 0) {
-      logger.warn({ userId: decoded.userId, path: req.path }, 'Auth failure: token expired or revoked');
+      logger.warn(
+        { userId: decoded.userId, path: req.path },
+        'Auth failure: token expired or revoked',
+      );
       res.status(401).json({ error: 'Token expired or revoked' });
       return;
     }

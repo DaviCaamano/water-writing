@@ -8,8 +8,7 @@ export function insertGenre(q: Queryable, storyId: string, genre: string) {
 }
 
 export function findByStoryId(q: Queryable, storyId: string) {
-  return q.query<GenreRow>(
-    'SELECT genre FROM genres WHERE story_id = $1 ORDER BY genre',
-    [storyId],
-  );
+  return q.query<GenreRow>('SELECT genre FROM genres WHERE story_id = $1 ORDER BY genre', [
+    storyId,
+  ]);
 }

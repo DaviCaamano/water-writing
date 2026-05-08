@@ -27,11 +27,9 @@ export const login = async (data: LoginBody): Promise<LoginResponse> => {
   }
 
   const { jwtSecret, jwtExpiresIn } = authConfig;
-  const token = jwt.sign(
-    { userId: user.user_id },
-    jwtSecret,
-    { expiresIn: jwtExpiresIn } as jwt.SignOptions,
-  );
+  const token = jwt.sign({ userId: user.user_id }, jwtSecret, {
+    expiresIn: jwtExpiresIn,
+  } as jwt.SignOptions);
 
   const expiresAt = new Date(Date.now() + parseExpiration(jwtExpiresIn));
   await authRepo.insertToken(pool, user.user_id, token, expiresAt);

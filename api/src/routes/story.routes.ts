@@ -45,7 +45,7 @@ import {
   CannonResponse,
 } from '#types/shared/response';
 import { GenresBody, GenresSchema } from '#schemas/story.schemas';
-import { mapStoryResponse } from '#utils/story/map-story';
+import { mapStoryResponse } from '#utils/database/map-db-row';
 
 const router = Router();
 

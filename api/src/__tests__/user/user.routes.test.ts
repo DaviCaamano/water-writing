@@ -42,43 +42,34 @@ describe(
     });
 
     it('returns 400 when email is invalid', async () => {
-      const res = await request(app)
-        .post('/user/create')
-        .set('X-Forwarded-For', '10.0.0.2')
-        .send({
-          firstName: 'Jane',
-          lastName: 'Doe',
-          email: 'not-an-email',
-          password: MOCK_STRONG_PASSWORD,
-        });
+      const res = await request(app).post('/user/create').set('X-Forwarded-For', '10.0.0.2').send({
+        firstName: 'Jane',
+        lastName: 'Doe',
+        email: 'not-an-email',
+        password: MOCK_STRONG_PASSWORD,
+      });
       expect(res.status).toBe(400);
       expect(res.body.details.properties).toHaveProperty('email');
     });
 
     it('returns 400 when password is too weak', async () => {
-      const res = await request(app)
-        .post('/user/create')
-        .set('X-Forwarded-For', '10.0.0.3')
-        .send({
-          firstName: 'Jane',
-          lastName: 'Doe',
-          email: 'jane@example.com',
-          password: 'short',
-        });
+      const res = await request(app).post('/user/create').set('X-Forwarded-For', '10.0.0.3').send({
+        firstName: 'Jane',
+        lastName: 'Doe',
+        email: 'jane@example.com',
+        password: 'short',
+      });
       expect(res.status).toBe(400);
       expect(res.body.details.properties).toHaveProperty('password');
     });
 
     it('returns 400 when password is strong-looking but below the 12 character minimum', async () => {
-      const res = await request(app)
-        .post('/user/create')
-        .set('X-Forwarded-For', '10.0.0.4')
-        .send({
-          firstName: 'Jane',
-          lastName: 'Doe',
-          email: 'jane@example.com',
-          password: 'Aa1!aaaaaaa',
-        });
+      const res = await request(app).post('/user/create').set('X-Forwarded-For', '10.0.0.4').send({
+        firstName: 'Jane',
+        lastName: 'Doe',
+        email: 'jane@example.com',
+        password: 'Aa1!aaaaaaa',
+      });
 
       expect(res.status).toBe(400);
       expect(res.body.details.properties).toHaveProperty('password');
@@ -87,15 +78,12 @@ describe(
     it('returns 201 even when email is already registered (anti-enumeration)', async () => {
       mockCreateUser.mockRejectedValueOnce(new EmailTakenError());
 
-      const res = await request(app)
-        .post('/user/create')
-        .set('X-Forwarded-For', '10.0.0.5')
-        .send({
-          firstName: 'Jane',
-          lastName: 'Doe',
-          email: 'jane@example.com',
-          password: MOCK_STRONG_PASSWORD,
-        });
+      const res = await request(app).post('/user/create').set('X-Forwarded-For', '10.0.0.5').send({
+        firstName: 'Jane',
+        lastName: 'Doe',
+        email: 'jane@example.com',
+        password: MOCK_STRONG_PASSWORD,
+      });
       expect(res.status).toBe(201);
       expect(res.body).toEqual({ status: 'ok' });
       expect(res.body.password).toBeUndefined();
@@ -104,15 +92,12 @@ describe(
     it('returns 201 on successful creation', async () => {
       mockCreateUser.mockResolvedValueOnce(undefined);
 
-      const res = await request(app)
-        .post('/user/create')
-        .set('X-Forwarded-For', '10.0.0.6')
-        .send({
-          firstName: 'Jane',
-          lastName: 'Doe',
-          email: 'jane@example.com',
-          password: MOCK_STRONG_PASSWORD,
-        });
+      const res = await request(app).post('/user/create').set('X-Forwarded-For', '10.0.0.6').send({
+        firstName: 'Jane',
+        lastName: 'Doe',
+        email: 'jane@example.com',
+        password: MOCK_STRONG_PASSWORD,
+      });
       expect(res.status).toBe(201);
       expect(res.body).toEqual({ status: 'ok' });
       expect(res.body.password).toBeUndefined();
@@ -243,10 +228,7 @@ describe(
         subscriptionStatus: null,
         isYearPlan: false,
       });
-      expect(mockSubscribe).toHaveBeenCalledWith(
-        MOCK_USER_ID,
-        MOCK_SUBSCRIPTION_REQUEST,
-      );
+      expect(mockSubscribe).toHaveBeenCalledWith(MOCK_USER_ID, MOCK_SUBSCRIPTION_REQUEST);
     });
 
     it('returns 402 on a payment processing error', async () => {
@@ -259,10 +241,7 @@ describe(
         .send(MOCK_SUBSCRIPTION_REQUEST);
       expect(res.status).toBe(402);
       expect(res.body.error).toBe('Payment failed');
-      expect(mockSubscribe).toHaveBeenCalledWith(
-        MOCK_USER_ID,
-        MOCK_SUBSCRIPTION_REQUEST,
-      );
+      expect(mockSubscribe).toHaveBeenCalledWith(MOCK_USER_ID, MOCK_SUBSCRIPTION_REQUEST);
     });
 
     it('returns 404 when the authenticated user no longer exists', async () => {

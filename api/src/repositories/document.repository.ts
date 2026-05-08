@@ -88,10 +88,10 @@ export function insert(q: Queryable, storyId: string, title: string, predecessor
 }
 
 export function updateTitle(q: Queryable, documentId: string, title: string) {
-  return q.query(
-    'UPDATE documents SET title = $1, updated_at = NOW() WHERE document_id = $2',
-    [title, documentId],
-  );
+  return q.query('UPDATE documents SET title = $1, updated_at = NOW() WHERE document_id = $2', [
+    title,
+    documentId,
+  ]);
 }
 
 export function setSuccessorId(q: Queryable, documentId: string, successorId: string | null) {
@@ -121,8 +121,8 @@ export function upsertContent(q: Queryable, documentId: string, body: Buffer) {
 }
 
 export function insertContent(q: Queryable, documentId: string, body: Buffer) {
-  return q.query(
-    'INSERT INTO document_content (document_id, body) VALUES ($1, $2)',
-    [documentId, body],
-  );
+  return q.query('INSERT INTO document_content (document_id, body) VALUES ($1, $2)', [
+    documentId,
+    body,
+  ]);
 }

@@ -83,7 +83,9 @@ export const Paragraph = Node.create<ParagraphOptions>({
     const content = Array.isArray(node.content) ? node.content : [];
 
     if (content.length === 0) {
-      const previousContent = Array.isArray(ctx?.previousNode?.content) ? ctx.previousNode.content : [];
+      const previousContent = Array.isArray(ctx?.previousNode?.content)
+        ? ctx.previousNode.content
+        : [];
       const previousNodeIsEmptyParagraph =
         ctx?.previousNode?.type === 'paragraph' && previousContent.length === 0;
 

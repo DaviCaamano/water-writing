@@ -8,10 +8,9 @@ export function findById(q: Queryable, cannonId: string, userId?: string) {
 }
 
 export function findByUserId(q: Queryable, userId: string) {
-  return q.query<CannonRow>(
-    'SELECT * FROM cannons WHERE user_id = $1 ORDER BY created_at',
-    [userId],
-  );
+  return q.query<CannonRow>('SELECT * FROM cannons WHERE user_id = $1 ORDER BY created_at', [
+    userId,
+  ]);
 }
 
 export function exists(q: Queryable, cannonId: string, userId: string) {
@@ -29,15 +28,12 @@ export function insert(q: Queryable, userId: string, title: string) {
 }
 
 export function updateTitle(q: Queryable, cannonId: string, title: string) {
-  return q.query(
-    'UPDATE cannons SET title = $1, updated_at = NOW() WHERE cannon_id = $2',
-    [title, cannonId],
-  );
+  return q.query('UPDATE cannons SET title = $1, updated_at = NOW() WHERE cannon_id = $2', [
+    title,
+    cannonId,
+  ]);
 }
 
 export function deleteByIdAndUser(q: Queryable, cannonId: string, userId: string) {
-  return q.query(
-    'DELETE FROM cannons WHERE cannon_id = $1 AND user_id = $2',
-    [cannonId, userId],
-  );
+  return q.query('DELETE FROM cannons WHERE cannon_id = $1 AND user_id = $2', [cannonId, userId]);
 }

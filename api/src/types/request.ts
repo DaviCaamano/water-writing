@@ -11,7 +11,9 @@ export interface AuthRequest extends Request {
  * Narrows an AuthRequest to guaranteed userId and token after authMiddleware.
  * Throws if called before authMiddleware has run (programming error).
  */
-export function assertAuthenticated(req: AuthRequest): asserts req is AuthRequest & { userId: string; token: string } {
+export function assertAuthenticated(
+  req: AuthRequest,
+): asserts req is AuthRequest & { userId: string; token: string } {
   if (!req.userId || !req.token) {
     throw new Error('Route handler called without authMiddleware');
   }
