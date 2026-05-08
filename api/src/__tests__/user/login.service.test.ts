@@ -1,12 +1,11 @@
 import { Plan } from '#types/shared/enum/plan';
 import { StripeSubscriptionStatus } from '#types/enum/stripe';
 
-jest.mock('#utils/database/with-query');
+jest.mock('#config/database');
 jest.mock('#services/story/cannon.service');
 jest.mock('bcrypt');
 jest.mock('jsonwebtoken');
 
-import { withQuery } from '#utils/database/with-query';
 import { fetchLegacy } from '#services/story/cannon.service';
 import { getSession, login } from '#services/user/login.service';
 import {
@@ -16,15 +15,13 @@ import {
   MOCK_STRONG_PASSWORD,
   MOCK_USER,
 } from '#__tests__/constants/mock-user';
-import { PoolClient } from 'pg';
-import { createMockClient } from '#__tests__/constants/mock-database';
+import { mockPool } from '#__tests__/constants/mock-database';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { InvalidCredentialsError, UserNotFoundError } from '#constants/error/custom-errors';
 import { mockClear } from '#__tests__/utils/test-wrappers';
 import { mockLegacyResponse } from '#__tests__/utils/mock-linked-documents';
 
-const mockWithQuery = withQuery as jest.MockedFunction<typeof withQuery>;
 const mockFetchLegacy = fetchLegacy as jest.MockedFunction<typeof fetchLegacy>;
 const mockBcryptCompare = bcrypt.compare as jest.Mock;
 
@@ -32,9 +29,7 @@ describe(
   'login service: login',
   mockClear(() => {
     it('should return a user object with the correct properties', async () => {
-      const mockClient = createMockClient();
-      mockWithQuery.mockImplementation((callback) => callback(mockClient as PoolClient));
-      mockClient.query
+      mockPool.query
         .mockResolvedValueOnce({ rows: [MOCK_USER] })
         .mockResolvedValueOnce(undefined)
         .mockResolvedValueOnce({
@@ -53,9 +48,7 @@ describe(
     });
 
     it('throw InvalidCredentialsError error if email does not exist', async () => {
-      const mockClient = createMockClient();
-      mockWithQuery.mockImplementation((callback) => callback(mockClient as PoolClient));
-      mockClient.query.mockResolvedValueOnce({ rows: [] });
+      mockPool.query.mockResolvedValueOnce({ rows: [] });
 
       void expect(
         login({
@@ -66,9 +59,7 @@ describe(
     });
 
     it('throw InvalidCredentialsError error if password is incorrect', async () => {
-      const mockClient = createMockClient();
-      mockWithQuery.mockImplementation((callback) => callback(mockClient as PoolClient));
-      mockClient.query.mockResolvedValueOnce({ rows: [MOCK_USER] });
+      mockPool.query.mockResolvedValueOnce({ rows: [MOCK_USER] });
       mockBcryptCompare.mockResolvedValueOnce(false);
       void expect(
         login({ email: MOCK_LOGIN_EMAIL, password: MOCK_STRONG_PASSWORD }),
@@ -81,11 +72,11 @@ describe(
   'login service: getSession',
   mockClear(() => {
     it('returns the current authenticated session payload', async () => {
-      const mockClient = createMockClient();
-      mockWithQuery.mockImplementation((callback) => callback(mockClient as PoolClient));
-      mockClient.query.mockResolvedValueOnce({ rows: [MOCK_USER] }).mockResolvedValueOnce({
-        rows: [{ plan_type: Plan.pro, subscription_status: StripeSubscriptionStatus.active }],
-      });
+      mockPool.query
+        .mockResolvedValueOnce({ rows: [MOCK_USER] })
+        .mockResolvedValueOnce({
+          rows: [{ plan_type: Plan.pro, subscription_status: StripeSubscriptionStatus.active }],
+        });
       mockFetchLegacy.mockImplementation(async () => mockLegacyResponse());
 
       const response = await getSession(MOCK_USER.user_id, MOCK_LOGIN_TOKEN);
@@ -94,9 +85,7 @@ describe(
     });
 
     it('throws UserNotFoundError when the authenticated user no longer exists', async () => {
-      const mockClient = createMockClient();
-      mockWithQuery.mockImplementation((callback) => callback(mockClient as PoolClient));
-      mockClient.query.mockResolvedValueOnce({ rows: [] });
+      mockPool.query.mockResolvedValueOnce({ rows: [] });
 
       await expect(getSession(MOCK_USER.user_id, MOCK_LOGIN_TOKEN)).rejects.toThrow(
         UserNotFoundError,
@@ -104,11 +93,11 @@ describe(
     });
 
     it('propagates downstream fetchLegacy failures', async () => {
-      const mockClient = createMockClient();
-      mockWithQuery.mockImplementation((callback) => callback(mockClient as PoolClient));
-      mockClient.query.mockResolvedValueOnce({ rows: [MOCK_USER] }).mockResolvedValueOnce({
-        rows: [{ plan_type: Plan.pro, subscription_status: StripeSubscriptionStatus.active }],
-      });
+      mockPool.query
+        .mockResolvedValueOnce({ rows: [MOCK_USER] })
+        .mockResolvedValueOnce({
+          rows: [{ plan_type: Plan.pro, subscription_status: StripeSubscriptionStatus.active }],
+        });
       mockFetchLegacy.mockRejectedValueOnce(new Error('legacy failed'));
 
       await expect(getSession(MOCK_USER.user_id, MOCK_LOGIN_TOKEN)).rejects.toThrow(

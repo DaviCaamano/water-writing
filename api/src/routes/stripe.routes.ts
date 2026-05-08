@@ -1,6 +1,6 @@
 import express, { Router } from 'express';
 import Stripe from 'stripe';
-import stripe from '#config/stripe';
+import stripe, { getStripeWebhookSecret } from '#config/stripe';
 import logger from '#config/logger';
 import { handleStripeWebhook } from '#services/stripe/stripe-webhook.service';
 
@@ -13,8 +13,7 @@ router.post(
   express.raw({ type: 'application/json' }),
   async (req, res): Promise<void> => {
     const signature = req.headers['stripe-signature'];
-    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
-
+    const webhookSecret = getStripeWebhookSecret();
     if (!webhookSecret) {
       logger.error('Missing STRIPE_WEBHOOK_SECRET for Stripe webhook handling');
       res.status(500).json({ error: 'Stripe webhook secret is not configured' });

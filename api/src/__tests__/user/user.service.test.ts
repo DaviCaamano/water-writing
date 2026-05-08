@@ -1,5 +1,4 @@
 jest.mock('#utils/database/with-transaction');
-jest.mock('#utils/database/with-query');
 jest.mock('#config/stripe', () => ({
   __esModule: true,
   default: {

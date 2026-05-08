@@ -6,6 +6,7 @@ jest.mock('#config/stripe', () => ({
       constructEvent: jest.fn(),
     },
   },
+  getStripeWebhookSecret: () => process.env.STRIPE_WEBHOOK_SECRET ?? null,
 }));
 
 import request from 'supertest';

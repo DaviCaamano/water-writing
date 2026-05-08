@@ -1,5 +1,6 @@
 import Stripe from 'stripe';
 import type { PoolClient } from 'pg';
+import { Pool } from 'pg';
 import { Plan } from '#types/shared/enum/plan';
 import type { PlanRow } from '#types/database';
 import { RenewOn } from '#types/shared/enum/renew-on';
@@ -59,7 +60,7 @@ export async function syncPlanSnapshot(
       currentPeriodEnd,
       priceId,
       subscription.id,
-      toStripeSubscriptionStatus(subscription.status),
+      subscription.status as StripeSubscriptionStatus,
       subscription.cancel_at_period_end,
       currentPeriodStart,
       canceledAt,
@@ -109,16 +110,10 @@ export function getAmountCentsFromSubscription(
   return price?.unit_amount ?? 0;
 }
 
-export function toStripeSubscriptionStatus(
-  status: Stripe.Subscription.Status,
-): StripeSubscriptionStatus {
-  return status as StripeSubscriptionStatus;
-}
-
 export function assertBillableSubscription(subscription: Stripe.Subscription) {
   if (
     ![StripeSubscriptionStatus.active, StripeSubscriptionStatus.trialing].includes(
-      toStripeSubscriptionStatus(subscription.status),
+      subscription.status as StripeSubscriptionStatus,
     )
   ) {
     throw new StripePaymentFailed();
@@ -138,7 +133,7 @@ export function inferPlanTypeFromPriceId(priceId: string | null, fallback: Plan 
 export function inferRenewOnFromSubscription(subscription: Stripe.Subscription): RenewOn | null {
   if (
     subscription.cancel_at_period_end ||
-    toStripeSubscriptionStatus(subscription.status) === StripeSubscriptionStatus.canceled
+    (subscription.status as StripeSubscriptionStatus) === StripeSubscriptionStatus.canceled
   ) {
     return null;
   }
@@ -168,4 +163,31 @@ export function isAccessibleSubscriptionStatus(
 
 export function getStoredPlanType(plan: PlanRow | null): Plan {
   return plan?.plan_type ?? Plan.none;
+}
+
+export async function getUserPlan(queryable: PoolClient | Pool, userId: string): Promise<Plan | null> {
+  const result = await queryable.query<PlanRow>(
+    `SELECT plan_type, subscription_status FROM plans WHERE user_id = $1 LIMIT 1`,
+    [userId],
+  );
+  if (result.rows.length === 0) return null;
+  return isAccessibleSubscriptionStatus(result.rows[0].subscription_status)
+    ? result.rows[0].plan_type
+    : null;
+}
+
+export async function resetPlanToNone(client: PoolClient, userId: string): Promise<void> {
+  await client.query(
+    `INSERT INTO plans (user_id, plan_type, is_year_plan, renew_on, renew_date,
+       stripe_price_id, stripe_subscription_id, subscription_status,
+       cancel_at_period_end, start_date, end_date, updated_at)
+     VALUES ($1, $2, FALSE, NULL, NOW(), NULL, NULL, $3, FALSE, NOW(), NOW(), NOW())
+     ON CONFLICT (user_id) DO UPDATE SET
+       plan_type = EXCLUDED.plan_type, is_year_plan = EXCLUDED.is_year_plan,
+       renew_on = EXCLUDED.renew_on, renew_date = EXCLUDED.renew_date,
+       stripe_price_id = EXCLUDED.stripe_price_id, stripe_subscription_id = EXCLUDED.stripe_subscription_id,
+       subscription_status = EXCLUDED.subscription_status, cancel_at_period_end = EXCLUDED.cancel_at_period_end,
+       end_date = EXCLUDED.end_date, updated_at = NOW()`,
+    [userId, Plan.none, StripeSubscriptionStatus.canceled],
+  );
 }

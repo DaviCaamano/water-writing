@@ -32,12 +32,6 @@ import {
   upsertDocument,
 } from '#services/story/document.service';
 import {
-  DocumentNotFoundError,
-  InvalidSelectionError,
-  StoryNotFoundError,
-  CannonNotFoundError,
-} from '#constants/error/custom-errors';
-import {
   deleteCannon,
   fetchLegacy,
   fetchUserCannon,
@@ -62,16 +56,8 @@ router.get(
   validateParams(DocumentParamsSchema),
   async (req: AuthRequest, res: RouteResponse<DocumentResponse>): Promise<void> => {
     const { documentId } = req.params as DocumentParams;
-    try {
-      const document = await fetchUserDocument(req.userId!, documentId);
-      res.json(document);
-    } catch (err) {
-      if (err instanceof DocumentNotFoundError) {
-        res.status(404).json({ error: 'Document not found' });
-        return;
-      }
-      throw err;
-    }
+    const document = await fetchUserDocument(req.userId!, documentId);
+    res.json(document);
   },
 );
 
@@ -82,16 +68,8 @@ router.get(
   validateParams(StoryParamsSchema),
   async (req: AuthRequest, res: RouteResponse<StoryResponse>): Promise<void> => {
     const { storyId } = req.params as StoryParams;
-    try {
-      const story = await fetchUserStoryWithDocuments(req.userId!, storyId);
-      res.json(mapStoryResponse(story));
-    } catch (err) {
-      if (err instanceof StoryNotFoundError) {
-        res.status(404).json({ error: 'Story not found' });
-        return;
-      }
-      throw err;
-    }
+    const story = await fetchUserStoryWithDocuments(req.userId!, storyId);
+    res.json(mapStoryResponse(story));
   },
 );
 
@@ -112,16 +90,8 @@ router.get(
   validateParams(CannonParamsSchema),
   async (req: AuthRequest, res: RouteResponse<CannonResponse>): Promise<void> => {
     const { cannonId } = req.params as CannonParams;
-    try {
-      const cannon = await fetchUserCannon(req.userId!, cannonId);
-      res.json(cannon);
-    } catch (err) {
-      if (err instanceof CannonNotFoundError) {
-        res.status(404).json({ error: 'Cannon not found' });
-        return;
-      }
-      throw err;
-    }
+    const cannon = await fetchUserCannon(req.userId!, cannonId);
+    res.json(cannon);
   },
 );
 
@@ -141,16 +111,8 @@ router.post(
   generalLimiter,
   validate(UpsertDocumentSchema),
   async (req: AuthRequest, res: RouteResponse<CannonResponse | null>): Promise<void> => {
-    try {
-      const cannon = await upsertDocument(req.userId!, req.body as UpsertDocumentBody);
-      res.json(cannon);
-    } catch (err) {
-      if (err instanceof StoryNotFoundError) {
-        res.status(404).json({ error: 'Story not found' });
-        return;
-      }
-      throw err;
-    }
+    const cannon = await upsertDocument(req.userId!, req.body as UpsertDocumentBody);
+    res.json(cannon);
   },
 );
 
@@ -160,16 +122,8 @@ router.post(
   generalLimiter,
   validate(UpsertStorySchema),
   async (req: AuthRequest, res: RouteResponse<StoryResponse>): Promise<void> => {
-    try {
-      const cannon = await upsertStory(req.userId!, req.body as UpsertStoryBody);
-      res.json(cannon);
-    } catch (err) {
-      if (err instanceof CannonNotFoundError) {
-        res.status(404).json({ error: 'Cannon not found' });
-        return;
-      }
-      throw err;
-    }
+    const story = await upsertStory(req.userId!, req.body as UpsertStoryBody);
+    res.json(story);
   },
 );
 
@@ -179,16 +133,8 @@ router.post(
   generalLimiter,
   validate(UpsertCannonSchema),
   async (req: AuthRequest, res: RouteResponse<CannonResponse | null>): Promise<void> => {
-    try {
-      const cannon = await upsertCannon(req.userId!, req.body as UpsertCannonBody);
-      res.json(cannon);
-    } catch (err) {
-      if (err instanceof CannonNotFoundError) {
-        res.status(404).json({ error: 'Cannon not found' });
-      } else {
-        throw err;
-      }
-    }
+    const cannon = await upsertCannon(req.userId!, req.body as UpsertCannonBody);
+    res.json(cannon);
   },
 );
 
@@ -199,16 +145,8 @@ router.delete(
   validateParams(CannonParamsSchema),
   async (req: AuthRequest, res: RouteResponse<{ status: 'ok' }>): Promise<void> => {
     const { cannonId } = req.params as CannonParams;
-    try {
-      await deleteCannon(req.userId!, cannonId);
-      res.json({ status: 'ok' });
-    } catch (err) {
-      if (err instanceof CannonNotFoundError) {
-        res.status(404).json({ error: 'Cannon not found' });
-        return;
-      }
-      throw err;
-    }
+    await deleteCannon(req.userId!, cannonId);
+    res.json({ status: 'ok' });
   },
 );
 
@@ -219,16 +157,8 @@ router.delete(
   validateParams(StoryParamsSchema),
   async (req: AuthRequest, res: RouteResponse<{ status: 'ok' }>): Promise<void> => {
     const { storyId } = req.params as StoryParams;
-    try {
-      await deleteStory(req.userId!, storyId);
-      res.json({ status: 'ok' });
-    } catch (err) {
-      if (err instanceof StoryNotFoundError) {
-        res.status(404).json({ error: 'Story not found' });
-        return;
-      }
-      throw err;
-    }
+    await deleteStory(req.userId!, storyId);
+    res.json({ status: 'ok' });
   },
 );
 
@@ -239,16 +169,8 @@ router.delete(
   validateParams(DocumentParamsSchema),
   async (req: AuthRequest, res: RouteResponse<{ status: 'ok' }>): Promise<void> => {
     const { documentId } = req.params as DocumentParams;
-    try {
-      await deleteDocument(req.userId!, documentId);
-      res.json({ status: 'ok' });
-    } catch (err) {
-      if (err instanceof DocumentNotFoundError) {
-        res.status(404).json({ error: 'Document not found' });
-        return;
-      }
-      throw err;
-    }
+    await deleteDocument(req.userId!, documentId);
+    res.json({ status: 'ok' });
   },
 );
 
@@ -258,40 +180,29 @@ router.post(
   aiLimiter,
   validate(EditorSchema),
   async (req: AuthRequest, res: RouteResponse<never>): Promise<void> => {
-    try {
-      const body = req.body as EditorBody;
-      await waterWrite(req.userId!, body.documentId, body.selection, body.prompt, res);
-    } catch (err) {
-      if (err instanceof DocumentNotFoundError) {
-        res.status(404).json({ error: 'Document not found' });
-        return;
-      }
-      if (err instanceof InvalidSelectionError) {
-        res.status(400).json({ error: 'Invalid selection range' });
-        return;
-      }
-      throw err;
+    const body = req.body as EditorBody;
+    const stream = await waterWrite(req.userId!, body.documentId, body.selection, body.prompt);
+
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+
+    for await (const text of stream) {
+      res.write(`data: ${JSON.stringify({ text })}\n\n`);
     }
+    res.write('data: [DONE]\n\n');
+    res.end();
   },
 );
 
-// Add genres
 router.post(
   '/genre',
   authMiddleware,
   generalLimiter,
   validate(GenresSchema),
   async (req: AuthRequest, res: RouteResponse<{ genres: string[] }>): Promise<void> => {
-    try {
-      const { story_id, genres } = req.body as GenresBody;
-      res.json({ genres: await upsertGenre(req.userId!, story_id, genres) });
-    } catch (err) {
-      if (err instanceof StoryNotFoundError) {
-        res.status(404).json({ error: 'Story not found' });
-        return;
-      }
-      throw err;
-    }
+    const { story_id, genres } = req.body as GenresBody;
+    res.json({ genres: await upsertGenre(req.userId!, story_id, genres) });
   },
 );
 

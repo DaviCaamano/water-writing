@@ -1,122 +1,99 @@
 import logger from '#config/logger';
 import type { LoginBody } from '#schemas/user.schemas';
 import bcrypt from 'bcrypt';
-import { PlanRow, UserRow } from '#types/database';
+import { UserRow } from '#types/database';
 import jwt from 'jsonwebtoken';
 import { InvalidCredentialsError, UserNotFoundError } from '#constants/error/custom-errors';
-import { withQuery } from '#utils/database/with-query';
+import pool from '#config/database';
+import { authConfig } from '#config/auth';
 import { LoginResponse } from '#types/shared/response';
 import { parseExpiration } from '#utils/database/parse-expiration';
 import { fetchLegacy } from '#services/story/cannon.service';
-import { isAccessibleSubscriptionStatus } from '#services/stripe/subscription-sync.service';
+import { getUserPlan } from '#services/stripe/subscription-sync.service';
 
 export const login = async (data: LoginBody): Promise<LoginResponse> => {
-  return withQuery(async (client) => {
-    const userResult = await client.query<UserRow>('SELECT * FROM users WHERE email = $1', [
-      data.email,
-    ]);
+  const userResult = await pool.query<UserRow>('SELECT * FROM users WHERE email = $1', [
+    data.email,
+  ]);
 
-    if (userResult.rows.length === 0) {
-      logger.info({ email: data.email }, 'Login failed: unknown email');
-      throw new InvalidCredentialsError();
-    }
+  if (userResult.rows.length === 0) {
+    logger.info({ email: data.email }, 'Login failed: unknown email');
+    throw new InvalidCredentialsError();
+  }
 
-    const user = userResult.rows[0];
-    const passwordMatch = await bcrypt.compare(data.password, user.password_hash);
-    if (!passwordMatch) {
-      logger.info({ userId: user.user_id }, 'Login failed: wrong password');
-      throw new InvalidCredentialsError();
-    }
+  const user = userResult.rows[0];
+  const passwordMatch = await bcrypt.compare(data.password, user.password_hash);
+  if (!passwordMatch) {
+    logger.info({ userId: user.user_id }, 'Login failed: wrong password');
+    throw new InvalidCredentialsError();
+  }
 
-    const expiresIn = process.env.JWT_EXPIRES_IN || '7d';
-    const token = jwt.sign(
-      { userId: user.user_id },
-      process.env.JWT_SECRET as string,
-      { expiresIn } as jwt.SignOptions,
-    );
+  const { jwtSecret, jwtExpiresIn } = authConfig;
+  const token = jwt.sign(
+    { userId: user.user_id },
+    jwtSecret,
+    { expiresIn: jwtExpiresIn } as jwt.SignOptions,
+  );
 
-    const expiresAt = new Date(Date.now() + parseExpiration(expiresIn));
-    await client.query(
-      'INSERT INTO authentication (user_id, token, expires_at) VALUES ($1, $2, $3)',
-      [user.user_id, token, expiresAt],
-    );
+  const expiresAt = new Date(Date.now() + parseExpiration(jwtExpiresIn));
+  await pool.query(
+    'INSERT INTO authentication (user_id, token, expires_at) VALUES ($1, $2, $3)',
+    [user.user_id, token, expiresAt],
+  );
 
-    const planResult = await client.query<PlanRow>(
-      `SELECT plan_type, subscription_status
-       FROM plans
-       WHERE user_id = $1
-       LIMIT 1`,
-      [user.user_id],
-    );
+  const [plan, legacy] = await Promise.all([
+    getUserPlan(pool, user.user_id),
+    fetchLegacy(user.user_id),
+  ]);
 
-    const legacy = await fetchLegacy(user.user_id);
+  logger.info({ userId: user.user_id }, 'User logged in');
 
-    logger.info({ userId: user.user_id }, 'User logged in');
-
-    return {
-      email: user.email,
-      userId: user.user_id,
-      plan:
-        planResult.rows.length > 0 &&
-        isAccessibleSubscriptionStatus(planResult.rows[0].subscription_status)
-          ? planResult.rows[0].plan_type
-          : null,
-      firstName: user.first_name,
-      lastName: user.last_name,
-      legacy,
-      token,
-    };
-  });
+  return {
+    email: user.email,
+    userId: user.user_id,
+    plan,
+    firstName: user.first_name,
+    lastName: user.last_name,
+    legacy,
+    token,
+  };
 };
 
 export const logout = async (token: string) => {
-  return withQuery(async (client) => {
-    const result = await client.query(
-      'DELETE FROM authentication WHERE token = $1 RETURNING user_id',
-      [token],
-    );
-    if (result.rows.length > 0) {
-      logger.info({ userId: result.rows[0].user_id }, 'User logged out');
-    }
-  });
+  const result = await pool.query(
+    'DELETE FROM authentication WHERE token = $1 RETURNING user_id',
+    [token],
+  );
+  if (result.rows.length > 0) {
+    logger.info({ userId: result.rows[0].user_id }, 'User logged out');
+  }
 };
 
 export const getSession = async (userId: string, token: string): Promise<LoginResponse> => {
-  return withQuery(async (client) => {
-    const userResult = await client.query<UserRow>('SELECT * FROM users WHERE user_id = $1', [
-      userId,
-    ]);
+  const userResult = await pool.query<UserRow>('SELECT * FROM users WHERE user_id = $1', [
+    userId,
+  ]);
 
-    if (userResult.rows.length === 0) {
-      logger.info({ userId }, 'Session refresh failed: unknown user');
-      throw new UserNotFoundError();
-    }
+  if (userResult.rows.length === 0) {
+    logger.info({ userId }, 'Session refresh failed: unknown user');
+    throw new UserNotFoundError();
+  }
 
-    const user = userResult.rows[0];
-    const planResult = await client.query<PlanRow>(
-      `SELECT plan_type, subscription_status
-       FROM plans
-       WHERE user_id = $1
-       LIMIT 1`,
-      [userId],
-    );
+  const user = userResult.rows[0];
+  const [plan, legacy] = await Promise.all([
+    getUserPlan(pool, user.user_id),
+    fetchLegacy(user.user_id),
+  ]);
 
-    const legacy = await fetchLegacy(user.user_id);
+  logger.info({ userId: user.user_id }, 'User session refreshed');
 
-    logger.info({ userId: user.user_id }, 'User session refreshed');
-
-    return {
-      email: user.email,
-      userId: user.user_id,
-      plan:
-        planResult.rows.length > 0 &&
-        isAccessibleSubscriptionStatus(planResult.rows[0].subscription_status)
-          ? planResult.rows[0].plan_type
-          : null,
-      firstName: user.first_name,
-      lastName: user.last_name,
-      legacy,
-      token,
-    };
-  });
+  return {
+    email: user.email,
+    userId: user.user_id,
+    plan,
+    firstName: user.first_name,
+    lastName: user.last_name,
+    legacy,
+    token,
+  };
 };

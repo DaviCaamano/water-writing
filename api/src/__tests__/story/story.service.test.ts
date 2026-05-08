@@ -1,7 +1,7 @@
 import { MOCK_GENRES, MOCK_USER_ID } from '#__tests__/constants/mock-user';
 
+jest.mock('#config/database');
 jest.mock('#utils/database/with-transaction');
-jest.mock('#utils/database/with-query');
 jest.mock('#utils/compression', () => ({
   decompressBody: async (buf: unknown) => (typeof buf === 'string' ? buf : String(buf)),
   compressBody: async (text: string) => Buffer.from(text),
@@ -9,7 +9,6 @@ jest.mock('#utils/compression', () => ({
 
 import * as storyService from '#services/story/story.service';
 import { withTransaction } from '#utils/database/with-transaction';
-import { withQuery } from '#utils/database/with-query';
 import {
   MOCK_STORY_ID,
   MOCK_CANNON_ID,
@@ -19,13 +18,11 @@ import {
   MOCK_STORY_RESPONSE,
 } from '#__tests__/constants/mock-story';
 import { createMockClient } from '#__tests__/constants/mock-database';
-import { PoolClient } from 'pg';
 import { mockClear } from '#__tests__/utils/test-wrappers';
 import { StoryNotFoundError, CannonNotFoundError } from '#constants/error/custom-errors';
 import { deleteStory, upsertGenre } from '#services/story/story.service';
 
 const mockWithTransaction = withTransaction as jest.MockedFunction<typeof withTransaction>;
-const mockWithQuery = withQuery as jest.MockedFunction<typeof withQuery>;
 
 describe(
   'fetchStory',
@@ -49,11 +46,9 @@ describe(
   mockClear(() => {
     it('returns a story with its documents', async () => {
       const storyWithDocs = { ...MOCK_STORY, documents: [MOCK_DOC] };
-      const mockClient = createMockClient();
-      mockClient.query
+      mockPool.query
         .mockResolvedValueOnce({ rows: [MOCK_STORY] })
         .mockResolvedValueOnce({ rows: [MOCK_DOC] });
-      mockWithQuery.mockImplementation((callback) => callback(mockClient as PoolClient));
 
       await expect(storyService.fetchStoryWithDocuments(MOCK_STORY_ID)).resolves.toEqual(
         storyWithDocs,
@@ -61,9 +56,7 @@ describe(
     });
 
     it('throws StoryNotFoundError when no story row is returned', async () => {
-      const mockClient = createMockClient();
-      mockClient.query.mockResolvedValueOnce({ rows: [] });
-      mockWithQuery.mockImplementation((callback) => callback(mockClient as PoolClient));
+      mockPool.query.mockResolvedValueOnce({ rows: [] });
 
       await expect(storyService.fetchStoryWithDocuments(MOCK_STORY_ID)).rejects.toThrow(
         StoryNotFoundError,
@@ -77,22 +70,18 @@ describe(
   mockClear(() => {
     it('returns the story when it belongs to the authenticated user', async () => {
       const storyWithDocs = { ...MOCK_STORY, documents: [MOCK_DOC] };
-      const mockClient = createMockClient();
-      mockClient.query
+      mockPool.query
         .mockResolvedValueOnce({ rows: [MOCK_STORY] })
         .mockResolvedValueOnce({ rows: [MOCK_DOC] });
-      mockWithQuery.mockImplementation((callback) => callback(mockClient as PoolClient));
 
       await expect(
         storyService.fetchUserStoryWithDocuments(MOCK_USER_ID, MOCK_STORY_ID),
       ).resolves.toEqual(storyWithDocs);
-      expect(mockClient.query).toHaveBeenCalledWith(expect.any(String), [MOCK_STORY_ID, MOCK_USER_ID]);
+      expect(mockPool.query).toHaveBeenCalledWith(expect.any(String), [MOCK_STORY_ID, MOCK_USER_ID]);
     });
 
     it('throws StoryNotFoundError when the story is missing or not owned by the user', async () => {
-      const mockClient = createMockClient();
-      mockClient.query.mockResolvedValueOnce({ rows: [] });
-      mockWithQuery.mockImplementation((callback) => callback(mockClient as PoolClient));
+      mockPool.query.mockResolvedValueOnce({ rows: [] });
 
       await expect(
         storyService.fetchUserStoryWithDocuments(MOCK_USER_ID, MOCK_STORY_ID),
@@ -243,26 +232,22 @@ describe(
   'upsertGenre',
   mockClear(() => {
     it('adds genres for a story owned by the user and returns the sorted list', async () => {
-      const mockClient = createMockClient();
-      mockClient.query
+      mockPool.query
         .mockResolvedValueOnce({ rows: [{}] })
         .mockResolvedValueOnce(undefined)
         .mockResolvedValueOnce(undefined)
         .mockResolvedValueOnce({
           rows: [{ genre: 'fantasy' }, { genre: 'horror' }],
         });
-      mockWithQuery.mockImplementation((callback) => callback(mockClient as PoolClient));
 
       await expect(upsertGenre(MOCK_USER_ID, MOCK_STORY_ID, MOCK_GENRES)).resolves.toEqual(
         MOCK_GENRES,
       );
-      expect(mockClient.query).toHaveBeenCalledWith(expect.any(String), [MOCK_STORY_ID, MOCK_USER_ID]);
+      expect(mockPool.query).toHaveBeenCalledWith(expect.any(String), [MOCK_STORY_ID, MOCK_USER_ID]);
     });
 
     it('throws StoryNotFoundError when the story is missing or not owned by the user', async () => {
-      const mockClient = createMockClient();
-      mockClient.query.mockResolvedValueOnce({ rows: [] });
-      mockWithQuery.mockImplementation((callback) => callback(mockClient as PoolClient));
+      mockPool.query.mockResolvedValueOnce({ rows: [] });
 
       await expect(upsertGenre(MOCK_USER_ID, MOCK_STORY_ID, MOCK_GENRES)).rejects.toThrow(
         StoryNotFoundError,

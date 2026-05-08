@@ -3,6 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import pinoHttp from 'pino-http';
 import logger from '#config/logger';
+import { AppError } from '#constants/error/custom-errors';
 import stripeRoutes from '#routes/stripe.routes';
 import userRoutes from '#routes/user.routes';
 import storyRoutes from '#routes/story.routes';
@@ -73,6 +74,11 @@ app.get('/health', (_req, res) => {
 app.use((err: Error & { status?: number; type?: string }, _req: Request, res: Response, _next: NextFunction) => {
   if (err instanceof SyntaxError && err.status === 400 && err.type === 'entity.parse.failed') {
     res.status(400).json({ error: 'Malformed JSON' });
+    return;
+  }
+
+  if (err instanceof AppError) {
+    res.status(err.statusCode).json({ error: err.message });
     return;
   }
 
