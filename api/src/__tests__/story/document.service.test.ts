@@ -21,7 +21,7 @@ import {
   MOCK_STORY_ID,
   MOCK_CANNON_ID,
   MOCK_DOC,
-  MOCK_DOCK_RESPONSE,
+  MOCK_DOC_RESPONSE,
   MOCK_CANNON_RESPONSE,
   mockPool,
 } from '#__tests__/constants/mock-story';
@@ -36,7 +36,7 @@ describe(
   mockClear(() => {
     it('should fetch a document by its ID', async () => {
       mockPool.query.mockResolvedValueOnce({ rows: [MOCK_DOC] });
-      expect(await fetchDocument(MOCK_DOC_ID)).toEqual(MOCK_DOCK_RESPONSE);
+      expect(await fetchDocument(MOCK_DOC_ID)).toEqual(MOCK_DOC_RESPONSE);
     });
 
     it('throws DocumentNotFoundError when no row matches the document', async () => {
@@ -54,7 +54,7 @@ describe(
 
       const result = await fetchUserDocument(MOCK_USER_ID, MOCK_DOC_ID);
 
-      expect(result).toEqual(MOCK_DOCK_RESPONSE);
+      expect(result).toEqual(MOCK_DOC_RESPONSE);
       expect(mockPool.query).toHaveBeenCalledWith(expect.stringContaining('JOIN cannons w'), [
         MOCK_DOC_ID,
         MOCK_USER_ID,
@@ -82,7 +82,7 @@ describe(
       mockClient.query.mockResolvedValueOnce({}); // UPDATE predecessor
       mockClient.query.mockResolvedValueOnce({}); // UPDATE successor
       mockClient.query.mockResolvedValueOnce({}); // DELETE doc
-      mockWithTransaction.mockImplementation((callback) => callback(mockClient));
+      mockWithTransaction.mockImplementationOnce((callback) => callback(mockClient));
 
       await expect(deleteDocument(MOCK_USER_ID, MOCK_DOC_ID)).resolves.toBeUndefined();
 
@@ -110,7 +110,7 @@ describe(
       });
       mockClient.query.mockResolvedValueOnce({});
       mockClient.query.mockResolvedValueOnce({});
-      mockWithTransaction.mockImplementation((callback) => callback(mockClient));
+      mockWithTransaction.mockImplementationOnce((callback) => callback(mockClient));
 
       await deleteDocument(MOCK_USER_ID, MOCK_DOC_ID);
 
@@ -128,7 +128,7 @@ describe(
       });
       mockClient.query.mockResolvedValueOnce({});
       mockClient.query.mockResolvedValueOnce({});
-      mockWithTransaction.mockImplementation((callback) => callback(mockClient));
+      mockWithTransaction.mockImplementationOnce((callback) => callback(mockClient));
 
       await deleteDocument(MOCK_USER_ID, MOCK_DOC_ID);
 
@@ -145,7 +145,7 @@ describe(
         rows: [{ ...MOCK_DOC, predecessor_id: null, successor_id: null }],
       });
       mockClient.query.mockResolvedValueOnce({});
-      mockWithTransaction.mockImplementation((callback) => callback(mockClient));
+      mockWithTransaction.mockImplementationOnce((callback) => callback(mockClient));
 
       await deleteDocument(MOCK_USER_ID, MOCK_DOC_ID);
 
@@ -160,7 +160,7 @@ describe(
     it('throws DocumentNotFoundError when no row matches the user/document pair', async () => {
       const mockClient = createMockClient();
       mockClient.query.mockResolvedValueOnce({ rows: [] });
-      mockWithTransaction.mockImplementation((callback) => callback(mockClient));
+      mockWithTransaction.mockImplementationOnce((callback) => callback(mockClient));
 
       await expect(deleteDocument(MOCK_USER_ID, MOCK_DOC_ID)).rejects.toThrow(
         DocumentNotFoundError,
@@ -173,8 +173,8 @@ describe(
   'upsertDocument',
   mockClear(() => {
     it('should create a new document with a new cannon and story when no IDs are provided', async () => {
-      mockWithTransaction.mockImplementation((callback) => callback(mockClient));
       const mockClient = createMockClient();
+      mockWithTransaction.mockImplementationOnce((callback) => callback(mockClient));
       mockClient.query.mockResolvedValueOnce({ rows: [{ cannon_id: MOCK_CANNON_ID }] }); // INSERT cannon
       mockClient.query.mockResolvedValueOnce({ rows: [{ story_id: MOCK_STORY_ID }] }); // INSERT story
       mockClient.query.mockResolvedValueOnce({ rows: [] }); // SELECT predecessor
@@ -189,8 +189,8 @@ describe(
     });
 
     it('should update an existing document when documentId is provided', async () => {
-      mockWithTransaction.mockImplementation((callback) => callback(mockClient as any));
       const mockClient = createMockClient();
+      mockWithTransaction.mockImplementationOnce((callback) => callback(mockClient));
       mockClient.query
         .mockResolvedValueOnce({
           rows: [
@@ -224,8 +224,8 @@ describe(
     });
 
     it('throw DocumentNotFoundError error if provided documentId do not exist in the database', async () => {
-      mockWithTransaction.mockImplementation((callback) => callback(mockClient));
       const mockClient = createMockClient();
+      mockWithTransaction.mockImplementationOnce((callback) => callback(mockClient));
       mockClient.query.mockResolvedValueOnce({ rows: [] }); // Get document, story, and cannon for documentId
 
       await expect(
@@ -238,7 +238,7 @@ describe(
     });
 
     it('throw StoryNotFoundError when storyId does not exist', async () => {
-      mockWithTransaction.mockImplementation((callback) => callback(mockClient as any));
+      mockWithTransaction.mockImplementationOnce((callback) => callback(mockClient as any));
       const mockClient = createMockClient();
       mockClient.query.mockResolvedValueOnce({ rows: [] });
 

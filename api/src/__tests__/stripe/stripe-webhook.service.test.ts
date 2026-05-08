@@ -58,7 +58,7 @@ describe(
           .mockResolvedValueOnce({ rows: [MOCK_PLAN] })
           .mockResolvedValueOnce(undefined);
         mockPool.query.mockResolvedValueOnce({ rows: [MOCK_USER] });
-        mockWithTransaction.mockImplementation((callback) => callback(mockClient as PoolClient));
+        mockWithTransaction.mockImplementationOnce((callback) => callback(mockClient as PoolClient));
 
         await expect(
           handleStripeWebhook(buildEvent('customer.subscription.updated', mockStripeSubscription)),
@@ -141,7 +141,7 @@ describe(
           .mockResolvedValueOnce(undefined);
         mockPool.query.mockResolvedValueOnce({ rows: [MOCK_USER] });
         mockRetrieveSubscription.mockResolvedValueOnce(mockStripeSubscription);
-        mockWithTransaction.mockImplementation((callback) => callback(mockClient as PoolClient));
+        mockWithTransaction.mockImplementationOnce((callback) => callback(mockClient as PoolClient));
 
         await expect(
           handleStripeWebhook(buildEvent('invoice.paid', paidInvoice)),
@@ -166,7 +166,7 @@ describe(
           .mockResolvedValueOnce({ rows: [{ billing_id: 'existing' }] });
         mockPool.query.mockResolvedValueOnce({ rows: [MOCK_USER] });
         mockRetrieveSubscription.mockResolvedValueOnce(mockStripeSubscription);
-        mockWithTransaction.mockImplementation((callback) => callback(mockClient as PoolClient));
+        mockWithTransaction.mockImplementationOnce((callback) => callback(mockClient as PoolClient));
 
         await expect(
           handleStripeWebhook(buildEvent('invoice.paid', paidInvoice)),
@@ -215,7 +215,7 @@ describe(
           .mockResolvedValueOnce(undefined);
         mockPool.query.mockResolvedValueOnce({ rows: [MOCK_USER] });
         mockRetrieveSubscription.mockResolvedValueOnce(mockStripeSubscription);
-        mockWithTransaction.mockImplementation((callback) => callback(mockClient as PoolClient));
+        mockWithTransaction.mockImplementationOnce((callback) => callback(mockClient as PoolClient));
 
         await expect(
           handleStripeWebhook(buildEvent('invoice.payment_failed', failedInvoice)),

@@ -1,6 +1,6 @@
 import {
   MOCK_DOC,
-  MOCK_DOCK_RESPONSE,
+  MOCK_DOC_RESPONSE,
   MOCK_STORY,
   MOCK_STORY_RESPONSE,
   MOCK_CANNON,
@@ -22,7 +22,7 @@ export const DocTypeMap = {
   [DocType.storyRow]: MOCK_STORY,
   [DocType.storyResponse]: MOCK_STORY_RESPONSE,
   [DocType.documentRow]: MOCK_DOC,
-  [DocType.documentResponse]: MOCK_DOCK_RESPONSE,
+  [DocType.documentResponse]: MOCK_DOC_RESPONSE,
 };
 
 // A helper to mock a list of documents

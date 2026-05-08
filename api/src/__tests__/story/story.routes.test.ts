@@ -13,12 +13,15 @@ import * as cannonService from '#services/story/cannon.service';
 import { mockAuthHeaders } from '#__tests__/constants/mock-auth-headers';
 import { mockClear, testAuth } from '#__tests__/utils/test-wrappers';
 import {
+  MOCK_CANNON_ID,
   MOCK_DOC_ID,
-  MOCK_DOCK_RESPONSE,
+  MOCK_DOC_RESPONSE,
   MOCK_STORY,
+  MOCK_STORY_ID,
   MOCK_STORY_RESPONSE,
   MOCK_CANNON_RESPONSE,
 } from '#__tests__/constants/mock-story';
+import { MOCK_USER_ID } from '#__tests__/constants/mock-ids';
 import { DocumentNotFoundError } from '#constants/error/custom-errors';
 
 const mockUpsertDocument = documentService.upsertDocument as jest.Mock;
@@ -35,10 +38,6 @@ const mockUpsertCannon = cannonService.upsertCannon as jest.Mock;
 const mockFetchUserCannon = cannonService.fetchUserCannon as jest.Mock;
 const mockFetchLegacy = cannonService.fetchLegacy as jest.Mock;
 const mockDeleteCannon = cannonService.deleteCannon as jest.Mock;
-
-const MOCK_USER_ID = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11'; // must match MOCK_LOGIN_RESPONSE.userId
-const MOCK_CANNON_ID = 'b1eebc99-9c0b-4ef8-bb6d-6bb9bd380a22';
-const MOCK_STORY_ID = 'c2eebc99-9c0b-4ef8-bb6d-6bb9bd380a33';
 
 describe(
   'POST /story/cannon',
@@ -189,7 +188,7 @@ describe(
     });
 
     it('returns 200 with the document on success', async () => {
-      mockFetchUserDocument.mockResolvedValueOnce(MOCK_DOCK_RESPONSE);
+      mockFetchUserDocument.mockResolvedValueOnce(MOCK_DOC_RESPONSE);
 
       const res = await request(app).get(`/story/document/${MOCK_DOC_ID}`).set(mockAuthHeaders());
 

@@ -35,7 +35,7 @@ describe(
         .mockResolvedValueOnce({
           rows: [{ plan_type: Plan.pro, subscription_status: StripeSubscriptionStatus.active }],
         });
-      mockFetchLegacy.mockImplementation(async () => mockLegacyResponse());
+      mockFetchLegacy.mockImplementationOnce(async () => mockLegacyResponse());
       mockBcryptCompare.mockResolvedValueOnce(true);
       (jwt.sign as jest.Mock).mockReturnValueOnce(MOCK_LOGIN_TOKEN);
 
@@ -77,7 +77,7 @@ describe(
         .mockResolvedValueOnce({
           rows: [{ plan_type: Plan.pro, subscription_status: StripeSubscriptionStatus.active }],
         });
-      mockFetchLegacy.mockImplementation(async () => mockLegacyResponse());
+      mockFetchLegacy.mockImplementationOnce(async () => mockLegacyResponse());
 
       const response = await getSession(MOCK_USER.user_id, MOCK_LOGIN_TOKEN);
 

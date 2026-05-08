@@ -98,7 +98,7 @@ describe(
       mockClient.query
         .mockResolvedValueOnce({ rows: [{ cannon_id: MOCK_CANNON_ID }] })
         .mockResolvedValueOnce({ rows: [{ story_id: MOCK_STORY_ID }] });
-      mockWithTransaction.mockImplementation((callback) => callback(mockClient));
+      mockWithTransaction.mockImplementationOnce((callback) => callback(mockClient));
 
       const fetchSpy = jest
         .spyOn(storyService, 'fetchStoryWithDocuments')
@@ -115,7 +115,7 @@ describe(
       mockClient.query
         .mockResolvedValueOnce({ rows: [{ ...MOCK_STORY, title: 'Old Story', user_id: MOCK_USER_ID }] })
         .mockResolvedValueOnce({});
-      mockWithTransaction.mockImplementation((callback) => callback(mockClient));
+      mockWithTransaction.mockImplementationOnce((callback) => callback(mockClient));
 
       jest.spyOn(storyService, 'fetchStoryWithDocuments').mockResolvedValueOnce({
         ...MOCK_STORY,
@@ -134,7 +134,7 @@ describe(
     it('throws StoryNotFoundError when updating a story that is not owned by the user', async () => {
       const mockClient = createMockClient();
       mockClient.query.mockResolvedValueOnce({ rows: [] });
-      mockWithTransaction.mockImplementation((callback) => callback(mockClient));
+      mockWithTransaction.mockImplementationOnce((callback) => callback(mockClient));
 
       await expect(
         storyService.upsertStory(MOCK_USER_ID, {
@@ -147,7 +147,7 @@ describe(
     it('throws CannonNotFoundError when creating into a missing cannon', async () => {
       const mockClient = createMockClient();
       mockClient.query.mockResolvedValueOnce({ rows: [] });
-      mockWithTransaction.mockImplementation((callback) => callback(mockClient));
+      mockWithTransaction.mockImplementationOnce((callback) => callback(mockClient));
 
       await expect(
         storyService.upsertStory(MOCK_USER_ID, { title: 'New Story', cannonId: MOCK_CANNON_ID }),
@@ -161,7 +161,7 @@ describe(
           rows: [{ ...MOCK_STORY, user_id: MOCK_USER_ID, cannon_id: `${MOCK_CANNON_ID}-other` }],
         })
         .mockResolvedValueOnce({ rows: [] });
-      mockWithTransaction.mockImplementation((callback) => callback(mockClient));
+      mockWithTransaction.mockImplementationOnce((callback) => callback(mockClient));
 
       await expect(
         storyService.upsertStory(MOCK_USER_ID, {

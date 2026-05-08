@@ -11,7 +11,13 @@ import request from 'supertest';
 import app from '#app';
 import * as userService from '#services/user/user.service';
 import { mockAuthHeaders } from '#__tests__/constants/mock-auth-headers';
-import { MOCK_STRONG_PASSWORD, MOCK_SUBSCRIPTION_REQUEST } from '#__tests__/constants/mock-user';
+import {
+  MOCK_LOGIN_EMAIL,
+  MOCK_LOGIN_LAST_NAME,
+  MOCK_STRONG_PASSWORD,
+  MOCK_SUBSCRIPTION_REQUEST,
+  MOCK_USER_ID,
+} from '#__tests__/constants/mock-user';
 import { mockClear, testAuth } from '#__tests__/utils/test-wrappers';
 
 app.set('trust proxy', true);
@@ -20,16 +26,6 @@ const mockCreateUser = userService.createUser as jest.MockedFunction<typeof user
 const mockUpdateUser = userService.updateUser as jest.MockedFunction<typeof userService.updateUser>;
 const mockDeleteUser = userService.deleteUser as jest.MockedFunction<typeof userService.deleteUser>;
 const mockSubscribe = userService.subscribe as jest.MockedFunction<typeof userService.subscribe>;
-
-const MOCK_LOGIN_RESPONSE = {
-  email: 'jane@example.com',
-  userId: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
-  plan: null,
-  firstName: 'Jane',
-  lastName: 'Doe',
-  legacy: [],
-  token: 'mock-jwt-token',
-};
 
 // POST /user/create
 describe(
@@ -144,10 +140,10 @@ describe(
 
     it('returns 200 with the updated user payload on success', async () => {
       mockUpdateUser.mockResolvedValueOnce({
-        userId: MOCK_LOGIN_RESPONSE.userId,
+        userId: MOCK_USER_ID,
         firstName: 'Janet',
-        lastName: MOCK_LOGIN_RESPONSE.lastName,
-        email: MOCK_LOGIN_RESPONSE.email,
+        lastName: MOCK_LOGIN_LAST_NAME,
+        email: MOCK_LOGIN_EMAIL,
         plan: null,
       });
 
@@ -158,13 +154,13 @@ describe(
 
       expect(res.status).toBe(200);
       expect(res.body).toEqual({
-        userId: MOCK_LOGIN_RESPONSE.userId,
+        userId: MOCK_USER_ID,
         firstName: 'Janet',
-        lastName: MOCK_LOGIN_RESPONSE.lastName,
-        email: MOCK_LOGIN_RESPONSE.email,
+        lastName: MOCK_LOGIN_LAST_NAME,
+        email: MOCK_LOGIN_EMAIL,
         plan: null,
       });
-      expect(mockUpdateUser).toHaveBeenCalledWith(MOCK_LOGIN_RESPONSE.userId, {
+      expect(mockUpdateUser).toHaveBeenCalledWith(MOCK_USER_ID, {
         firstName: 'Janet',
       });
     });
@@ -192,7 +188,7 @@ describe(
       const res = await request(app).delete('/user/deleteme').set(mockAuthHeaders()).send();
       expect(res.status).toBe(200);
       expect(res.body.status).toBe('ok');
-      expect(mockDeleteUser).toHaveBeenCalledWith(MOCK_LOGIN_RESPONSE.userId);
+      expect(mockDeleteUser).toHaveBeenCalledWith(MOCK_USER_ID);
     });
 
     it('returns 404 when the authenticated user no longer exists', async () => {
@@ -248,7 +244,7 @@ describe(
         yearPlan: false,
       });
       expect(mockSubscribe).toHaveBeenCalledWith(
-        MOCK_LOGIN_RESPONSE.userId,
+        MOCK_USER_ID,
         MOCK_SUBSCRIPTION_REQUEST,
       );
     });
@@ -264,7 +260,7 @@ describe(
       expect(res.status).toBe(402);
       expect(res.body.error).toBe('Payment failed');
       expect(mockSubscribe).toHaveBeenCalledWith(
-        MOCK_LOGIN_RESPONSE.userId,
+        MOCK_USER_ID,
         MOCK_SUBSCRIPTION_REQUEST,
       );
     });

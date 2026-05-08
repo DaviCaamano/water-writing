@@ -57,7 +57,7 @@ export const MOCK_DOC: DecompressedDocumentRow = {
   updated_at: MOCK_DATE,
 };
 
-export const MOCK_DOCK_RESPONSE: DocumentResponse = {
+export const MOCK_DOC_RESPONSE: DocumentResponse = {
   documentId: MOCK_DOC_ID,
   storyId: MOCK_STORY_ID,
   title: 'Test Document',

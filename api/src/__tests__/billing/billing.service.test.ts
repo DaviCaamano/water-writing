@@ -5,11 +5,21 @@ import {
   MOCK_BILLING_ROW,
   MOCK_USER_ID,
 } from '#__tests__/constants/mock-user';
+import { mockClear } from '#__tests__/utils/test-wrappers';
 
-describe('BillingService', () => {
-  it('should return billing history for a user', async () => {
-    mockPool.query.mockResolvedValueOnce({ rows: [MOCK_BILLING_ROW] });
-    const result = await getBillingHistory(MOCK_USER_ID);
-    expect(result).toEqual([MOCK_BILLING_RESPONSE]);
-  });
-});
+describe(
+  'BillingService',
+  mockClear(() => {
+    it('should return billing history for a user', async () => {
+      mockPool.query.mockResolvedValueOnce({ rows: [MOCK_BILLING_ROW] });
+      const result = await getBillingHistory(MOCK_USER_ID);
+      expect(result).toEqual([MOCK_BILLING_RESPONSE]);
+    });
+
+    it('should return an empty array when user has no billing records', async () => {
+      mockPool.query.mockResolvedValueOnce({ rows: [] });
+      const result = await getBillingHistory(MOCK_USER_ID);
+      expect(result).toEqual([]);
+    });
+  }),
+);

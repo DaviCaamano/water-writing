@@ -68,7 +68,7 @@ describe(
         .mockResolvedValueOnce(undefined)
         .mockResolvedValueOnce({ rows: [MOCK_USER] })
         .mockResolvedValueOnce({ rows: [MOCK_PLAN] });
-      mockWithTransaction.mockImplementation((callback) => callback(mockClient as PoolClient));
+      mockWithTransaction.mockImplementationOnce((callback) => callback(mockClient as PoolClient));
 
       await expect(updateUser(MOCK_USER_ID, MOCK_UPDATING_USER)).resolves.toEqual({
         userId: MOCK_USER.user_id,
@@ -85,7 +85,7 @@ describe(
         .mockResolvedValueOnce(undefined)
         .mockResolvedValueOnce({ rows: [] })
         .mockResolvedValueOnce({ rows: [] });
-      mockWithTransaction.mockImplementation((callback) => callback(mockClient as PoolClient));
+      mockWithTransaction.mockImplementationOnce((callback) => callback(mockClient as PoolClient));
 
       await expect(updateUser(MOCK_USER_ID, { firstName: 'Jane' })).rejects.toThrow(
         UserNotFoundError,
@@ -122,7 +122,7 @@ describe(
         .mockResolvedValueOnce({ rows: [] })
         .mockResolvedValueOnce(undefined)
         .mockResolvedValueOnce(undefined);
-      mockWithTransaction.mockImplementation((callback) => callback(mockClient as PoolClient));
+      mockWithTransaction.mockImplementationOnce((callback) => callback(mockClient as PoolClient));
       (stripe.paymentMethods.attach as jest.Mock).mockResolvedValueOnce({});
       (stripe.customers.update as jest.Mock).mockResolvedValueOnce(mockStripCustomer);
       (stripe.subscriptions.create as jest.Mock).mockResolvedValueOnce(mockStripeSubscription);
@@ -142,7 +142,7 @@ describe(
         .mockResolvedValueOnce(undefined)
         .mockResolvedValueOnce(undefined)
         .mockResolvedValueOnce(undefined);
-      mockWithTransaction.mockImplementation((callback) => callback(mockClient as PoolClient));
+      mockWithTransaction.mockImplementationOnce((callback) => callback(mockClient as PoolClient));
       (stripe.customers.create as jest.Mock).mockResolvedValueOnce(mockStripCustomer);
       (stripe.paymentMethods.attach as jest.Mock).mockResolvedValueOnce({});
       (stripe.customers.update as jest.Mock).mockResolvedValueOnce(mockStripCustomer);
@@ -155,7 +155,7 @@ describe(
     it('throws UserNotFoundError when the user record is missing', async () => {
       const mockClient = createMockClient();
       mockClient.query.mockResolvedValueOnce({ rows: [] });
-      mockWithTransaction.mockImplementation((callback) => callback(mockClient as PoolClient));
+      mockWithTransaction.mockImplementationOnce((callback) => callback(mockClient as PoolClient));
 
       await expect(subscribe(MOCK_USER_ID, MOCK_SUBSCRIPTION_REQUEST)).rejects.toThrow(
         UserNotFoundError,
@@ -169,7 +169,7 @@ describe(
         .mockResolvedValueOnce({ rows: [{ ...MOCK_USER, stripe_customer_id: null }] })
         .mockResolvedValueOnce({ rows: [] })
         .mockResolvedValueOnce(undefined);
-      mockWithTransaction.mockImplementation((callback) => callback(mockClient as PoolClient));
+      mockWithTransaction.mockImplementationOnce((callback) => callback(mockClient as PoolClient));
 
       await expect(
         subscribe(MOCK_USER_ID, { planType: Plan.none, yearPlan: false }),
@@ -191,7 +191,7 @@ describe(
         .mockResolvedValueOnce({ rows: [{ ...MOCK_USER, stripe_customer_id: null }] })
         .mockResolvedValueOnce({ rows: [] })
         .mockResolvedValueOnce(undefined);
-      mockWithTransaction.mockImplementation((callback) => callback(mockClient as PoolClient));
+      mockWithTransaction.mockImplementationOnce((callback) => callback(mockClient as PoolClient));
       (stripe.customers.create as jest.Mock).mockResolvedValueOnce(mockStripCustomer);
       (stripe.paymentMethods.attach as jest.Mock).mockResolvedValueOnce({});
       (stripe.customers.update as jest.Mock).mockResolvedValueOnce(mockStripCustomer);
