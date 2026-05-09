@@ -35,7 +35,9 @@ export function toJsonCamelCase<T extends object | object[], R extends object | 
   for (const [key, value] of Object.entries(obj)) {
     const camelCaseKey = toCamelCase(key);
 
-    if (value !== null && typeof value === 'object') {
+    if (value instanceof Date) {
+      converted[camelCaseKey] = value;
+    } else if (value !== null && typeof value === 'object') {
       converted[camelCaseKey] = toJsonCamelCase(value as Record<string, unknown>);
     } else {
       converted[camelCaseKey] = value;

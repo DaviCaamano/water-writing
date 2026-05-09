@@ -105,8 +105,11 @@ export const MOCK_BILLING_ROW: BillingRow = {
 
 export const MOCK_BILLING_RESPONSE: BillingResponse = {
   billingId: MOCK_BILLING_ID,
+  userId: MOCK_USER_ID,
   planType: Plan.pro,
   isYearPlan: false,
   amountCents: 152315,
+  stripePaymentIntentId: MOCK_STRIPE_PAYMENT_INTENT_ID,
+  stripeInvoiceId: MOCK_STRIPE_INVOICE_ID,
   billedAt: MOCK_DATE,
 };
