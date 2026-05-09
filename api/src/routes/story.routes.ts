@@ -199,10 +199,14 @@ router.post(
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
 
-    for await (const text of stream) {
-      res.write(`data: ${JSON.stringify({ text })}\n\n`);
+    try {
+      for await (const text of stream) {
+        res.write(`data: ${JSON.stringify({ text })}\n\n`);
+      }
+      res.write('data: [DONE]\n\n');
+    } catch {
+      res.write(`data: ${JSON.stringify({ error: 'Stream interrupted' })}\n\n`);
     }
-    res.write('data: [DONE]\n\n');
     res.end();
   },
 );

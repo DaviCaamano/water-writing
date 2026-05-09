@@ -66,9 +66,12 @@ export interface UserResponse {
 
 export interface BillingResponse {
   billingId: string;
+  userId: string;
   planType: Plan;
   isYearPlan: boolean;
   amountCents: number;
+  stripePaymentIntentId: string | null;
+  stripeInvoiceId: string | null;
   billedAt: Date;
 }
 

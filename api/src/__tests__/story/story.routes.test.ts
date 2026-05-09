@@ -264,7 +264,7 @@ describe(
 
       expect(res.status).toBe(200);
       expect(res.body).toMatchObject({ cannonId: MOCK_CANNON_ID, title: 'Test Cannon' });
-      expect(mockFetchUserCannon).toHaveBeenCalledWith(MOCK_USER_ID, MOCK_CANNON_ID);
+      expect(mockFetchUserCannon).toHaveBeenCalledWith(MOCK_CANNON_ID, MOCK_USER_ID);
     });
 
     it('returns 404 when the cannon is not found', async () => {

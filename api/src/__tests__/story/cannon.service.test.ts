@@ -7,7 +7,6 @@ import {
   MOCK_DOC_ID,
   MOCK_STORY_ID,
   MOCK_CANNON_ID,
-  MOCK_CANNON_FLAT_ROW,
   MOCK_CANNON_RESPONSE,
   MOCK_CANNON,
   MOCK_STORY,
@@ -16,7 +15,6 @@ import {
 
 import { CannonNotFoundError } from '#constants/error/custom-errors';
 import {
-  CannonFlatRow,
   CannonRowWithStories,
   DecompressedDocumentRow,
   StoryRow,
@@ -78,47 +76,22 @@ describe(
   }),
 );
 
-const toFlatRows = (cannon: CannonRowWithStories): CannonFlatRow[] => {
-  const base = {
-    cannon_id: cannon.cannon_id,
-    user_id: cannon.user_id,
-    cannon_title: cannon.title,
-    cannon_created_at: cannon.created_at,
-    cannon_updated_at: cannon.updated_at,
-  };
-  const stories = cannon.stories as StoryRowWithDocuments[];
-  if (stories.length === 0) {
-    return [{ ...base, story_id: null, story_title: null, story_predecessor_id: null, story_successor_id: null, story_created_at: null, story_updated_at: null, document_id: null, doc_title: null, doc_predecessor_id: null, doc_successor_id: null, doc_created_at: null, doc_updated_at: null, body: null }];
-  }
-  return stories.flatMap((story): CannonFlatRow[] => {
-    const storyBase = { ...base, story_id: story.story_id, story_title: story.title, story_predecessor_id: story.predecessor_id, story_successor_id: story.successor_id, story_created_at: story.created_at, story_updated_at: story.updated_at };
-    if (story.documents.length === 0) {
-      return [{ ...storyBase, document_id: null, doc_title: null, doc_predecessor_id: null, doc_successor_id: null, doc_created_at: null, doc_updated_at: null, body: null }];
-    }
-    return story.documents.map((doc) => ({
-      ...storyBase,
-      document_id: doc.document_id,
-      doc_title: doc.title,
-      doc_predecessor_id: doc.predecessor_id,
-      doc_successor_id: doc.successor_id,
-      doc_created_at: doc.created_at,
-      doc_updated_at: doc.updated_at,
-      body: Buffer.from(doc.body),
-    }));
-  });
-};
-
 describe(
   'fetchCannon',
   mockClear(() => {
     it('should throw CannonNotFoundError when the cannon does not exist', async () => {
-      mockPool.query.mockResolvedValueOnce({ rows: [] });
+      mockPool.query
+        .mockResolvedValueOnce({ rows: [] }) // SELECT cannons
+        .mockResolvedValueOnce({ rows: [] }); // SELECT stories (parallel)
 
       await expect(cannonService.fetchCannon(MOCK_CANNON_ID)).rejects.toThrow(CannonNotFoundError);
     });
 
     it('should return the cannon with nested stories and documents', async () => {
-      mockPool.query.mockResolvedValueOnce({ rows: [MOCK_CANNON_FLAT_ROW] });
+      mockPool.query
+        .mockResolvedValueOnce({ rows: [MOCK_CANNON] })
+        .mockResolvedValueOnce({ rows: [MOCK_STORY] })
+        .mockResolvedValueOnce({ rows: [MOCK_DOC] });
 
       const result = await cannonService.fetchCannon(MOCK_CANNON_ID);
 
@@ -155,8 +128,9 @@ describe(
     });
 
     it('should return a mapped cannon with no stories', async () => {
-      const noStoriesRow: CannonFlatRow = { ...MOCK_CANNON_FLAT_ROW, story_id: null, story_title: null, story_predecessor_id: null, story_successor_id: null, story_created_at: null, story_updated_at: null, document_id: null, doc_title: null, doc_predecessor_id: null, doc_successor_id: null, doc_created_at: null, doc_updated_at: null, body: null };
-      mockPool.query.mockResolvedValueOnce({ rows: [noStoriesRow] });
+      mockPool.query
+        .mockResolvedValueOnce({ rows: [MOCK_CANNON] }) // SELECT cannons
+        .mockResolvedValueOnce({ rows: [] }); // SELECT stories
 
       const result = await cannonService.fetchCannon(MOCK_CANNON_ID);
       expect(result).toEqual(MOCK_CANNON_RESPONSE);
@@ -171,7 +145,20 @@ describe(
         [9, 3, 5, 1],
       ]);
 
-      mockPool.query.mockResolvedValueOnce({ rows: toFlatRows(cannons[0]!) });
+      // fetchCannon handles one cannon at a time — provide only the first cannon's stories/docs
+      const singleCannon = cannons[0]!;
+      const cannonList = [{ ...singleCannon, stories: undefined }];
+      const storyList = (singleCannon.stories as StoryRowWithDocuments[]).map(
+        ({ documents: _, ...story }) => story,
+      );
+      const documentList = (singleCannon.stories as StoryRowWithDocuments[]).reduce<
+        DecompressedDocumentRow[]
+      >((acc, story) => [...acc, ...story.documents], []);
+
+      mockPool.query
+        .mockResolvedValueOnce({ rows: cannonList })
+        .mockResolvedValueOnce({ rows: storyList })
+        .mockResolvedValueOnce({ rows: documentList });
 
       const result = await cannonService.fetchCannon(MOCK_CANNON_ID);
       expect(result).not.toBeNull();
@@ -184,7 +171,10 @@ describe(
   'fetchCannon (with userId)',
   mockClear(() => {
     it('returns the cannon when it belongs to the authenticated user', async () => {
-      mockPool.query.mockResolvedValueOnce({ rows: [MOCK_CANNON_FLAT_ROW] });
+      mockPool.query
+        .mockResolvedValueOnce({ rows: [MOCK_CANNON] })
+        .mockResolvedValueOnce({ rows: [MOCK_STORY] })
+        .mockResolvedValueOnce({ rows: [MOCK_DOC] });
 
       await expect(fetchCannon(MOCK_CANNON_ID, MOCK_USER_ID)).resolves.toMatchObject({
         cannonId: MOCK_CANNON_ID,
@@ -197,7 +187,9 @@ describe(
     });
 
     it('throws CannonNotFoundError when the cannon is missing or owned by another user', async () => {
-      mockPool.query.mockResolvedValueOnce({ rows: [] });
+      mockPool.query
+        .mockResolvedValueOnce({ rows: [] })
+        .mockResolvedValueOnce({ rows: [] });
 
       await expect(fetchCannon(MOCK_CANNON_ID, MOCK_USER_ID)).rejects.toThrow(
         CannonNotFoundError,
@@ -231,7 +223,9 @@ describe(
   'fetchLegacy',
   mockClear(() => {
     it('should return an empty array when user has no cannons', async () => {
-      mockPool.query.mockResolvedValueOnce({ rows: [] });
+      mockPool.query
+        .mockResolvedValueOnce({ rows: [] }) // SELECT cannons
+        .mockResolvedValueOnce({ rows: [] }); // SELECT stories (parallel)
       expect(await fetchLegacy(MOCK_USER_ID)).toEqual([]);
     });
 
