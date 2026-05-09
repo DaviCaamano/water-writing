@@ -24,7 +24,7 @@ export const upsertCannon = async (
   const { cannonId, title } = data;
 
   if (cannonId) {
-    assertFound(await cannonRepo.exists(pool, cannonId, userId), CannonNotFoundError);
+    await cannonRepo.exists(pool, cannonId, userId, CannonNotFoundError);
     await cannonRepo.updateTitle(pool, cannonId, title);
     return fetchCannonFn(cannonId);
   } else {

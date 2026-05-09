@@ -69,7 +69,7 @@ const updateExistingStory = async (
   }
 
   if (cannonId && cannonId !== existing.cannon_id) {
-    assertFound(await cannonRepo.exists(client, cannonId, userId), CannonNotFoundError);
+    await cannonRepo.exists(client, cannonId, userId, CannonNotFoundError);
     await storyRepo.updateCannonId(client, storyId, cannonId);
   }
 
@@ -85,7 +85,7 @@ const createNewStory = async (
   let resolvedCannonId = cannonId;
 
   if (resolvedCannonId) {
-    assertFound(await cannonRepo.exists(client, resolvedCannonId, userId), CannonNotFoundError);
+    await cannonRepo.exists(client, resolvedCannonId, userId, CannonNotFoundError);
   } else {
     const newCannon = await cannonRepo.insert(client, userId, 'Untitled Cannon');
     resolvedCannonId = newCannon.rows[0]!.cannon_id;
@@ -95,7 +95,10 @@ const createNewStory = async (
   return newStory.rows[0]!.story_id;
 };
 
-export const upsertStory = async (userId: string, data: UpsertStoryBody): Promise<StoryResponse> => {
+export const upsertStory = async (
+  userId: string,
+  data: UpsertStoryBody,
+): Promise<StoryResponse> => {
   const { storyId, title, cannonId } = data;
 
   const persistedStoryId = await withTransaction(async (client) => {

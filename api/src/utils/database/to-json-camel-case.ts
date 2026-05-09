@@ -13,7 +13,7 @@ import {
   StoryResponse,
 } from '#types/shared/response';
 import { toCamelCase } from '#utils/to-camel-case';
-import { orderLinkedDocs } from '#utils/order-linked-docs';
+import { orderLinkedDocs } from '#utils/story/order-linked-docs';
 
 export function toJsonCamelCase<T extends object[], R extends object[] = Record<string, unknown>[]>(
   obj: T,

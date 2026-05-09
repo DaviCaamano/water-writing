@@ -1,5 +1,5 @@
 import { DocumentResponse, StoryResponse, CannonResponse } from '#types/shared/response';
-import { orderLinkedDocs } from '#utils/order-linked-docs';
+import { orderLinkedDocs } from '#utils/story/order-linked-docs';
 import { Document, Story, Cannon } from '~types/story';
 
 export const mapDocumentState = (response: DocumentResponse): Document => {

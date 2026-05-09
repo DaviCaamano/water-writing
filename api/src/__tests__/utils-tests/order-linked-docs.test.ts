@@ -1,4 +1,4 @@
-import { orderLinkedDocs } from '#utils/order-linked-docs';
+import { orderLinkedDocs } from '#utils/story/order-linked-docs';
 import { DocumentResponse } from '#types/shared/response';
 import { MOCK_DATE } from '#__tests__/constants/mock-basic';
 import { MOCK_DOC_ID, MOCK_STORY_ID } from '#__tests__/constants/mock-story';
