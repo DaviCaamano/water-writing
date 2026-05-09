@@ -22,8 +22,11 @@ export const Editor = () => {
   const hasInitialized = useRef(false);
   const titleRef = useRef(title);
   const bodyRef = useRef(body);
-  titleRef.current = title;
-  bodyRef.current = body;
+
+  useEffect(() => {
+    titleRef.current = title;
+    bodyRef.current = body;
+  });
 
   const [editor, setEditor] = useState<TiptapEditor | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
