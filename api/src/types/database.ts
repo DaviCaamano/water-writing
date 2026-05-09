@@ -99,6 +99,27 @@ export interface BillingRow {
   billed_at: Date;
 }
 
+export interface CannonFlatRow {
+  cannon_id: string;
+  user_id: string;
+  cannon_title: string;
+  cannon_created_at: Date;
+  cannon_updated_at: Date;
+  story_id: string | null;
+  story_title: string | null;
+  story_predecessor_id: string | null;
+  story_successor_id: string | null;
+  story_created_at: Date | null;
+  story_updated_at: Date | null;
+  document_id: string | null;
+  doc_title: string | null;
+  doc_predecessor_id: string | null;
+  doc_successor_id: string | null;
+  doc_created_at: Date | null;
+  doc_updated_at: Date | null;
+  body: Buffer | null;
+}
+
 export interface AuthenticationRow {
   auth_id: string;
   user_id: string;
