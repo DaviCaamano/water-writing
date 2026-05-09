@@ -87,7 +87,7 @@ export const HomeView = ({ currentView }: HomeViewProps) => {
   );
 };
 
-function renderView(view: ViewMode, currentDocumentId: string | null) {
+const renderView = (view: ViewMode, currentDocumentId: string | null) => {
   switch (view) {
     case ViewMode.editor:
       return <DynamicEditor key={currentDocumentId ?? 'no-doc'} />;
@@ -100,4 +100,4 @@ function renderView(view: ViewMode, currentDocumentId: string | null) {
     default:
       return assertNever(view);
   }
-}
+};

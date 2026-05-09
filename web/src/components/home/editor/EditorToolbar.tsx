@@ -38,7 +38,7 @@ interface ToolButtonProps {
   onClick: () => void;
 }
 
-function ToolButton({ icon, label, shortcut, active, disabled, onClick }: ToolButtonProps) {
+const ToolButton = ({ icon, label, shortcut, active, disabled, onClick }: ToolButtonProps) => {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
@@ -72,13 +72,13 @@ function ToolButton({ icon, label, shortcut, active, disabled, onClick }: ToolBu
       </TooltipContent>
     </Tooltip>
   );
-}
+};
 
-function Separator() {
+const Separator = () => {
   return <div aria-hidden='true' className='mx-1 h-3.5 w-px bg-temp opacity-15 shrink-0' />;
-}
+};
 
-export function EditorToolbar({ editor }: EditorToolbarProps) {
+export const EditorToolbar = ({ editor }: EditorToolbarProps) => {
   const state = useEditorState({
     editor,
     selector: ({ editor }) => {
@@ -295,4 +295,4 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
       </Tooltip>
     </div>
   );
-}
+};

@@ -25,7 +25,7 @@ interface UserMenuProps {
 
 type MenuItemAction = 'settings' | 'gallery' | 'upgrade' | 'logout' | 'sign-in';
 
-export function UserMenu({ onOpenAuth, onOpenSettings }: UserMenuProps) {
+export const UserMenu = ({ onOpenAuth, onOpenSettings }: UserMenuProps) => {
   const { isLoggedIn, plan, logout, firstName, lastName, email } = useUserStore();
   const [menuOpen, setMenuOpen] = useState(false);
   const [waterOpen, setWaterOpen] = useState(false);
@@ -200,4 +200,4 @@ export function UserMenu({ onOpenAuth, onOpenSettings }: UserMenuProps) {
       </DropdownMenu>
     </div>
   );
-}
+};

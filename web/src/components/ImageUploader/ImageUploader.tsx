@@ -4,7 +4,7 @@ import { useState, useRef } from 'react';
 import { uploadCannonImage } from '~lib/actions/upload-image-s3';
 import Image from 'next/image';
 
-export function ImageUploader({ cannonId }: { cannonId: string }) {
+export const ImageUploader = ({ cannonId }: { cannonId: string }) => {
   const [loading, setLoading] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -58,4 +58,4 @@ export function ImageUploader({ cannonId }: { cannonId: string }) {
       )}
     </div>
   );
-}
+};

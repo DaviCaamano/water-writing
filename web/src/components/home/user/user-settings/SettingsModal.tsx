@@ -18,11 +18,11 @@ interface SettingsModalProps {
   initialSection?: SettingsSection;
 }
 
-export function SettingsModal({
+export const SettingsModal = ({
   open,
   onOpenChange,
   initialSection = SettingsSection.general,
-}: SettingsModalProps) {
+}: SettingsModalProps) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange} className='-settings-dialog-'>
       {open ? (
@@ -34,15 +34,15 @@ export function SettingsModal({
       ) : null}
     </Dialog>
   );
-}
+};
 
-function SettingsModalContent({
+const SettingsModalContent = ({
   initialSection,
   onClose,
 }: {
   initialSection: SettingsSection;
   onClose: () => void;
-}) {
+}) => {
   const [activeSection, setActiveSection] = useState<SettingsSection>(initialSection);
 
   const sections: { key: SettingsSection; label: string }[] = [
@@ -135,4 +135,4 @@ function SettingsModalContent({
       </DialogPrimitive.Content>
     </DialogPortal>
   );
-}
+};

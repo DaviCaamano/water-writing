@@ -3,9 +3,9 @@ import { DecompressedDocumentRow } from '#types/database';
 import { decompressBody } from '#utils/compression';
 import * as documentRepo from '#repositories/document.repository';
 
-export async function fetchDocumentsForStories(
+export const fetchDocumentsForStories = async (
   storyIds: string[],
-): Promise<Map<string, DecompressedDocumentRow[]>> {
+): Promise<Map<string, DecompressedDocumentRow[]>> => {
   const docsByStory = new Map<string, DecompressedDocumentRow[]>();
   if (storyIds.length === 0) return docsByStory;
 
@@ -25,4 +25,4 @@ export async function fetchDocumentsForStories(
   }
 
   return docsByStory;
-}
+};

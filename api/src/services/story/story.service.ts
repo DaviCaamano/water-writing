@@ -18,16 +18,15 @@ export const fetchStory = async (storyId: string): Promise<StoryRowWithDocuments
   return assertFound(result, StoryNotFoundError) as StoryRowWithDocuments;
 };
 
-async function decompressDocumentRows(
+const decompressDocumentRows = async (
   rows: DocumentRowWithBody[],
-): Promise<StoryRowWithDocuments['documents']> {
-  return Promise.all(
+): Promise<StoryRowWithDocuments['documents']> =>
+  Promise.all(
     rows.map(async (doc) => ({
       ...doc,
       body: doc.body ? await decompressBody(doc.body) : '',
     })),
   );
-}
 
 export const fetchStoryWithDocuments = async (storyId: string): Promise<StoryRowWithDocuments> => {
   const story = assertFound(await storyRepo.findById(pool, storyId), StoryNotFoundError);
@@ -53,13 +52,13 @@ export const fetchUserStoryWithDocuments = async (
   };
 };
 
-async function updateExistingStory(
+const updateExistingStory = async (
   client: Queryable,
   userId: string,
   storyId: string,
   title: string | undefined,
   cannonId: string | undefined,
-): Promise<string> {
+): Promise<string> => {
   const existing = assertFound(
     await storyRepo.findByIdWithUserOwnership(client, storyId, userId),
     StoryNotFoundError,
@@ -75,14 +74,14 @@ async function updateExistingStory(
   }
 
   return storyId;
-}
+};
 
-async function createNewStory(
+const createNewStory = async (
   client: Queryable,
   userId: string,
   title: string | undefined,
   cannonId: string | undefined,
-): Promise<string> {
+): Promise<string> => {
   let resolvedCannonId = cannonId;
 
   if (resolvedCannonId) {
@@ -94,9 +93,9 @@ async function createNewStory(
 
   const newStory = await storyRepo.insert(client, resolvedCannonId!, title ?? null);
   return newStory.rows[0]!.story_id;
-}
+};
 
-export async function upsertStory(userId: string, data: UpsertStoryBody): Promise<StoryResponse> {
+export const upsertStory = async (userId: string, data: UpsertStoryBody): Promise<StoryResponse> => {
   const { storyId, title, cannonId } = data;
 
   const persistedStoryId = await withTransaction(async (client) => {
@@ -107,16 +106,16 @@ export async function upsertStory(userId: string, data: UpsertStoryBody): Promis
   });
 
   return mapStoryResponse(await fetchStoryWithDocuments(persistedStoryId));
-}
+};
 
-export async function deleteStory(userId: string, storyId: string): Promise<void> {
+export const deleteStory = async (userId: string, storyId: string): Promise<void> => {
   const result = await storyRepo.deleteByIdAndUser(pool, storyId, userId);
   if (result.rowCount === 0) {
     throw new StoryNotFoundError();
   }
-}
+};
 
-export async function fetchUserStories(userId: string): Promise<StoryResponse[]> {
+export const fetchUserStories = async (userId: string): Promise<StoryResponse[]> => {
   const storiesResult = await storyRepo.findByUserId(pool, userId);
 
   if (storiesResult.rows.length === 0) return [];
@@ -127,9 +126,9 @@ export async function fetchUserStories(userId: string): Promise<StoryResponse[]>
   return storiesResult.rows.map((story) =>
     mapStoryResponse(story, docsByStory.get(story.story_id) ?? []),
   );
-}
+};
 
-export async function upsertGenre(userId: string, storyId: string, genres: string[]) {
+export const upsertGenre = async (userId: string, storyId: string, genres: string[]) => {
   assertFound(await storyRepo.userOwnsStory(pool, storyId, userId), StoryNotFoundError);
 
   for (const genre of genres) {
@@ -138,4 +137,4 @@ export async function upsertGenre(userId: string, storyId: string, genres: strin
 
   const result = await genreRepo.findByStoryId(pool, storyId);
   return result.rows.map((r) => r.genre as string);
-}
+};

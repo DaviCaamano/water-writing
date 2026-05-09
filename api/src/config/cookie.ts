@@ -5,12 +5,10 @@ import { authConfig } from '#config/auth';
 
 export const TOKEN_COOKIE_NAME = 'token';
 
-export function tokenCookieOptions(): CookieOptions {
-  return {
-    httpOnly: true,
-    secure: env.NODE_ENV === 'production',
-    sameSite: 'strict',
-    path: '/',
-    maxAge: parseExpiration(authConfig.jwtExpiresIn),
-  };
-}
+export const tokenCookieOptions = (): CookieOptions => ({
+  httpOnly: true,
+  secure: env.NODE_ENV === 'production',
+  sameSite: 'strict',
+  path: '/',
+  maxAge: parseExpiration(authConfig.jwtExpiresIn),
+});

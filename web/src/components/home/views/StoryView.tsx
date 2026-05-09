@@ -20,7 +20,7 @@ import { queryKeys } from '~types/lib/tanstack-query/query-keys';
 import Image from 'next/image';
 import { promptForTitle, generateUntitledName } from '~utils/catalog-helpers';
 
-function summarizeDocument(body: string): string {
+const summarizeDocument = (body: string): string => {
   const trimmed = body.trim();
 
   if (!trimmed) {
@@ -32,9 +32,9 @@ function summarizeDocument(body: string): string {
   }
 
   return `${trimmed.slice(0, 117)}...`;
-}
+};
 
-export function StoryView() {
+export const StoryView = () => {
   const { currentCannonId, currentStoryId, navigateToEditor } = useNavigationStore();
   const { data: currentStory } = useStoryQuery(currentStoryId);
   const { data: currentCannon } = useCannonQuery(currentCannonId);
@@ -172,4 +172,4 @@ export function StoryView() {
       )}
     </CatalogShell>
   );
-}
+};

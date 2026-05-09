@@ -33,11 +33,10 @@ import * as billingRepo from '#repositories/billing.repository';
 
 const SALT_ROUNDS = 12;
 
-function isUniqueViolation(error: unknown): boolean {
-  return typeof error === 'object' && error !== null && 'code' in error && error.code === '23505';
-}
+const isUniqueViolation = (error: unknown): boolean =>
+  typeof error === 'object' && error !== null && 'code' in error && error.code === '23505';
 
-export async function createUser(data: CreateUserBody): Promise<void> {
+export const createUser = async (data: CreateUserBody): Promise<void> => {
   const existing = await userRepo.emailExists(pool, data.email);
   if (existing.rows.length > 0) throw new EmailTakenError();
 
@@ -51,7 +50,7 @@ export async function createUser(data: CreateUserBody): Promise<void> {
     throw error;
   }
   logger.info({ email: data.email }, 'User account created');
-}
+};
 
 export const updateUser = async (userId: string, data: UpdateUserBody): Promise<UserResponse> => {
   return withTransaction(async (client: PoolClient) => {
@@ -101,12 +100,12 @@ export const updateUser = async (userId: string, data: UpdateUserBody): Promise<
   });
 };
 
-export async function deleteUser(userId: string): Promise<void> {
+export const deleteUser = async (userId: string): Promise<void> => {
   assertFound(await userRepo.deleteById(pool, userId), UserNotFoundError);
   logger.info({ userId }, 'User account deleted');
-}
+};
 
-async function ensureStripeCustomer(client: PoolClient, user: UserRow): Promise<string> {
+const ensureStripeCustomer = async (client: PoolClient, user: UserRow): Promise<string> => {
   if (user.stripe_customer_id) return user.stripe_customer_id;
 
   const customer = await stripe.customers.create({
@@ -115,16 +114,16 @@ async function ensureStripeCustomer(client: PoolClient, user: UserRow): Promise<
   });
   await userRepo.setStripeCustomerId(client, user.user_id, customer.id);
   return customer.id;
-}
+};
 
-async function recordBilling(
+const recordBilling = async (
   client: PoolClient,
   userId: string,
   planType: Plan,
   isYearPlan: boolean,
   amountCents: number,
   subscription: Stripe.Subscription,
-): Promise<void> {
+): Promise<void> => {
   await billingRepo.insert(
     client,
     userId,
@@ -133,12 +132,12 @@ async function recordBilling(
     amountCents,
     extractPaymentIntentId(subscription),
   );
-}
+};
 
-export async function subscribe(
+export const subscribe = async (
   userId: string,
   data: SubscribeBody,
-): Promise<SubscriptionResponse> {
+): Promise<SubscriptionResponse> => {
   return withTransaction(async (client: PoolClient) => {
     const userResult = await userRepo.findById(client, userId);
     const user = userResult.rows[0];
@@ -192,13 +191,13 @@ export async function subscribe(
       isYearPlan,
     };
   });
-}
+};
 
-async function cancelSubscription(
+const cancelSubscription = async (
   client: PoolClient,
   userId: string,
   existingPlan: PlanRow | null,
-): Promise<SubscriptionResponse> {
+): Promise<SubscriptionResponse> => {
   if (!existingPlan?.stripe_subscription_id) {
     await planRepo.resetToNone(client, userId);
 
@@ -236,14 +235,14 @@ async function cancelSubscription(
     subscriptionStatus: toStripeSubscriptionStatus(subscription.status),
     isYearPlan: existingPlan.is_year_plan,
   };
-}
+};
 
-async function createOrUpdateSubscription(args: {
+const createOrUpdateSubscription = async (args: {
   existingPlan: PlanRow | null;
   paymentMethodId: string;
   priceId: string;
   stripeCustomerId: string;
-}): Promise<Stripe.Subscription> {
+}): Promise<Stripe.Subscription> => {
   const { existingPlan, paymentMethodId, priceId, stripeCustomerId } = args;
 
   if (existingPlan?.stripe_subscription_id) {
@@ -286,4 +285,4 @@ async function createOrUpdateSubscription(args: {
     items: [{ price: priceId }],
     payment_behavior: 'error_if_incomplete',
   });
-}
+};

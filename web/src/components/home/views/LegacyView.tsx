@@ -23,15 +23,15 @@ import { promptForTitle, generateUntitledName } from '~utils/catalog-helpers';
 const legacyViewDescription =
   'This is the top-level catalog for the user. Click a cannon card to dive into its ' +
   'stories, or use the ellipsis menu to rename, delete, or change its cover.';
-function summarizeCannon(storyCount: number, documentCount: number): string {
+const summarizeCannon = (storyCount: number, documentCount: number): string => {
   if (storyCount === 0) {
     return 'An empty cannon waiting for its first story.';
   }
 
   return `${storyCount} stor${storyCount === 1 ? 'y' : 'ies'} and ${documentCount} document${documentCount === 1 ? '' : 's'} live in this cannon.`;
-}
+};
 
-export function LegacyView() {
+export const LegacyView = () => {
   const { userId } = useUserStore();
   const { navigateToCannon } = useNavigationStore();
   const { data: cannons = [] } = useLegacyQuery(userId);
@@ -169,4 +169,4 @@ export function LegacyView() {
       )}
     </CatalogShell>
   );
-}
+};

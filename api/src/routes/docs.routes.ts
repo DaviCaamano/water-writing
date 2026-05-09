@@ -6,10 +6,10 @@ const router = Router();
 
 // Cache the document so it is only generated once
 let cachedDocument: ReturnType<typeof generateOpenApiDocument> | null = null;
-function getDocument() {
+const getDocument = () => {
   if (!cachedDocument) cachedDocument = generateOpenApiDocument();
   return cachedDocument;
-}
+};
 
 router.get('/api-spec.json', (_req, res) => {
   res.json(getDocument());

@@ -148,7 +148,7 @@ export const SubscriptionSection = ({ colorMap }: { colorMap: SettingsColorMap }
   );
 };
 
-function PlanCard({
+const PlanCard = ({
   colorMap,
   description,
   isCurrent,
@@ -168,7 +168,7 @@ function PlanCard({
   yearly: boolean;
   yearlyPrice: string;
   yearlySubtext?: string;
-}) {
+}) => {
   const price = yearly ? yearlyPrice : monthlyPrice;
   const period = yearly ? '/year' : '/month';
   const subtext = yearly ? yearlySubtext : monthlySubtext;
@@ -204,4 +204,4 @@ function PlanCard({
       {!isCurrent && <NeuPillButton colorMap={colorMap}>Subscribe to {name}</NeuPillButton>}
     </div>
   );
-}
+};

@@ -28,7 +28,7 @@ interface RichEditorProps {
 
 const SERIALIZE_DEBOUNCE_MS = 150;
 
-export function RichEditor({
+export const RichEditor = ({
   title,
   body,
   onChange,
@@ -38,7 +38,7 @@ export function RichEditor({
   fontFamily,
   titlePlaceholder = 'Untitled Document',
   bodyPlaceholder = 'Start writing...',
-}: RichEditorProps) {
+}: RichEditorProps) => {
   const lastEmittedRef = useRef<{ title: string; body: string }>({ title, body });
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const onSaveRef = useRef(onSave);
@@ -145,4 +145,4 @@ export function RichEditor({
       )}
     </div>
   );
-}
+};

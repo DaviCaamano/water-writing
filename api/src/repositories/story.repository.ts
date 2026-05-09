@@ -1,41 +1,36 @@
 import type { Queryable, StoryRow } from '#types/database';
 
-export function findById(q: Queryable, storyId: string) {
-  return q.query<StoryRow>('SELECT * FROM stories WHERE story_id = $1', [storyId]);
-}
+export const findById = (q: Queryable, storyId: string) =>
+  q.query<StoryRow>('SELECT * FROM stories WHERE story_id = $1', [storyId]);
 
-export function findByIdWithUser(q: Queryable, storyId: string, userId: string) {
-  return q.query<StoryRow>(
+export const findByIdWithUser = (q: Queryable, storyId: string, userId: string) =>
+  q.query<StoryRow>(
     `SELECT s.* FROM stories s
      JOIN cannons c ON c.cannon_id = s.cannon_id
      WHERE s.story_id = $1 AND c.user_id = $2`,
     [storyId, userId],
   );
-}
 
-export function findByIdWithUserOwnership(q: Queryable, storyId: string, userId: string) {
-  return q.query<StoryRow & { user_id: string }>(
+export const findByIdWithUserOwnership = (q: Queryable, storyId: string, userId: string) =>
+  q.query<StoryRow & { user_id: string }>(
     `SELECT s.*, c.user_id FROM stories s
      JOIN cannons c ON c.cannon_id = s.cannon_id
      WHERE s.story_id = $1 AND c.user_id = $2`,
     [storyId, userId],
   );
-}
 
-export function findByCannonId(q: Queryable, cannonId: string) {
-  return q.query<StoryRow>('SELECT * FROM stories WHERE cannon_id = $1 ORDER BY created_at', [
+export const findByCannonId = (q: Queryable, cannonId: string) =>
+  q.query<StoryRow>('SELECT * FROM stories WHERE cannon_id = $1 ORDER BY created_at', [
     cannonId,
   ]);
-}
 
-export function findByCannonIds(q: Queryable, cannonIds: string[]) {
-  return q.query<StoryRow>('SELECT * FROM stories WHERE cannon_id = ANY($1) ORDER BY created_at', [
+export const findByCannonIds = (q: Queryable, cannonIds: string[]) =>
+  q.query<StoryRow>('SELECT * FROM stories WHERE cannon_id = ANY($1) ORDER BY created_at', [
     cannonIds,
   ]);
-}
 
-export function findByUserId(q: Queryable, userId: string) {
-  return q.query<StoryRow>(
+export const findByUserId = (q: Queryable, userId: string) =>
+  q.query<StoryRow>(
     `SELECT s.*
      FROM stories s
      JOIN cannons c ON c.cannon_id = s.cannon_id
@@ -43,44 +38,38 @@ export function findByUserId(q: Queryable, userId: string) {
      ORDER BY s.created_at`,
     [userId],
   );
-}
 
-export function userOwnsStory(q: Queryable, storyId: string, userId: string) {
-  return q.query<{ '?column?': number }>(
+export const userOwnsStory = (q: Queryable, storyId: string, userId: string) =>
+  q.query<{ '?column?': number }>(
     `SELECT 1
      FROM stories s
      JOIN cannons c ON c.cannon_id = s.cannon_id
      WHERE s.story_id = $1 AND c.user_id = $2`,
     [storyId, userId],
   );
-}
 
-export function insert(q: Queryable, cannonId: string, title: string | null) {
-  return q.query<StoryRow>(
+export const insert = (q: Queryable, cannonId: string, title: string | null) =>
+  q.query<StoryRow>(
     'INSERT INTO stories (cannon_id, title) VALUES ($1, $2) RETURNING story_id',
     [cannonId, title],
   );
-}
 
-export function updateTitle(q: Queryable, storyId: string, title: string) {
-  return q.query('UPDATE stories SET title = $1, updated_at = NOW() WHERE story_id = $2', [
+export const updateTitle = (q: Queryable, storyId: string, title: string) =>
+  q.query('UPDATE stories SET title = $1, updated_at = NOW() WHERE story_id = $2', [
     title,
     storyId,
   ]);
-}
 
-export function updateCannonId(q: Queryable, storyId: string, cannonId: string) {
-  return q.query('UPDATE stories SET cannon_id = $1, updated_at = NOW() WHERE story_id = $2', [
+export const updateCannonId = (q: Queryable, storyId: string, cannonId: string) =>
+  q.query('UPDATE stories SET cannon_id = $1, updated_at = NOW() WHERE story_id = $2', [
     cannonId,
     storyId,
   ]);
-}
 
-export function deleteByIdAndUser(q: Queryable, storyId: string, userId: string) {
-  return q.query(
+export const deleteByIdAndUser = (q: Queryable, storyId: string, userId: string) =>
+  q.query(
     `DELETE FROM stories
      WHERE story_id = $1
        AND cannon_id IN (SELECT c.cannon_id FROM cannons c WHERE c.user_id = $2)`,
     [storyId, userId],
   );
-}

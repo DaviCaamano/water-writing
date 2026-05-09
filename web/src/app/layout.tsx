@@ -18,20 +18,19 @@ export const metadata: Metadata = {
   description: 'Create, organize, and enhance your writing with AI assistance.',
 };
 
-export default function RootLayout({
+const RootLayout = ({
   children,
 }: Readonly<{
   children: React.ReactNode;
-}>) {
-  return (
-    <html
-      lang='en'
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-      suppressHydrationWarning
-    >
-      <body className='min-h-full flex flex-col'>
-        <Providers>{children}</Providers>
-      </body>
-    </html>
-  );
-}
+}>) => (
+  <html
+    lang='en'
+    className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+    suppressHydrationWarning
+  >
+    <body className='min-h-full flex flex-col'>
+      <Providers>{children}</Providers>
+    </body>
+  </html>
+);
+export default RootLayout;

@@ -3,7 +3,7 @@ type LinkedNode = {
   successorId: string | null;
 };
 
-export function orderLinkedDocs<T extends LinkedNode>(items: T[], getId: (item: T) => string): T[] {
+export const orderLinkedDocs = <T extends LinkedNode>(items: T[], getId: (item: T) => string): T[] => {
   if (items.length === 0) return [];
 
   const byId = new Map<string, T>();
@@ -38,4 +38,4 @@ export function orderLinkedDocs<T extends LinkedNode>(items: T[], getId: (item: 
   }
 
   return result;
-}
+};

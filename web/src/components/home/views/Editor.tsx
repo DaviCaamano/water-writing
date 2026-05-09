@@ -12,7 +12,7 @@ import { RichEditor } from '~components/home/editor/RichEditor';
 import { EditorWordCount } from '~components/home/editor/EditorWordCount';
 import { normalizeEditorBody } from '~components/home/editor/markdown';
 
-export function Editor() {
+export const Editor = () => {
   const { fontSize, fontFamily, markDirty, markSaved } = useEditorStore();
   const { currentDocumentId, currentStoryId } = useNavigationStore();
   const { data: documentData } = useDocumentQuery(currentDocumentId);
@@ -122,4 +122,4 @@ export function Editor() {
       <EditorWordCount charCount={charCount} wordCount={wordCount} />
     </div>
   );
-}
+};

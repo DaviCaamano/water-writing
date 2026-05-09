@@ -29,7 +29,7 @@ export interface UserActions {
   reset: () => void;
 }
 
-export function useUserStore() {
+export const useUserStore = () => {
   const { isAuthenticated } = useStore(authStore);
   const queryClient = useQueryClient();
   const { data: session } = useSessionQuery(isAuthenticated);
@@ -90,4 +90,4 @@ export function useUserStore() {
     }),
     [session, actions],
   );
-}
+};
