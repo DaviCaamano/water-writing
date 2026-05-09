@@ -6,6 +6,7 @@ export type ApiRouteBody = {
   includeAuth?: boolean;
 };
 
+// A dictionary for all API routes to be deployed by the front end.
 // Do not expose any routes in the following route files to the front end
 // stripe.routes.ts
 export class ApiRoute {

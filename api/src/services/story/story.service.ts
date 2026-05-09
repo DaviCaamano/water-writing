@@ -11,7 +11,7 @@ import * as storyRepo from '#repositories/story.repository';
 import * as cannonRepo from '#repositories/cannon.repository';
 import * as documentRepo from '#repositories/document.repository';
 import * as genreRepo from '#repositories/genre.repository';
-import { mapStoryResponse } from '#utils/database/map-db-row';
+import { mapStoryResponse } from '#utils/database/to-json-camel-case';
 
 export const fetchStory = async (storyId: string): Promise<StoryRowWithDocuments> => {
   const result = await storyRepo.findById(pool, storyId);

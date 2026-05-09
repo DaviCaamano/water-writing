@@ -2,87 +2,90 @@ import type { Queryable, DocumentRowWithBody, StoryRow } from '#types/database';
 
 export function findByIdWithBody(q: Queryable, documentId: string) {
   return q.query<DocumentRowWithBody>(
-    `SELECT d.*, dc.body FROM documents d
-     LEFT JOIN document_content dc ON dc.document_id = d.document_id
-     JOIN stories s ON s.story_id = d.story_id
-     WHERE d.document_id = $1`,
+      `SELECT d.*, dc.body
+      FROM documents d
+      LEFT JOIN document_content dc ON dc.document_id = d.document_id
+      JOIN stories s ON s.story_id = d.story_id
+      WHERE d.document_id = $1`,
     [documentId],
   );
 }
 
 export function findByIdWithBodyAndUser(q: Queryable, documentId: string, userId: string) {
   return q.query<DocumentRowWithBody>(
-    `SELECT d.*, dc.body
-     FROM documents d
-     LEFT JOIN document_content dc ON dc.document_id = d.document_id
-     JOIN stories s ON s.story_id = d.story_id
-     JOIN cannons c ON c.cannon_id = s.cannon_id
-     WHERE d.document_id = $1 AND c.user_id = $2`,
+      `SELECT d.*, dc.body
+      FROM documents d
+      LEFT JOIN document_content dc ON dc.document_id = d.document_id
+      JOIN stories s ON s.story_id = d.story_id
+      JOIN cannons c ON c.cannon_id = s.cannon_id
+      WHERE d.document_id = $1 AND c.user_id = $2`,
     [documentId, userId],
   );
 }
 
 export function findOwnedWithCannonId(q: Queryable, documentId: string, userId: string) {
   return q.query<DocumentRowWithBody & { cannon_id: string }>(
-    `SELECT d.*, dc.body, s.cannon_id FROM documents d
-     LEFT JOIN document_content dc ON dc.document_id = d.document_id
-     JOIN stories s ON s.story_id = d.story_id
-     JOIN (SELECT c2.cannon_id, c2.user_id FROM cannons c2 WHERE c2.user_id = $1) c ON c.cannon_id = s.cannon_id
-     WHERE d.document_id = $2`,
+      `SELECT d.*, dc.body, s.cannon_id FROM documents d
+      LEFT JOIN document_content dc ON dc.document_id = d.document_id
+      JOIN stories s ON s.story_id = d.story_id
+      JOIN (SELECT c2.cannon_id, c2.user_id FROM cannons c2 WHERE c2.user_id = $1) c ON c.cannon_id = s.cannon_id
+      WHERE d.document_id = $2`,
     [userId, documentId],
   );
 }
 
 export function findOwnedForUpdate(q: Queryable, documentId: string, userId: string) {
   return q.query<DocumentRowWithBody>(
-    `SELECT d.* FROM documents d
-     JOIN stories s ON s.story_id = d.story_id
-     JOIN cannons c ON c.cannon_id = s.cannon_id
-     WHERE d.document_id = $1 AND c.user_id = $2
-     FOR UPDATE`,
+      `SELECT d.*
+      FROM documents d
+      JOIN stories s ON s.story_id = d.story_id
+      JOIN cannons c ON c.cannon_id = s.cannon_id
+      WHERE d.document_id = $1 AND c.user_id = $2
+      FOR UPDATE`,
     [documentId, userId],
   );
 }
 
 export function findByStoryId(q: Queryable, storyId: string) {
   return q.query<DocumentRowWithBody>(
-    `SELECT d.*, dc.body FROM documents d
-     LEFT JOIN document_content dc ON dc.document_id = d.document_id
-     WHERE d.story_id = $1 ORDER BY d.created_at`,
+      `SELECT d.*, dc.body
+      FROM documents d
+      LEFT JOIN document_content dc ON dc.document_id = d.document_id
+      WHERE d.story_id = $1 ORDER BY d.created_at`,
     [storyId],
   );
 }
 
 export function findByStoryIds(q: Queryable, storyIds: string[]) {
   return q.query<DocumentRowWithBody>(
-    `SELECT d.*, dc.body FROM documents d
-     LEFT JOIN document_content dc ON dc.document_id = d.document_id
-     WHERE d.story_id = ANY($1) ORDER BY d.created_at`,
+      `SELECT d.*, dc.body FROM documents d
+      LEFT JOIN document_content dc ON dc.document_id = d.document_id
+      WHERE d.story_id = ANY($1) ORDER BY d.created_at`,
     [storyIds],
   );
 }
 
 export function findLastInStory(q: Queryable, storyId: string) {
   return q.query<DocumentRowWithBody>(
-    `SELECT * FROM documents WHERE story_id = $1 AND successor_id IS NULL
-     ORDER BY created_at DESC LIMIT 1 FOR UPDATE`,
+      `SELECT * FROM documents WHERE story_id = $1 AND successor_id IS NULL
+      ORDER BY created_at DESC LIMIT 1 FOR UPDATE`,
     [storyId],
   );
 }
 
 export function findStoryForUser(q: Queryable, storyId: string, userId: string) {
   return q.query<StoryRow>(
-    `SELECT s.* FROM stories s
-     JOIN cannons c ON c.cannon_id = s.cannon_id
-     WHERE s.story_id = $1 AND c.user_id = $2`,
+      `SELECT s.* FROM stories s
+      JOIN cannons c ON c.cannon_id = s.cannon_id
+      WHERE s.story_id = $1 AND c.user_id = $2`,
     [storyId, userId],
   );
 }
 
 export function insert(q: Queryable, storyId: string, title: string, predecessorId: string | null) {
   return q.query<{ document_id: string }>(
-    `INSERT INTO documents (story_id, title, predecessor_id)
-     VALUES ($1, $2, $3) RETURNING document_id`,
+      `INSERT INTO documents (story_id, title, predecessor_id)
+      VALUES ($1, $2, $3) RETURNING document_id`,
     [storyId, title, predecessorId],
   );
 }
@@ -114,8 +117,8 @@ export function deleteById(q: Queryable, documentId: string) {
 
 export function upsertContent(q: Queryable, documentId: string, body: Buffer) {
   return q.query(
-    `INSERT INTO document_content (document_id, body) VALUES ($1, $2)
-     ON CONFLICT (document_id) DO UPDATE SET body = $2`,
+      `INSERT INTO document_content (document_id, body) VALUES ($1, $2)
+      ON CONFLICT (document_id) DO UPDATE SET body = $2`,
     [documentId, body],
   );
 }

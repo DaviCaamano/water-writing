@@ -7,7 +7,7 @@ import { fetchDocumentsForStories } from '#utils/story/fetch-documents';
 import { assertFound } from '#utils/database/assert-found';
 import * as cannonRepo from '#repositories/cannon.repository';
 import * as storyRepo from '#repositories/story.repository';
-import { mapCannonResponse } from '#utils/database/map-db-row';
+import { mapCannonResponse } from '#utils/database/to-json-camel-case';
 
 export const deleteCannon = async (userId: string, cannonId: string): Promise<void> => {
   const result = await cannonRepo.deleteByIdAndUser(pool, cannonId, userId);
@@ -53,9 +53,6 @@ export async function fetchCannon(cannonId: string, userId?: string): Promise<Ca
 
   return mapCannonResponse(cannon, stories);
 }
-
-export const fetchUserCannon = (userId: string, cannonId: string): Promise<CannonResponse> =>
-  fetchCannon(cannonId, userId);
 
 export async function fetchLegacy(userId: string): Promise<CannonResponse[]> {
   const cannonsResult = await cannonRepo.findByUserId(pool, userId);

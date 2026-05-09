@@ -33,8 +33,8 @@ import {
 } from '#services/story/document.service';
 import {
   deleteCannon,
+  fetchCannon,
   fetchLegacy,
-  fetchUserCannon,
   upsertCannon,
 } from '#services/story/cannon.service';
 import { waterWrite } from '#services/story/editor.service';
@@ -45,7 +45,7 @@ import {
   CannonResponse,
 } from '#types/shared/response';
 import { GenresBody, GenresSchema } from '#schemas/story.schemas';
-import { mapStoryResponse } from '#utils/database/map-db-row';
+import { mapStoryResponse } from '#utils/database/to-json-camel-case';
 
 const router = Router();
 
@@ -94,7 +94,7 @@ router.get(
   async (req: AuthRequest, res: RouteResponse<CannonResponse>): Promise<void> => {
     assertAuthenticated(req);
     const { cannonId } = req.params as CannonParams;
-    const cannon = await fetchUserCannon(req.userId, cannonId);
+    const cannon = await fetchCannon(cannonId, req.userId);
     res.json(cannon);
   },
 );
