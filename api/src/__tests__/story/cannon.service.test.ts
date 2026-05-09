@@ -26,7 +26,7 @@ import { mockClear } from '#__tests__/utils/test-wrappers';
 
 import * as cannonService from '#services/story/cannon.service';
 import { DocType, checkLegacyStructure, mockLegacy } from '#__tests__/utils/mock-linked-documents';
-import { deleteCannon, fetchLegacy, fetchUserCannon } from '#services/story/cannon.service';
+import { deleteCannon, fetchCannon, fetchLegacy } from '#services/story/cannon.service';
 import { MOCK_USER_ID } from '#__tests__/constants/mock-user';
 
 describe(
@@ -166,7 +166,7 @@ describe(
 );
 
 describe(
-  'fetchUserCannon',
+  'fetchCannon (with userId)',
   mockClear(() => {
     it('returns the cannon when it belongs to the authenticated user', async () => {
       mockPool.query
@@ -174,7 +174,7 @@ describe(
         .mockResolvedValueOnce({ rows: [MOCK_STORY] })
         .mockResolvedValueOnce({ rows: [MOCK_DOC] });
 
-      await expect(fetchUserCannon(MOCK_USER_ID, MOCK_CANNON_ID)).resolves.toMatchObject({
+      await expect(fetchCannon(MOCK_CANNON_ID, MOCK_USER_ID)).resolves.toMatchObject({
         cannonId: MOCK_CANNON_ID,
         userId: MOCK_USER_ID,
       });
@@ -187,7 +187,7 @@ describe(
     it('throws CannonNotFoundError when the cannon is missing or owned by another user', async () => {
       mockPool.query.mockResolvedValueOnce({ rows: [] });
 
-      await expect(fetchUserCannon(MOCK_USER_ID, MOCK_CANNON_ID)).rejects.toThrow(
+      await expect(fetchCannon(MOCK_CANNON_ID, MOCK_USER_ID)).rejects.toThrow(
         CannonNotFoundError,
       );
     });

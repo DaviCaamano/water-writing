@@ -1,4 +1,5 @@
 import type { Queryable, CannonRow } from '#types/database';
+import { QueryResult } from 'pg';
 
 export const findById = (q: Queryable, cannonId: string, userId?: string) =>
   q.query<CannonRow>(

@@ -1,6 +1,7 @@
 import zlib from 'zlib';
 import { promisify } from 'util';
 
+// Turn zlib functions into promises so we don't have to use callbacks.
 const gzip = promisify(zlib.gzip);
 const gunzip = promisify(zlib.gunzip);
 

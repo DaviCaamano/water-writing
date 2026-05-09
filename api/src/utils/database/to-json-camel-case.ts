@@ -15,11 +15,11 @@ import {
 import { toCamelCase } from '#utils/to-camel-case';
 import { orderLinkedDocs } from '#utils/order-linked-docs';
 
-export function mapDbRow<T extends object[], R extends object[] = Record<string, unknown>[]>(
+export function toJsonCamelCase<T extends object[], R extends object[] = Record<string, unknown>[]>(
   obj: T,
 ): R;
-export function mapDbRow<T extends object, R extends object = Record<string, unknown>>(obj: T): R;
-export function mapDbRow<T extends object | object[], R extends object | object[] = object>(
+export function toJsonCamelCase<T extends object, R extends object = Record<string, unknown>>(obj: T): R;
+export function toJsonCamelCase<T extends object | object[], R extends object | object[] = object>(
   obj: T,
 ): R {
   if (obj === null || typeof obj !== 'object') {
@@ -27,7 +27,7 @@ export function mapDbRow<T extends object | object[], R extends object | object[
   }
 
   if (Array.isArray(obj)) {
-    return obj.map((item) => mapDbRow(item)) as R;
+    return obj.map((item) => toJsonCamelCase(item)) as R;
   }
 
   const converted: Record<string, unknown> = {};
@@ -36,7 +36,7 @@ export function mapDbRow<T extends object | object[], R extends object | object[
     const camelCaseKey = toCamelCase(key);
 
     if (value !== null && typeof value === 'object') {
-      converted[camelCaseKey] = mapDbRow(value as Record<string, unknown>);
+      converted[camelCaseKey] = toJsonCamelCase(value as Record<string, unknown>);
     } else {
       converted[camelCaseKey] = value;
     }
@@ -46,10 +46,10 @@ export function mapDbRow<T extends object | object[], R extends object | object[
 }
 
 export const mapBilling = (billing: BillingRow): BillingResponse =>
-  mapDbRow<BillingRow, BillingResponse>(billing);
+  toJsonCamelCase<BillingRow, BillingResponse>(billing);
 
 export const mapDocumentResponse = (row: DecompressedDocumentRow): DocumentResponse =>
-  mapDbRow<DecompressedDocumentRow, DocumentResponse>(row);
+  toJsonCamelCase<DecompressedDocumentRow, DocumentResponse>(row);
 
 export const mapStoryResponse = (
   row: StoryRow | StoryRowWithDocuments,
@@ -58,7 +58,7 @@ export const mapStoryResponse = (
   const docs: DocumentResponse[] = ((row as StoryRowWithDocuments).documents ?? documents)?.map(
     mapDocumentResponse,
   );
-  return mapDbRow<StoryRow & { documents: DocumentResponse[] }, StoryResponse>({
+  return toJsonCamelCase<StoryRow & { documents: DocumentResponse[] }, StoryResponse>({
     ...row,
     documents: orderLinkedDocs(docs, (doc) => doc.documentId),
   });
@@ -71,5 +71,5 @@ export const mapCannonResponse = (
   const rowWithStories = ((row as CannonRowWithStories).stories ?? stories)?.map((cannon) =>
     mapStoryResponse(cannon),
   );
-  return mapDbRow({ ...row, stories: orderLinkedDocs(rowWithStories, (doc) => doc.storyId) });
+  return toJsonCamelCase({ ...row, stories: orderLinkedDocs(rowWithStories, (doc) => doc.storyId) });
 };

@@ -35,7 +35,7 @@ const mockAddGenres = storyService.upsertGenre as jest.MockedFunction<
   typeof storyService.upsertGenre
 >;
 const mockUpsertCannon = cannonService.upsertCannon as jest.Mock;
-const mockFetchUserCannon = cannonService.fetchUserCannon as jest.Mock;
+const mockFetchUserCannon = cannonService.fetchCannon as jest.Mock;
 const mockFetchLegacy = cannonService.fetchLegacy as jest.Mock;
 const mockDeleteCannon = cannonService.deleteCannon as jest.Mock;
 

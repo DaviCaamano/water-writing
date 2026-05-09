@@ -10,17 +10,13 @@ import { assertFound } from '#utils/database/assert-found';
 import * as documentRepo from '#repositories/document.repository';
 import * as cannonRepo from '#repositories/cannon.repository';
 import * as storyRepo from '#repositories/story.repository';
+import { toJsonCamelCase } from '#utils/database/to-json-camel-case';
 
-const toDocumentResponse = async (row: DocumentRowWithBody): Promise<DocumentResponse> => ({
-  documentId: row.document_id,
-  storyId: row.story_id,
-  title: row.title,
-  body: row.body ? await decompressBody(row.body) : '',
-  predecessorId: row.predecessor_id,
-  successorId: row.successor_id,
-  createdAt: row.created_at,
-  updatedAt: row.updated_at,
-});
+const toDocumentResponse = async (row: DocumentRowWithBody): Promise<DocumentResponse> =>
+  toJsonCamelCase<Omit<DocumentRowWithBody, 'body'> & { body: string }, DocumentResponse>({
+    ...row,
+    body: row.body ? await decompressBody(row.body) : '',
+  });
 
 export const fetchDocument = async (documentId: string): Promise<DocumentResponse> => {
   const result = await documentRepo.findByIdWithBody(pool, documentId);

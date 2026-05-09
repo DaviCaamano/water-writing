@@ -79,7 +79,7 @@ const buildStoryApp = async (rateLimiters: Partial<Record<string, unknown>>, wit
   jest.doMock('#services/story/cannon.service', () => ({
     deleteCannon: jest.fn(),
     fetchLegacy: jest.fn(),
-    fetchUserCannon: jest.fn(),
+    fetchCannon: jest.fn(),
     upsertCannon: jest.fn(),
   }));
   jest.doMock('#services/story/editor.service', () => ({
