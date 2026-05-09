@@ -36,12 +36,12 @@ export const upsertCannon = async (
 };
 
 export const fetchCannon = async (cannonId: string, userId?: string): Promise<CannonResponse> => {
-  const cannon = assertFound(
-    await cannonRepo.findById(pool, cannonId, userId),
-    CannonNotFoundError,
-  );
+  const [cannonResult, storiesResult] = await Promise.all([
+    cannonRepo.findById(pool, cannonId, userId),
+    storyRepo.findByCannonId(pool, cannonId),
+  ]);
 
-  const storiesResult = await storyRepo.findByCannonId(pool, cannonId);
+  const cannon = assertFound(cannonResult, CannonNotFoundError);
 
   const storyIds = storiesResult.rows.map((s) => s.story_id);
   const docsByStory = await fetchDocumentsForStories(storyIds);
