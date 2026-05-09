@@ -10,14 +10,14 @@ type RippleFilterProps = {
   maxScale?: number;
 };
 
-export function RippleFilter({
+export const RippleFilter = ({
   children,
   rippleImageUrl,
   className,
   trigger = 'hover',
   duration = 1.2,
   maxScale = 90,
-}: RippleFilterProps) {
+}: RippleFilterProps) => {
   const reactId = useId();
   const safeId = useMemo(() => reactId.replace(/:/g, ''), [reactId]);
 
@@ -34,7 +34,7 @@ export function RippleFilter({
   useEffect(() => {
     let cancelled = false;
 
-    async function convertToDataURL(url: string) {
+    const convertToDataURL = async (url: string) => {
       const img = new Image();
       img.crossOrigin = 'anonymous';
 
@@ -59,7 +59,7 @@ export function RippleFilter({
       if (!cancelled) {
         setDataUrl(url64);
       }
-    }
+    };
 
     convertToDataURL(rippleImageUrl).catch((err) => {
       console.error('Failed to convert ripple image to base64:', err);
@@ -151,4 +151,4 @@ export function RippleFilter({
       </div>
     </>
   );
-}
+};

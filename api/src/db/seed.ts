@@ -23,7 +23,7 @@ type SeedStory = typeof stories.$inferInsert;
 type SeedDocument = typeof documents.$inferInsert;
 type SeedDocumentContent = typeof documentContent.$inferInsert;
 
-function getRequiredEnv(name: string): string {
+const getRequiredEnv = (name: string): string => {
   const value = process.env[name];
 
   if (!value) {
@@ -31,10 +31,9 @@ function getRequiredEnv(name: string): string {
   }
 
   return value;
-}
+};
 
-// produce a UUID from a Sha1 hash.
-function deterministicUuid(scope: string, value: string): string {
+const deterministicUuid = (scope: string, value: string): string => {
   const hash = createHash('sha1').update(`${scope}:${value}`).digest('hex');
   const versioned = `${hash.slice(0, 8)}-${hash.slice(8, 12)}-5${hash.slice(13, 16)}`;
   const variantByte = ((parseInt(hash.slice(16, 18), 16) & 0x3f) | 0x80)
@@ -42,20 +41,19 @@ function deterministicUuid(scope: string, value: string): string {
     .padStart(2, '0');
 
   return `${versioned}-${variantByte}${hash.slice(18, 20)}-${hash.slice(20, 32)}`;
-}
+};
 
-function naturalSort(a: string, b: string): number {
-  return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
-}
+const naturalSort = (a: string, b: string): number =>
+  a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
 
 const BOOKS_DIR = path.resolve(__dirname, '..', '__tests__', 'constants', 'books');
 
-function buildLegacySeedRows(seedUserId: string): {
+const buildLegacySeedRows = (seedUserId: string): {
   cannonsToInsert: SeedCannon[];
   storiesToInsert: SeedStory[];
   documentsToInsert: SeedDocument[];
   documentContentsToInsert: { documentId: string; body: string }[];
-} {
+} => {
   const cannonsToInsert: SeedCannon[] = [];
   const storiesToInsert: SeedStory[] = [];
   const documentsToInsert: SeedDocument[] = [];
@@ -148,9 +146,9 @@ function buildLegacySeedRows(seedUserId: string): {
   }
 
   return { cannonsToInsert, storiesToInsert, documentsToInsert, documentContentsToInsert };
-}
+};
 
-async function seed() {
+const seed = async () => {
   const seedUserId = getRequiredEnv('DB_SEED_USER_ID');
   const seedEmail = getRequiredEnv('DB_SEED_EMAIL');
   const seedPassword = getRequiredEnv('DB_SEED_PASSWORD');
@@ -257,9 +255,9 @@ async function seed() {
   console.log(
     `Seeded legacy for user_id=${seedUserId}: ${cannonsToInsert.length} cannons, ${storiesToInsert.length} stories, ${documentsToInsert.length} documents.`,
   );
-}
+};
 
-async function main() {
+const main = async () => {
   if (process.env.NODE_ENV === 'production') {
     throw new Error('Seed script cannot be run in production');
   }
@@ -269,7 +267,7 @@ async function main() {
   } finally {
     await pool.end();
   }
-}
+};
 
 void main().catch((error) => {
   console.error(error);

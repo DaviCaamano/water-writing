@@ -25,8 +25,8 @@ import {
 const mockWithTransaction = withTransaction as jest.MockedFunction<typeof withTransaction>;
 const mockRetrieveSubscription = stripe.subscriptions.retrieve as jest.Mock;
 
-function buildEvent<T extends Stripe.Event.Type>(type: T, object: unknown): Stripe.Event {
-  return {
+const buildEvent = <T extends Stripe.Event.Type>(type: T, object: unknown): Stripe.Event =>
+  ({
     id: 'evt_test',
     object: 'event',
     api_version: '2024-01-01',
@@ -36,8 +36,7 @@ function buildEvent<T extends Stripe.Event.Type>(type: T, object: unknown): Stri
     request: { id: null, idempotency_key: null },
     type,
     data: { object: object as Stripe.Event.Data.Object },
-  } as unknown as Stripe.Event;
-}
+  }) as unknown as Stripe.Event;
 
 describe(
   'stripe-webhook service: handleStripeWebhook',

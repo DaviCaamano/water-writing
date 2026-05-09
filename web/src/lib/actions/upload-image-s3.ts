@@ -13,7 +13,7 @@ const s3 = new S3Client({
   },
 });
 
-export async function uploadCannonImage(cannonId: string, file: File) {
+export const uploadCannonImage = async (cannonId: string, file: File) => {
   // Validate
   if (!file.type.startsWith('image/')) {
     throw new Error('File must be an image');
@@ -51,4 +51,4 @@ export async function uploadCannonImage(cannonId: string, file: File) {
 
   revalidatePath('/');
   return { url: imageUrl, key };
-}
+};

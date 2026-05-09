@@ -32,7 +32,7 @@ const MOCK_EVENT = {
   data: { object: { id: 'sub_test_123' } },
 } as const;
 
-function expectConstructEventCall() {
+const expectConstructEventCall = () => {
   const calls = mockConstructEvent.mock.calls;
   const [payload, signature, secret] = calls[calls.length - 1] ?? [];
 
@@ -40,7 +40,7 @@ function expectConstructEventCall() {
   expect((payload as Buffer).toString('utf8')).toBe(MOCK_BODY_TEXT);
   expect(signature).toBe(MOCK_SIGNATURE);
   expect(secret).toBe(MOCK_SECRET);
-}
+};
 
 describe(
   'POST /stripe/webhook',

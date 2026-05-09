@@ -21,7 +21,7 @@ interface CatalogCardProps {
   menuContent: (helpers: { openCoverPicker: () => void }) => ReactNode;
 }
 
-function readFileAsDataUrl(file: File): Promise<string> {
+const readFileAsDataUrl = (file: File): Promise<string> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
 
@@ -40,9 +40,9 @@ function readFileAsDataUrl(file: File): Promise<string> {
 
     reader.readAsDataURL(file);
   });
-}
+};
 
-export function CatalogCard({
+export const CatalogCard = ({
   itemLabel,
   title,
   description,
@@ -54,7 +54,7 @@ export function CatalogCard({
   onOpen,
   onUploadCover,
   menuContent,
-}: CatalogCardProps) {
+}: CatalogCardProps) => {
   const coverInputId = useId();
 
   const openCoverPicker = () => {
@@ -152,4 +152,4 @@ export function CatalogCard({
       </div>
     </Card>
   );
-}
+};

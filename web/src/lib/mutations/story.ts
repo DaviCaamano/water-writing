@@ -22,7 +22,7 @@ interface UpsertDocumentVariables {
   body?: string | undefined;
 }
 
-export function useUpsertCannonMutation() {
+export const useUpsertCannonMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (vars: UpsertCannonVariables) =>
@@ -31,9 +31,9 @@ export function useUpsertCannonMutation() {
       void queryClient.invalidateQueries({ queryKey: queryKeys.cannons.all });
     },
   });
-}
+};
 
-export function useDeleteCannonMutation() {
+export const useDeleteCannonMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (cannonId: string) =>
@@ -57,9 +57,9 @@ export function useDeleteCannonMutation() {
       void queryClient.invalidateQueries({ queryKey: queryKeys.cannons.all });
     },
   });
-}
+};
 
-export function useUpsertStoryMutation() {
+export const useUpsertStoryMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (vars: UpsertStoryVariables) =>
@@ -69,9 +69,9 @@ export function useUpsertStoryMutation() {
       void queryClient.invalidateQueries({ queryKey: queryKeys.stories.all });
     },
   });
-}
+};
 
-export function useDeleteStoryMutation() {
+export const useDeleteStoryMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (storyId: string) =>
@@ -110,9 +110,9 @@ export function useDeleteStoryMutation() {
       void queryClient.invalidateQueries({ queryKey: queryKeys.stories.all });
     },
   });
-}
+};
 
-export function useUpsertDocumentMutation() {
+export const useUpsertDocumentMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (vars: UpsertDocumentVariables) =>
@@ -123,9 +123,9 @@ export function useUpsertDocumentMutation() {
       void queryClient.invalidateQueries({ queryKey: queryKeys.documents.all });
     },
   });
-}
+};
 
-export function useDeleteDocumentMutation() {
+export const useDeleteDocumentMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (documentId: string) =>
@@ -179,4 +179,4 @@ export function useDeleteDocumentMutation() {
       void queryClient.invalidateQueries({ queryKey: queryKeys.documents.all });
     },
   });
-}
+};

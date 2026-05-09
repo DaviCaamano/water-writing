@@ -11,33 +11,31 @@ import * as documentRepo from '#repositories/document.repository';
 import * as cannonRepo from '#repositories/cannon.repository';
 import * as storyRepo from '#repositories/story.repository';
 
-async function toDocumentResponse(row: DocumentRowWithBody): Promise<DocumentResponse> {
-  return {
-    documentId: row.document_id,
-    storyId: row.story_id,
-    title: row.title,
-    body: row.body ? await decompressBody(row.body) : '',
-    predecessorId: row.predecessor_id,
-    successorId: row.successor_id,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at,
-  };
-}
+const toDocumentResponse = async (row: DocumentRowWithBody): Promise<DocumentResponse> => ({
+  documentId: row.document_id,
+  storyId: row.story_id,
+  title: row.title,
+  body: row.body ? await decompressBody(row.body) : '',
+  predecessorId: row.predecessor_id,
+  successorId: row.successor_id,
+  createdAt: row.created_at,
+  updatedAt: row.updated_at,
+});
 
-export async function fetchDocument(documentId: string): Promise<DocumentResponse> {
+export const fetchDocument = async (documentId: string): Promise<DocumentResponse> => {
   const result = await documentRepo.findByIdWithBody(pool, documentId);
   return toDocumentResponse(assertFound(result, DocumentNotFoundError));
-}
+};
 
-export async function fetchUserDocument(
+export const fetchUserDocument = async (
   userId: string,
   documentId: string,
-): Promise<DocumentResponse> {
+): Promise<DocumentResponse> => {
   const result = await documentRepo.findByIdWithBodyAndUser(pool, documentId, userId);
   return toDocumentResponse(assertFound(result, DocumentNotFoundError));
-}
+};
 
-export async function deleteDocument(userId: string, documentId: string): Promise<void> {
+export const deleteDocument = async (userId: string, documentId: string): Promise<void> => {
   return withTransaction(async (client) => {
     const { predecessor_id, successor_id } = assertFound(
       await documentRepo.findOwnedForUpdate(client, documentId, userId),
@@ -55,15 +53,15 @@ export async function deleteDocument(userId: string, documentId: string): Promis
 
     await documentRepo.deleteById(client, documentId);
   });
-}
+};
 
-async function updateExistingDocument(
+const updateExistingDocument = async (
   client: Queryable,
   userId: string,
   documentId: string,
   title: string,
   body: string | undefined,
-): Promise<string> {
+): Promise<string> => {
   const existingDoc = assertFound(
     await documentRepo.findOwnedWithCannonId(client, documentId, userId),
     DocumentNotFoundError,
@@ -77,15 +75,15 @@ async function updateExistingDocument(
   }
 
   return existingDoc.cannon_id;
-}
+};
 
-async function createNewDocument(
+const createNewDocument = async (
   client: Queryable,
   userId: string,
   title: string,
   body: string | undefined,
   storyId: string | undefined,
-): Promise<string> {
+): Promise<string> => {
   let targetStoryId = storyId;
   let cannonId: string;
 
@@ -116,9 +114,9 @@ async function createNewDocument(
   }
 
   return cannonId;
-}
+};
 
-export async function upsertDocument(userId: string, data: UpsertDocumentBody) {
+export const upsertDocument = async (userId: string, data: UpsertDocumentBody) => {
   const { documentId, title, body, storyId } = data;
 
   const cannonId = await withTransaction(async (client) => {
@@ -129,4 +127,4 @@ export async function upsertDocument(userId: string, data: UpsertDocumentBody) {
   });
 
   return fetchCannon(cannonId);
-}
+};

@@ -16,6 +16,4 @@ import { twMerge } from 'tailwind-merge';
  * cn('px-2 py-1', 'px-4') // Returns: 'py-1 px-4' (px-2 is overridden)
  * cn('text-black', condition && 'font-bold') // Conditionally adds classes
  */
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}
+export const cn = (...inputs: ClassValue[]) => twMerge(clsx(inputs));

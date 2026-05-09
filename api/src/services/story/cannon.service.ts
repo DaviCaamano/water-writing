@@ -35,7 +35,7 @@ export const upsertCannon = async (
   }
 };
 
-export async function fetchCannon(cannonId: string, userId?: string): Promise<CannonResponse> {
+export const fetchCannon = async (cannonId: string, userId?: string): Promise<CannonResponse> => {
   const cannon = assertFound(
     await cannonRepo.findById(pool, cannonId, userId),
     CannonNotFoundError,
@@ -52,12 +52,12 @@ export async function fetchCannon(cannonId: string, userId?: string): Promise<Ca
   }));
 
   return mapCannonResponse(cannon, stories);
-}
+};
 
 export const fetchUserCannon = (userId: string, cannonId: string): Promise<CannonResponse> =>
   fetchCannon(cannonId, userId);
 
-export async function fetchLegacy(userId: string): Promise<CannonResponse[]> {
+export const fetchLegacy = async (userId: string): Promise<CannonResponse[]> => {
   const cannonsResult = await cannonRepo.findByUserId(pool, userId);
 
   if (cannonsResult.rows.length === 0) return [];
@@ -80,4 +80,4 @@ export async function fetchLegacy(userId: string): Promise<CannonResponse[]> {
   return cannonsResult.rows.map((cannon) =>
     mapCannonResponse(cannon, storiesByCannon.get(cannon.cannon_id) ?? []),
   );
-}
+};

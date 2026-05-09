@@ -7,7 +7,7 @@ import { StripePaymentFailed } from '#constants/error/custom-errors';
 import { env } from '#config/env';
 import * as planRepo from '#repositories/plan.repository';
 
-export async function syncPlanSnapshot(
+export const syncPlanSnapshot = async (
   client: Queryable,
   args: {
     userId: string;
@@ -16,7 +16,7 @@ export async function syncPlanSnapshot(
     renewOn: RenewOn | null;
     isYearPlan: boolean;
   },
-) {
+) => {
   const { userId, planType, subscription, renewOn, isYearPlan } = args;
 
   await planRepo.upsert(client, {
@@ -32,12 +32,12 @@ export async function syncPlanSnapshot(
     startDate: getSubscriptionDate(subscription.current_period_start) ?? new Date(),
     endDate: getSubscriptionDate(subscription.canceled_at),
   });
-}
+};
 
-export function getStripePriceId(
+export const getStripePriceId = (
   planType: typeof Plan.pro | typeof Plan.max,
   isYearPlan: boolean,
-): string {
+): string => {
   const priceId =
     planType === Plan.pro
       ? isYearPlan
@@ -51,17 +51,15 @@ export function getStripePriceId(
     priceId ??
     `price_${planType.replace(/[^a-z0-9]/gi, '_')}_${isYearPlan ? RenewOn.yearly : RenewOn.monthly}`
   );
-}
+};
 
-export function getSubscriptionPriceId(subscription: Stripe.Subscription): string | null {
-  return subscription.items.data[0]?.price?.id ?? null;
-}
+export const getSubscriptionPriceId = (subscription: Stripe.Subscription): string | null =>
+  subscription.items.data[0]?.price?.id ?? null;
 
-export function getSubscriptionDate(unixSeconds: number | null): Date | null {
-  return unixSeconds ? new Date(unixSeconds * 1000) : null;
-}
+export const getSubscriptionDate = (unixSeconds: number | null): Date | null =>
+  unixSeconds ? new Date(unixSeconds * 1000) : null;
 
-export function extractPaymentIntentId(subscription: Stripe.Subscription): string | null {
+export const extractPaymentIntentId = (subscription: Stripe.Subscription): string | null => {
   const latestInvoice = subscription.latest_invoice;
 
   if (!latestInvoice || typeof latestInvoice === 'string') return null;
@@ -69,17 +67,17 @@ export function extractPaymentIntentId(subscription: Stripe.Subscription): strin
 
   if (!paymentIntent) return null;
   return typeof paymentIntent === 'string' ? paymentIntent : paymentIntent.id;
-}
+};
 
-export function getAmountCentsFromSubscription(
+export const getAmountCentsFromSubscription = (
   subscription: Stripe.Subscription,
   priceId: string,
-): number {
+): number => {
   const price = subscription.items.data.find((item) => item.price?.id === priceId)?.price;
   return price?.unit_amount ?? 0;
-}
+};
 
-export function assertBillableSubscription(subscription: Stripe.Subscription) {
+export const assertBillableSubscription = (subscription: Stripe.Subscription) => {
   const billableStatuses: readonly StripeSubscriptionStatus[] = [
     StripeSubscriptionStatus.active,
     StripeSubscriptionStatus.trialing,
@@ -87,9 +85,9 @@ export function assertBillableSubscription(subscription: Stripe.Subscription) {
   if (!billableStatuses.includes(toStripeSubscriptionStatus(subscription.status))) {
     throw new StripePaymentFailed();
   }
-}
+};
 
-export function inferPlanTypeFromPriceId(priceId: string | null, fallback: Plan = Plan.none): Plan {
+export const inferPlanTypeFromPriceId = (priceId: string | null, fallback: Plan = Plan.none): Plan => {
   if (!priceId) return fallback;
 
   const normalized = priceId.toLowerCase();
@@ -97,9 +95,9 @@ export function inferPlanTypeFromPriceId(priceId: string | null, fallback: Plan 
   if (normalized.includes('max')) return Plan.max;
 
   return fallback;
-}
+};
 
-export function inferRenewOnFromSubscription(subscription: Stripe.Subscription): RenewOn | null {
+export const inferRenewOnFromSubscription = (subscription: Stripe.Subscription): RenewOn | null => {
   if (
     subscription.cancel_at_period_end ||
     toStripeSubscriptionStatus(subscription.status) === StripeSubscriptionStatus.canceled
@@ -111,11 +109,10 @@ export function inferRenewOnFromSubscription(subscription: Stripe.Subscription):
   if (interval === 'year') return RenewOn.yearly;
   if (interval === 'month') return RenewOn.monthly;
   return null;
-}
+};
 
-export function inferYearPlanFromSubscription(subscription: Stripe.Subscription): boolean {
-  return subscription.items.data[0]?.price?.recurring?.interval === 'year';
-}
+export const inferYearPlanFromSubscription = (subscription: Stripe.Subscription): boolean =>
+  subscription.items.data[0]?.price?.recurring?.interval === 'year';
 
 const accessibleStatuses: readonly StripeSubscriptionStatus[] = [
   StripeSubscriptionStatus.active,
@@ -123,23 +120,20 @@ const accessibleStatuses: readonly StripeSubscriptionStatus[] = [
   StripeSubscriptionStatus.past_due,
 ];
 
-export function isAccessibleSubscriptionStatus(
+export const isAccessibleSubscriptionStatus = (
   status: StripeSubscriptionStatus | null | undefined,
-): boolean {
-  return !!status && accessibleStatuses.includes(status);
-}
+): boolean => !!status && accessibleStatuses.includes(status);
 
-export function getStoredPlanType(plan: PlanRow | null): Plan {
-  return plan?.plan_type ?? Plan.none;
-}
+export const getStoredPlanType = (plan: PlanRow | null): Plan =>
+  plan?.plan_type ?? Plan.none;
 
-export async function getUserPlan(queryable: Queryable, userId: string): Promise<Plan | null> {
+export const getUserPlan = async (queryable: Queryable, userId: string): Promise<Plan | null> => {
   const result = await planRepo.findStatusByUserId(queryable, userId);
   const row = result.rows[0];
   if (!row) return null;
   return isAccessibleSubscriptionStatus(row.subscription_status) ? row.plan_type : null;
-}
+};
 
-export async function resetPlanToNone(client: Queryable, userId: string): Promise<void> {
+export const resetPlanToNone = async (client: Queryable, userId: string): Promise<void> => {
   await planRepo.resetToNone(client, userId);
-}
+};

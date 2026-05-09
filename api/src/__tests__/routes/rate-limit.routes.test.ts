@@ -6,7 +6,7 @@ const deny =
   (_req: unknown, res: { status: (code: number) => { json: (body: unknown) => void } }) =>
     res.status(429).json({ error });
 
-async function buildUserApp(rateLimiters: Partial<Record<string, unknown>>, withAuth = false) {
+const buildUserApp = async (rateLimiters: Partial<Record<string, unknown>>, withAuth = false) => {
   jest.resetModules();
   jest.doMock('#config/rate-limiters', () => ({
     loginLimiter: allow,
@@ -52,9 +52,9 @@ async function buildUserApp(rateLimiters: Partial<Record<string, unknown>>, with
   app.use('/user', userRoutes);
 
   return { app, loginService, userService };
-}
+};
 
-async function buildStoryApp(rateLimiters: Partial<Record<string, unknown>>, withAuth = false) {
+const buildStoryApp = async (rateLimiters: Partial<Record<string, unknown>>, withAuth = false) => {
   jest.resetModules();
   jest.doMock('#config/rate-limiters', () => ({
     loginLimiter: allow,
@@ -110,7 +110,7 @@ async function buildStoryApp(rateLimiters: Partial<Record<string, unknown>>, wit
   app.use('/story', storyRoutes);
 
   return { app, storyService, editorService };
-}
+};
 
 describe('route limiters', () => {
   afterEach(() => {

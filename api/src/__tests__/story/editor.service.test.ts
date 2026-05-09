@@ -17,13 +17,13 @@ import { mockClear } from '#__tests__/utils/test-wrappers';
 
 const mockStream = anthropic.messages.stream as jest.Mock;
 
-async function collectStream(iterable: AsyncIterable<string>): Promise<string[]> {
+const collectStream = async (iterable: AsyncIterable<string>): Promise<string[]> => {
   const chunks: string[] = [];
   for await (const text of iterable) {
     chunks.push(text);
   }
   return chunks;
-}
+};
 
 const asyncIter = (events: unknown[]) => ({
   async *[Symbol.asyncIterator]() {

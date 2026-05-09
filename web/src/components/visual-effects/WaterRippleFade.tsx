@@ -17,15 +17,15 @@ interface WaterRippleFadeProps {
   liveScale?: number;
 }
 
-function easeOutCubic(t: number): number {
+const easeOutCubic = (t: number): number => {
   return 1 - Math.pow(1 - t, 3);
-}
+};
 
-function easeInCubic(t: number): number {
+const easeInCubic = (t: number): number => {
   return t * t * t;
-}
+};
 
-export function WaterRippleFade({
+export const WaterRippleFade = ({
   open,
   children,
   className,
@@ -33,7 +33,7 @@ export function WaterRippleFade({
   maxScale = 100,
   liveTurbulence = false,
   liveScale = 6,
-}: WaterRippleFadeProps) {
+}: WaterRippleFadeProps) => {
   const reactId = useId();
   const id = useMemo(() => reactId.replace(/:/g, ''), [reactId]);
   const filterId = `wrf-${id}`;
@@ -145,4 +145,4 @@ export function WaterRippleFade({
       </div>
     </>
   );
-}
+};

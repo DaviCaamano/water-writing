@@ -18,7 +18,7 @@ interface CatalogShellProps {
   title: string;
 }
 
-export function CatalogShell({
+export const CatalogShell = ({
   addLabel,
   children,
   className,
@@ -28,7 +28,7 @@ export function CatalogShell({
   onAdd,
   style,
   title,
-}: CatalogShellProps) {
+}: CatalogShellProps) => {
   return (
     <div
       className={cn(
@@ -96,4 +96,4 @@ export function CatalogShell({
       </div>
     </div>
   );
-}
+};

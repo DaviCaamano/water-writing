@@ -22,7 +22,7 @@ import { useDeleteStoryMutation, useUpsertStoryMutation } from '~lib/mutations/s
 import Image from 'next/image';
 import { promptForTitle, generateUntitledName } from '~utils/catalog-helpers';
 
-function summarizeStory(documentCount: number): string {
+const summarizeStory = (documentCount: number): string => {
   if (documentCount === 0) {
     return 'No documents yet. Add a first draft and start filling out the story.';
   }
@@ -32,9 +32,9 @@ function summarizeStory(documentCount: number): string {
   }
 
   return `${documentCount} documents are already part of this story.`;
-}
+};
 
-export function WorldView() {
+export const WorldView = () => {
   const { userId } = useUserStore();
   const { currentCannonId, navigateToStory } = useNavigationStore();
   const { data: currentCannon } = useCannonQuery(currentCannonId);
@@ -193,4 +193,4 @@ export function WorldView() {
       )}
     </CatalogShell>
   );
-}
+};

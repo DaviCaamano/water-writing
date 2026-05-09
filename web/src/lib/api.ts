@@ -9,7 +9,7 @@ const apiClient = ky.create({
   credentials: 'include',
 });
 
-export async function api<T>(path: string, options: RequestInit = {}): Promise<T> {
+export const api = async <T>(path: string, options: RequestInit = {}): Promise<T> => {
   const headers = new Headers(options.headers);
 
   if (!headers.has('Content-Type')) {
@@ -32,7 +32,7 @@ export async function api<T>(path: string, options: RequestInit = {}): Promise<T
 
     throw error;
   }
-}
+};
 
 export type ApiQueryOptions = Omit<RequestInit, 'body'> & {
   params?: Record<string, string | number | boolean | undefined>;

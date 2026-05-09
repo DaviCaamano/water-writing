@@ -3,18 +3,16 @@ import { Plan } from '#types/shared/enum/plan';
 import { RenewOn } from '#types/shared/enum/renew-on';
 import { StripeSubscriptionStatus } from '#types/enum/stripe';
 
-export function findByUserId(q: Queryable, userId: string) {
-  return q.query<PlanRow>('SELECT * FROM plans WHERE user_id = $1 LIMIT 1', [userId]);
-}
+export const findByUserId = (q: Queryable, userId: string) =>
+  q.query<PlanRow>('SELECT * FROM plans WHERE user_id = $1 LIMIT 1', [userId]);
 
-export function findStatusByUserId(q: Queryable, userId: string) {
-  return q.query<Pick<PlanRow, 'plan_type' | 'subscription_status'>>(
+export const findStatusByUserId = (q: Queryable, userId: string) =>
+  q.query<Pick<PlanRow, 'plan_type' | 'subscription_status'>>(
     'SELECT plan_type, subscription_status FROM plans WHERE user_id = $1 LIMIT 1',
     [userId],
   );
-}
 
-export function upsert(
+export const upsert = (
   q: Queryable,
   args: {
     userId: string;
@@ -29,8 +27,8 @@ export function upsert(
     startDate: Date;
     endDate: Date | null;
   },
-) {
-  return q.query(
+) =>
+  q.query(
     `INSERT INTO plans (
        user_id, plan_type, is_year_plan, renew_on, renew_date,
        stripe_price_id, stripe_subscription_id, subscription_status,
@@ -64,10 +62,9 @@ export function upsert(
       args.endDate,
     ],
   );
-}
 
-export function resetToNone(q: Queryable, userId: string) {
-  return q.query(
+export const resetToNone = (q: Queryable, userId: string) =>
+  q.query(
     `INSERT INTO plans (user_id, plan_type, is_year_plan, renew_on, renew_date,
        stripe_price_id, stripe_subscription_id, subscription_status,
        cancel_at_period_end, start_date, end_date, updated_at)
@@ -80,4 +77,3 @@ export function resetToNone(q: Queryable, userId: string) {
        end_date = EXCLUDED.end_date, updated_at = NOW()`,
     [userId, Plan.none, StripeSubscriptionStatus.canceled],
   );
-}

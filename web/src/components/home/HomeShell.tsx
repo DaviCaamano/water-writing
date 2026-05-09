@@ -11,7 +11,7 @@ import { HomeView } from '~components/home/views/HomeView';
 import { useToggleSettings } from '~components/home/user/user-settings/useToggleSettings';
 import { cn } from '~utils/merge-css-classes';
 
-export function HomeShell() {
+export const HomeShell = () => {
   const [authOpen, setAuthOpen] = useState(false);
   const { handleOpenSettings, settingsOpen, setSettingsOpen, settingsSection } =
     useToggleSettings();
@@ -51,4 +51,4 @@ export function HomeShell() {
       </div>
     </div>
   );
-}
+};

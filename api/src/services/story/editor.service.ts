@@ -14,10 +14,10 @@ interface ContextDocument {
   story_id: string;
 }
 
-async function fetchContextDocuments(
+const fetchContextDocuments = async (
   userId: string,
   documentId: string,
-): Promise<ContextDocument[]> {
+): Promise<ContextDocument[]> => {
   const result = await pool.query<DocumentRowWithBody>(
     `SELECT d2.document_id, d2.title, dc.body, d2.predecessor_id, d2.successor_id,
             d2.story_id, d2.created_at, d2.updated_at
@@ -52,14 +52,14 @@ async function fetchContextDocuments(
       story_id: row.story_id,
     })),
   );
-}
+};
 
-export async function waterWrite(
+export const waterWrite = async (
   userId: string,
   documentId: string,
   selection: { start: number; end: number },
   prompt: string,
-): Promise<AsyncIterable<string>> {
+): Promise<AsyncIterable<string>> => {
   const documents = await fetchContextDocuments(userId, documentId);
   const current = documents.find((d) => d.document_id === documentId)!;
   const body = current.body ?? '';
@@ -99,4 +99,4 @@ Return ONLY the replacement text — no preamble, no explanation, no quotation m
       }
     },
   };
-}
+};

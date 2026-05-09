@@ -73,7 +73,7 @@ const initialState: AuthFormState = {
   loading: false,
 };
 
-function authFormReducer(state: AuthFormState, action: AuthFormAction): AuthFormState {
+const authFormReducer = (state: AuthFormState, action: AuthFormAction): AuthFormState => {
   switch (action.type) {
     case 'SET_MODE':
       return { ...state, mode: action.mode, error: '' };
@@ -90,9 +90,9 @@ function authFormReducer(state: AuthFormState, action: AuthFormAction): AuthForm
     default:
       return state;
   }
-}
+};
 
-export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
+export const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
   const [state, dispatch] = useReducer(authFormReducer, initialState);
   const { mode, email, password, confirm, firstName, lastName, error, loading } = state;
 
@@ -302,4 +302,4 @@ export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
       </DialogPortal>
     </Dialog>
   );
-}
+};

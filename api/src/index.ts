@@ -17,7 +17,7 @@ const server = app.listen(PORT, () => {
   logger.info(`Server running on port ${PORT}`);
 });
 
-function shutdown(signal: string) {
+const shutdown = (signal: string) => {
   logger.info({ signal }, 'Received shutdown signal, closing server');
   server.close(() => {
     logger.info('HTTP server closed');
@@ -32,7 +32,7 @@ function shutdown(signal: string) {
     logger.error('Graceful shutdown timed out, forcing exit');
     process.exit(1);
   }, GRACEFUL_SHUTDOWN_TIMEOUT_MS).unref();
-}
+};
 
 process.on('SIGTERM', () => shutdown('SIGTERM'));
 process.on('SIGINT', () => shutdown('SIGINT'));

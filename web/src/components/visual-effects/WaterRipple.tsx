@@ -27,14 +27,14 @@ const NEUTRAL_CONTENT_STYLE: CSSProperties = {
   transform: 'scale(1)',
 };
 
-export function WaterRipple({
+export const WaterRipple = ({
   children,
   className,
   contentClassName,
   disabled = false,
   effectColor = '74, 144, 226',
   maxTilt = 20,
-}: WaterRippleProps) {
+}: WaterRippleProps) => {
   const reactId = useId();
   const instanceId = useMemo(() => reactId.replace(/:/g, ''), [reactId]);
   const wrapperRef = useRef<HTMLDivElement | null>(null);
@@ -158,4 +158,4 @@ export function WaterRipple({
       `}</style>
     </>
   );
-}
+};

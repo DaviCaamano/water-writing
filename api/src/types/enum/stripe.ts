@@ -14,9 +14,9 @@ export type StripeSubscriptionStatus =
 
 const stripeStatusValues = new Set<string>(Object.values(StripeSubscriptionStatus));
 
-export function toStripeSubscriptionStatus(value: string): StripeSubscriptionStatus {
+export const toStripeSubscriptionStatus = (value: string): StripeSubscriptionStatus => {
   if (!stripeStatusValues.has(value)) {
     throw new Error(`Unexpected Stripe subscription status: ${value}`);
   }
   return value as StripeSubscriptionStatus;
-}
+};

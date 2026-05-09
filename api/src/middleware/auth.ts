@@ -7,7 +7,7 @@ import { TOKEN_COOKIE_NAME } from '#config/cookie';
 import { AuthRequest } from '#types/request';
 import * as authRepo from '#repositories/auth.repository';
 
-function extractToken(req: AuthRequest): string | null {
+const extractToken = (req: AuthRequest): string | null => {
   const cookieToken = req.cookies?.[TOKEN_COOKIE_NAME];
   if (cookieToken) return cookieToken;
 
@@ -15,7 +15,7 @@ function extractToken(req: AuthRequest): string | null {
   if (authHeader?.startsWith('Bearer ')) return authHeader.split(' ')[1] ?? null;
 
   return null;
-}
+};
 
 export const authMiddleware = async (
   req: AuthRequest,

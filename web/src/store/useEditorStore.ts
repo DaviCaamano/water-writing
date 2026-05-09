@@ -2,14 +2,12 @@ import { useMemo } from 'react';
 import { Store, useStore } from '@tanstack/react-store';
 import { EditorActions, EditorState, EditorStore } from '~types/state/editor-state';
 
-function createInitialEditorState(): EditorState {
-  return {
-    isDirty: false,
-    lastSaved: null,
-    fontSize: 18,
-    fontFamily: 'Georgia, serif',
-  };
-}
+const createInitialEditorState = (): EditorState => ({
+  isDirty: false,
+  lastSaved: null,
+  fontSize: 18,
+  fontFamily: 'Georgia, serif',
+});
 
 const editorStore = new Store<EditorState>(createInitialEditorState());
 
@@ -37,7 +35,7 @@ const editorActions: EditorActions = {
   },
 };
 
-export function useEditorStore(): EditorStore {
+export const useEditorStore = (): EditorStore => {
   const state = useStore(editorStore, (currentState) => currentState);
 
   return useMemo(
@@ -47,4 +45,4 @@ export function useEditorStore(): EditorStore {
     }),
     [state],
   );
-}
+};

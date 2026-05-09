@@ -8,7 +8,7 @@ import { EditorSettingsContent } from '~components/home/editor/EditorSettingsCon
 
 const WATER_RIPPLE_FADE_DURATION_MS = 600;
 
-export function EditorSettingsPopover() {
+export const EditorSettingsPopover = () => {
   const [open, setOpen] = useState(false);
   const [waterOpen, setWaterOpen] = useState(false);
   const closeTimeoutRef = useRef<number | null>(null);
@@ -42,4 +42,4 @@ export function EditorSettingsPopover() {
       </Popover>
     </div>
   );
-}
+};

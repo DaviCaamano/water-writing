@@ -38,6 +38,5 @@ export const validateParams =
     next();
   };
 
-function formatErrors(error: ZodError): ReturnType<typeof z.treeifyError> {
-  return z.treeifyError(error);
-}
+const formatErrors = (error: ZodError): ReturnType<typeof z.treeifyError> =>
+  z.treeifyError(error);

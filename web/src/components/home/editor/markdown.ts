@@ -39,7 +39,7 @@ turndown.addRule('taskListItem', {
   },
 });
 
-function transformTaskLists(html: string): string {
+const transformTaskLists = (html: string): string => {
   if (!html.includes('type="checkbox"')) return html;
   if (typeof document === 'undefined') return html;
   const wrapper = document.createElement('div');
@@ -66,25 +66,25 @@ function transformTaskLists(html: string): string {
     });
   });
   return wrapper.innerHTML;
-}
+};
 
-function sanitize(html: string): string {
+const sanitize = (html: string): string => {
   if (typeof window === 'undefined') return html;
   return DOMPurify.sanitize(html, { USE_PROFILES: { html: true } });
-}
+};
 
-export function markdownToHtml(md: string): string {
+export const markdownToHtml = (md: string): string => {
   if (!md) return '';
   const raw = marked.parse(md, { async: false }) as string;
   return transformTaskLists(sanitize(raw));
-}
+};
 
-export function htmlToMarkdown(html: string): string {
+export const htmlToMarkdown = (html: string): string => {
   if (!html) return '';
   return turndown.turndown(html).trim();
-}
+};
 
-function escapeHtml(s: string): string {
+const escapeHtml = (s: string): string => {
   if (typeof document === 'undefined') {
     return s.replace(/[&<>"']/g, (c) => {
       switch (c) {
@@ -104,9 +104,9 @@ function escapeHtml(s: string): string {
   const div = document.createElement('div');
   div.textContent = s;
   return div.innerHTML;
-}
+};
 
-function wrapParagraphBlock(block: string, maxLength = MAX_EDITOR_LINE_LENGTH): string[] {
+const wrapParagraphBlock = (block: string, maxLength = MAX_EDITOR_LINE_LENGTH): string[] => {
   const text = block.replace(/\s+/g, ' ').trim();
 
   if (!text) {
@@ -140,9 +140,9 @@ function wrapParagraphBlock(block: string, maxLength = MAX_EDITOR_LINE_LENGTH): 
   }
 
   return lines;
-}
+};
 
-function isStructuredMarkdownBlock(block: string): boolean {
+const isStructuredMarkdownBlock = (block: string): boolean => {
   const trimmed = block.trim();
 
   return (
@@ -154,9 +154,9 @@ function isStructuredMarkdownBlock(block: string): boolean {
     /^(-{3,}|\*{3,}|_{3,})$/.test(trimmed) ||
     /^\|/.test(trimmed)
   );
-}
+};
 
-export function normalizeEditorBody(body: string, maxLength = MAX_EDITOR_LINE_LENGTH): string {
+export const normalizeEditorBody = (body: string, maxLength = MAX_EDITOR_LINE_LENGTH): string => {
   const normalized = body.replace(/\r\n?/g, '\n').trim();
 
   if (!normalized) {
@@ -179,15 +179,15 @@ export function normalizeEditorBody(body: string, maxLength = MAX_EDITOR_LINE_LE
   }
 
   return outputBlocks.join('\n\n');
-}
+};
 
-export function buildEditorHtml(title: string, body: string): string {
+export const buildEditorHtml = (title: string, body: string): string => {
   const bodyHtml = markdownToHtml(normalizeEditorBody(body)).trim();
   const normalizedBodyHtml = bodyHtml.length > 0 ? bodyHtml : '<p></p>';
   return `<h1 data-title>${escapeHtml(title)}</h1>${normalizedBodyHtml}`;
-}
+};
 
-export function splitEditorHtml(html: string): { title: string; body: string } {
+export const splitEditorHtml = (html: string): { title: string; body: string } => {
   if (typeof document === 'undefined') return { title: '', body: htmlToMarkdown(html) };
   const wrapper = document.createElement('div');
   wrapper.innerHTML = sanitize(html);
@@ -196,4 +196,4 @@ export function splitEditorHtml(html: string): { title: string; body: string } {
   titleEl?.remove();
   const body = htmlToMarkdown(wrapper.innerHTML);
   return { title, body };
-}
+};
