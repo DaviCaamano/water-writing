@@ -200,7 +200,7 @@ registry.registerPath({
 
 registry.registerPath({
   method: 'post',
-  path: '/user/subscribe',
+  path: '/billing/subscribe',
   tags: ['User'],
   summary: 'Subscribe to a plan via Stripe',
   security: secured,

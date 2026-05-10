@@ -1,11 +1,17 @@
 import { getBillingHistory } from '#services/user/billing.service';
 import { authMiddleware } from '#middleware/auth';
 import { Router } from 'express';
-import { generalLimiter } from '#config/rate-limiters';
-import { validateParams } from '#middleware/validate';
-import { BillingHistoryParams, BillingHistoryParamsSchema } from '#schemas/user.schemas';
+import { generalLimiter, subscribeLimiter } from '#config/rate-limiters';
+import { validate, validateParams } from '#middleware/validate';
+import {
+  BillingHistoryParams,
+  BillingHistoryParamsSchema,
+  SubscribeBody,
+  SubscribeSchema,
+} from '#schemas/user.schemas';
 import { AuthRequest, assertAuthenticated } from '#types/request';
-import { BillingResponse, RouteResponse } from '#types/shared/response';
+import { BillingResponse, RouteResponse, SubscriptionResponse } from '#types/shared/response';
+import * as billingService from '#services/user/billing.service';
 
 const router = Router();
 
@@ -26,6 +32,23 @@ router.get(
     }
     const result = await getBillingHistory(params.userId);
     res.json(result);
+  },
+);
+
+router.post(
+  '/subscribe',
+  authMiddleware,
+  subscribeLimiter,
+  validate(SubscribeSchema),
+  async (
+    req: AuthRequest,
+    res: RouteResponse<{ status: string } & SubscriptionResponse>,
+  ): Promise<void> => {
+    assertAuthenticated(req);
+    res.json({
+      status: 'ok',
+      ...(await billingService.subscribe(req.userId, req.body as SubscribeBody)),
+    });
   },
 );
 

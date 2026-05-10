@@ -2,12 +2,7 @@ import { Router, Request } from 'express';
 import { authMiddleware } from '#middleware/auth';
 import { validate } from '#middleware/validate';
 import { TOKEN_COOKIE_NAME, tokenCookieOptions } from '#config/cookie';
-import {
-  loginLimiter,
-  createAccountLimiter,
-  subscribeLimiter,
-  generalLimiter,
-} from '#config/rate-limiters';
+import { loginLimiter, createAccountLimiter, generalLimiter } from '#config/rate-limiters';
 import {
   LoginSchema,
   LoginBody,
@@ -15,21 +10,12 @@ import {
   CreateUserBody,
   UpdateUserSchema,
   UpdateUserBody,
-  SubscribeSchema,
-  SubscribeBody,
 } from '#schemas/user.schemas';
 import { AuthRequest, assertAuthenticated } from '#types/request';
 import * as userService from '#services/user/user.service';
-import * as billingService from '#services/user/billing.service';
 import * as loginService from '#services/user/login.service';
 import { EmailTakenError } from '#constants/error/custom-errors';
-import {
-  LoginResponse,
-  LogoutResponse,
-  RouteResponse,
-  SubscriptionResponse,
-  UserResponse,
-} from '#types/shared/response';
+import { LoginResponse, LogoutResponse, RouteResponse, UserResponse } from '#types/shared/response';
 
 const router = Router();
 
@@ -105,23 +91,6 @@ router.delete(
     assertAuthenticated(req);
     await userService.deleteUser(req.userId);
     res.json({ status: 'ok' });
-  },
-);
-
-router.post(
-  '/subscribe',
-  authMiddleware,
-  subscribeLimiter,
-  validate(SubscribeSchema),
-  async (
-    req: AuthRequest,
-    res: RouteResponse<{ status: string } & SubscriptionResponse>,
-  ): Promise<void> => {
-    assertAuthenticated(req);
-    res.json({
-      status: 'ok',
-      ...(await billingService.subscribe(req.userId, req.body as SubscribeBody)),
-    });
   },
 );
 

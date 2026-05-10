@@ -22,6 +22,11 @@ class BillingApiRoute {
     url: '/billing/history/:userId',
     method: 'GET',
   });
+  subscribe = createRoute({
+    url: '/billing/subscribe',
+    method: 'POST',
+    includeAuth: true,
+  });
 }
 
 class StoryApiRoute {
@@ -113,11 +118,6 @@ class UserApiRoute {
   deleteAccount = createRoute({
     url: '/user/deleteme',
     method: 'DELETE',
-    includeAuth: true,
-  });
-  subscribe = createRoute({
-    url: '/user/subscribe',
-    method: 'POST',
     includeAuth: true,
   });
 }
