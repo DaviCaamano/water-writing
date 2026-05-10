@@ -59,7 +59,9 @@ router.get(
   authMiddleware,
   async (req: AuthRequest, res: RouteResponse<Omit<LoginResponse, 'token'>>): Promise<void> => {
     assertAuthenticated(req);
-    const body = await getSession(req.userId, req.token);
+    const result = await getSession(req.userId, req.token);
+    const { token, ...body } = result;
+    void token;
     res.json(body);
   },
 );
