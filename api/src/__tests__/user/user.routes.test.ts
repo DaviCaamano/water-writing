@@ -5,11 +5,13 @@ import {
 } from '#constants/error/custom-errors';
 
 jest.mock('#services/user/user.service');
+jest.mock('#services/user/billing.service');
 jest.mock('#config/stripe', () => ({ __esModule: true, default: {} }));
 
 import request from 'supertest';
 import app from '#app';
 import * as userService from '#services/user/user.service';
+import * as billingService from '#services/user/billing.service';
 import { mockAuthHeaders } from '#__tests__/constants/mock-auth-headers';
 import {
   MOCK_LOGIN_EMAIL,
@@ -25,7 +27,7 @@ app.set('trust proxy', true);
 const mockCreateUser = userService.createUser as jest.MockedFunction<typeof userService.createUser>;
 const mockUpdateUser = userService.updateUser as jest.MockedFunction<typeof userService.updateUser>;
 const mockDeleteUser = userService.deleteUser as jest.MockedFunction<typeof userService.deleteUser>;
-const mockSubscribe = userService.subscribe as jest.MockedFunction<typeof userService.subscribe>;
+const mockSubscribe = billingService.subscribe as jest.MockedFunction<typeof billingService.subscribe>;
 
 // POST /user/create
 describe(
