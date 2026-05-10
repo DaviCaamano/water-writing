@@ -110,7 +110,7 @@ describe(
       await expect(storyService.upsertStory(MOCK_USER_ID, { title: 'New Story' })).resolves.toEqual(
         MOCK_STORY_RESPONSE,
       );
-      expect(fetchSpy).toHaveBeenCalledWith(MOCK_STORY_ID);
+      expect(fetchSpy).toHaveBeenCalledWith(MOCK_STORY_ID, mockClient);
     });
 
     it('updates an existing story and returns the refreshed response', async () => {

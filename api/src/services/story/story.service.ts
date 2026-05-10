@@ -28,9 +28,12 @@ const decompressDocumentRows = async (
     })),
   );
 
-export const fetchStoryWithDocuments = async (storyId: string): Promise<StoryRowWithDocuments> => {
-  const story = assertFound(await storyRepo.findById(pool, storyId), StoryNotFoundError);
-  const docsResult = await documentRepo.findByStoryId(pool, storyId);
+export const fetchStoryWithDocuments = async (
+  storyId: string,
+  q: Queryable = pool,
+): Promise<StoryRowWithDocuments> => {
+  const story = assertFound(await storyRepo.findById(q, storyId), StoryNotFoundError);
+  const docsResult = await documentRepo.findByStoryId(q, storyId);
   return {
     ...story,
     documents: await decompressDocumentRows(docsResult.rows),
@@ -101,14 +104,13 @@ export const upsertStory = async (
 ): Promise<StoryResponse> => {
   const { storyId, title, cannonId } = data;
 
-  const persistedStoryId = await withTransaction(async (client) => {
-    if (storyId) {
-      return updateExistingStory(client, userId, storyId, title, cannonId);
-    }
-    return createNewStory(client, userId, title, cannonId);
-  });
+  return withTransaction(async (client) => {
+    const persistedStoryId = storyId
+      ? await updateExistingStory(client, userId, storyId, title, cannonId)
+      : await createNewStory(client, userId, title, cannonId);
 
-  return mapStoryResponse(await fetchStoryWithDocuments(persistedStoryId));
+    return mapStoryResponse(await fetchStoryWithDocuments(persistedStoryId, client));
+  });
 };
 
 export const deleteStory = async (userId: string, storyId: string): Promise<void> => {
