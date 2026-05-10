@@ -26,6 +26,43 @@ const buildUserApp = async (rateLimiters: Partial<Record<string, unknown>>, with
     updateUser: jest.fn(),
     deleteUser: jest.fn(),
   }));
+
+  if (withAuth) {
+    jest.doMock('#middleware/auth', () => ({
+      authMiddleware: (
+        req: { userId?: string; token?: string },
+        _res: unknown,
+        next: () => void,
+      ) => {
+        req.userId = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11';
+        req.token = 'test-token';
+        next();
+      },
+    }));
+  }
+
+  const express = (await import('express')).default;
+  const userRoutes = (await import('#routes/user.routes')).default;
+  const loginService = await import('#services/user/login.service');
+  const userService = await import('#services/user/user.service');
+
+  const app = express();
+  app.use(express.json());
+  app.use('/user', userRoutes);
+
+  return { app, loginService, userService };
+};
+
+const buildBillingApp = async (rateLimiters: Partial<Record<string, unknown>>, withAuth = false) => {
+  jest.resetModules();
+  jest.doMock('#config/rate-limiters', () => ({
+    loginLimiter: allow,
+    createAccountLimiter: allow,
+    subscribeLimiter: allow,
+    generalLimiter: allow,
+    aiLimiter: allow,
+    ...rateLimiters,
+  }));
   jest.doMock('#services/user/billing.service', () => ({
     subscribe: jest.fn(),
     getBillingHistory: jest.fn(),
@@ -46,16 +83,14 @@ const buildUserApp = async (rateLimiters: Partial<Record<string, unknown>>, with
   }
 
   const express = (await import('express')).default;
-  const userRoutes = (await import('#routes/user.routes')).default;
-  const loginService = await import('#services/user/login.service');
-  const userService = await import('#services/user/user.service');
+  const billingRoutes = (await import('#routes/billing.routes')).default;
   const billingService = await import('#services/user/billing.service');
 
   const app = express();
   app.use(express.json());
-  app.use('/user', userRoutes);
+  app.use('/billing', billingRoutes);
 
-  return { app, loginService, userService, billingService };
+  return { app, billingService };
 };
 
 const buildStoryApp = async (rateLimiters: Partial<Record<string, unknown>>, withAuth = false) => {
@@ -154,15 +189,15 @@ describe('route limiters', () => {
     expect(userService.createUser).not.toHaveBeenCalled();
   });
 
-  it('short-circuits /user/subscribe when the subscribe limiter rejects the request', async () => {
-    const { app, billingService } = await buildUserApp(
+  it('short-circuits /billing/subscribe when the subscribe limiter rejects the request', async () => {
+    const { app, billingService } = await buildBillingApp(
       {
         subscribeLimiter: deny('Too many subscription attempts, please try again later'),
       },
       true,
     );
 
-    const res = await request(app).post('/user/subscribe').send({
+    const res = await request(app).post('/billing/subscribe').send({
       planType: 'pro-plan',
       isYearPlan: false,
       paymentMethodId: 'pm_test',
