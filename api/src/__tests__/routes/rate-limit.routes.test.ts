@@ -25,7 +25,10 @@ const buildUserApp = async (rateLimiters: Partial<Record<string, unknown>>, with
     createUser: jest.fn(),
     updateUser: jest.fn(),
     deleteUser: jest.fn(),
+  }));
+  jest.doMock('#services/user/billing.service', () => ({
     subscribe: jest.fn(),
+    getBillingHistory: jest.fn(),
   }));
 
   if (withAuth) {
@@ -46,12 +49,13 @@ const buildUserApp = async (rateLimiters: Partial<Record<string, unknown>>, with
   const userRoutes = (await import('#routes/user.routes')).default;
   const loginService = await import('#services/user/login.service');
   const userService = await import('#services/user/user.service');
+  const billingService = await import('#services/user/billing.service');
 
   const app = express();
   app.use(express.json());
   app.use('/user', userRoutes);
 
-  return { app, loginService, userService };
+  return { app, loginService, userService, billingService };
 };
 
 const buildStoryApp = async (rateLimiters: Partial<Record<string, unknown>>, withAuth = false) => {
@@ -151,7 +155,7 @@ describe('route limiters', () => {
   });
 
   it('short-circuits /user/subscribe when the subscribe limiter rejects the request', async () => {
-    const { app, userService } = await buildUserApp(
+    const { app, billingService } = await buildUserApp(
       {
         subscribeLimiter: deny('Too many subscription attempts, please try again later'),
       },
@@ -166,7 +170,7 @@ describe('route limiters', () => {
 
     expect(res.status).toBe(429);
     expect(res.body.error).toBe('Too many subscription attempts, please try again later');
-    expect(userService.subscribe).not.toHaveBeenCalled();
+    expect(billingService.subscribe).not.toHaveBeenCalled();
   });
 
   it('short-circuits /story/stories when the general limiter rejects the request', async () => {

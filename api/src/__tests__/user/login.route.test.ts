@@ -59,6 +59,7 @@ describe(
 
       expect(res.status).toBe(200);
       const expectedBody = JSON.parse(JSON.stringify(MOCK_LOGIN_RESPONSE));
+      delete expectedBody.token;
       expect(res.body).toMatchObject(expectedBody);
       expect(res.body.token).toBeUndefined();
 
@@ -138,6 +139,7 @@ describe(
 
       expect(res.status).toBe(200);
       const expectedBody = JSON.parse(JSON.stringify(MOCK_LOGIN_RESPONSE));
+      delete expectedBody.token;
       expect(res.body).toMatchObject(expectedBody);
       expect(res.body.token).toBeUndefined();
     });
