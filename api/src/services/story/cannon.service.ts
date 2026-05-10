@@ -2,8 +2,9 @@ import { CannonNotFoundError } from '#constants/error/custom-errors';
 import { UpsertCannonBody } from '#schemas/story.schemas';
 import { CannonResponse } from '#types/shared/response';
 import pool from '#config/database';
-import { StoryRowWithDocuments } from '#types/database';
+import { Queryable, StoryRowWithDocuments } from '#types/database';
 import { fetchDocumentsForStories } from '#utils/story/fetch-documents';
+import { withTransaction } from '#utils/database/with-transaction';
 import { assertFound } from '#utils/database/assert-found';
 import * as cannonRepo from '#repositories/cannon.repository';
 import * as storyRepo from '#repositories/story.repository';
@@ -23,28 +24,34 @@ export const upsertCannon = async (
 ): Promise<CannonResponse | null> => {
   const { cannonId, title } = data;
 
-  if (cannonId) {
-    await cannonRepo.exists(pool, cannonId, userId, CannonNotFoundError);
-    await cannonRepo.updateTitle(pool, cannonId, title);
-    return fetchCannonFn(cannonId);
-  } else {
-    const newCannon = await cannonRepo.insert(pool, userId, title);
-    const created = newCannon.rows[0];
-    if (!created) throw new CannonNotFoundError();
-    return fetchCannonFn(created.cannon_id);
-  }
+  return withTransaction(async (client) => {
+    if (cannonId) {
+      await cannonRepo.exists(client, cannonId, userId, CannonNotFoundError);
+      await cannonRepo.updateTitle(client, cannonId, title);
+      return fetchCannonFn(cannonId, undefined, client);
+    } else {
+      const newCannon = await cannonRepo.insert(client, userId, title);
+      const created = newCannon.rows[0];
+      if (!created) throw new CannonNotFoundError();
+      return fetchCannonFn(created.cannon_id, undefined, client);
+    }
+  });
 };
 
-export const fetchCannon = async (cannonId: string, userId?: string): Promise<CannonResponse> => {
+export const fetchCannon = async (
+  cannonId: string,
+  userId?: string,
+  q: Queryable = pool,
+): Promise<CannonResponse> => {
   const [cannonResult, storiesResult] = await Promise.all([
-    cannonRepo.findById(pool, cannonId, userId),
-    storyRepo.findByCannonId(pool, cannonId),
+    cannonRepo.findById(q, cannonId, userId),
+    storyRepo.findByCannonId(q, cannonId),
   ]);
 
   const cannon = assertFound(cannonResult, CannonNotFoundError);
 
   const storyIds = storiesResult.rows.map((s) => s.story_id);
-  const docsByStory = await fetchDocumentsForStories(storyIds);
+  const docsByStory = await fetchDocumentsForStories(storyIds, q);
 
   const stories: StoryRowWithDocuments[] = storiesResult.rows.map((story) => ({
     ...story,

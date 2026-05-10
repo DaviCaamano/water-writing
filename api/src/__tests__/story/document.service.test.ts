@@ -185,7 +185,7 @@ describe(
       expect(await upsertDocument(MOCK_USER_ID, { title: 'Chapter 1', body: 'Content' })).toEqual(
         MOCK_CANNON_RESPONSE,
       );
-      expect(mockFetchCannon).toHaveBeenCalledWith(MOCK_CANNON_ID);
+      expect(mockFetchCannon).toHaveBeenCalledWith(MOCK_CANNON_ID, undefined, mockClient);
     });
 
     it('should update an existing document when documentId is provided', async () => {
@@ -212,7 +212,7 @@ describe(
       });
 
       expect(result).toEqual(MOCK_CANNON_RESPONSE);
-      expect(mockFetchCannon).toHaveBeenCalledWith(MOCK_CANNON_ID);
+      expect(mockFetchCannon).toHaveBeenCalledWith(MOCK_CANNON_ID, undefined, mockClient);
       expect(mockClient.query).toHaveBeenCalledWith(
         'UPDATE documents SET title = $1, updated_at = NOW() WHERE document_id = $2',
         ['Updated Chapter', MOCK_DOC_ID],

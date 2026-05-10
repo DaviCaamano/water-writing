@@ -1,15 +1,16 @@
 import pool from '#config/database';
-import { DecompressedDocumentRow } from '#types/database';
+import { DecompressedDocumentRow, Queryable } from '#types/database';
 import { decompressBody } from '#utils/compression';
 import * as documentRepo from '#repositories/document.repository';
 
 export const fetchDocumentsForStories = async (
   storyIds: string[],
+  q: Queryable = pool,
 ): Promise<Map<string, DecompressedDocumentRow[]>> => {
   const docsByStory = new Map<string, DecompressedDocumentRow[]>();
   if (storyIds.length === 0) return docsByStory;
 
-  const docsResult = await documentRepo.findByStoryIds(pool, storyIds);
+  const docsResult = await documentRepo.findByStoryIds(q, storyIds);
 
   const decompressedDocs = await Promise.all(
     docsResult.rows.map(async (doc) => ({

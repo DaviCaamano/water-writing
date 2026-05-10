@@ -2,6 +2,7 @@ jest.mock('#utils/compression', () => ({
   decompressBody: async (buf: unknown) => (typeof buf === 'string' ? buf : String(buf)),
   compressBody: async (text: string) => Buffer.from(text),
 }));
+jest.mock('#utils/database/with-transaction');
 
 import {
   MOCK_DOC_ID,
@@ -20,38 +21,44 @@ import {
   StoryRow,
   StoryRowWithDocuments,
 } from '#types/database';
-import { mockPool } from '#__tests__/constants/mock-database';
+import { mockPool, createMockClient } from '#__tests__/constants/mock-database';
 import { MOCK_DATE } from '#__tests__/constants/mock-basic';
 import { mockClear } from '#__tests__/utils/test-wrappers';
+import { withTransaction } from '#utils/database/with-transaction';
 
 import * as cannonService from '#services/story/cannon.service';
 import { DocType, checkLegacyStructure, mockLegacy } from '#__tests__/utils/mock-linked-documents';
 import { deleteCannon, fetchCannon, fetchLegacy } from '#services/story/cannon.service';
 import { MOCK_USER_ID } from '#__tests__/constants/mock-user';
 
+const mockWithTransaction = withTransaction as jest.MockedFunction<typeof withTransaction>;
+
 describe(
   'upsertCannon',
   mockClear(() => {
     it('should insert a new cannon when no cannonId is provided', async () => {
       const mockFetch = jest.fn().mockResolvedValueOnce(MOCK_CANNON_RESPONSE);
-      mockPool.query.mockResolvedValueOnce({ rows: [{ cannon_id: MOCK_CANNON_ID }] }); // INSERT cannons
+      const mockClient = createMockClient();
+      mockClient.query.mockResolvedValueOnce({ rows: [{ cannon_id: MOCK_CANNON_ID }] }); // INSERT cannons
+      mockWithTransaction.mockImplementationOnce((callback) => callback(mockClient));
 
       const result = await cannonService.upsertCannon(
         MOCK_USER_ID,
         { title: 'Test Cannon' },
         mockFetch,
       );
-      expect(mockFetch).toHaveBeenCalledWith(MOCK_CANNON_ID);
+      expect(mockFetch).toHaveBeenCalledWith(MOCK_CANNON_ID, undefined, mockClient);
       expect(result).toEqual(MOCK_CANNON_RESPONSE);
     });
 
     it('should update a cannon when cannonId is provided and exists', async () => {
       const updatedResponse = { ...MOCK_CANNON_RESPONSE, title: 'Updated Cannon' };
       const mockFetch = jest.fn().mockResolvedValueOnce(updatedResponse);
-
-      mockPool.query
+      const mockClient = createMockClient();
+      mockClient.query
         .mockResolvedValueOnce({ rows: [{}] }) // SELECT 1 (ownership check)
         .mockResolvedValueOnce({}); // UPDATE cannons
+      mockWithTransaction.mockImplementationOnce((callback) => callback(mockClient));
 
       const result = await cannonService.upsertCannon(
         MOCK_USER_ID,
@@ -59,12 +66,14 @@ describe(
         mockFetch,
       );
 
-      expect(mockFetch).toHaveBeenCalledWith(MOCK_CANNON_ID);
+      expect(mockFetch).toHaveBeenCalledWith(MOCK_CANNON_ID, undefined, mockClient);
       expect(result).toEqual(updatedResponse);
     });
 
     it('throw CannonNotFoundError when cannonId does not exist', async () => {
-      mockPool.query.mockResolvedValueOnce({ rows: [] });
+      const mockClient = createMockClient();
+      mockClient.query.mockResolvedValueOnce({ rows: [] });
+      mockWithTransaction.mockImplementationOnce((callback) => callback(mockClient));
 
       await expect(
         cannonService.upsertCannon(MOCK_USER_ID, {

@@ -115,12 +115,11 @@ const createNewDocument = async (
 export const upsertDocument = async (userId: string, data: UpsertDocumentBody) => {
   const { documentId, title, body, storyId } = data;
 
-  const cannonId = await withTransaction(async (client) => {
-    if (documentId) {
-      return updateExistingDocument(client, userId, documentId, title, body);
-    }
-    return createNewDocument(client, userId, title, body, storyId);
-  });
+  return withTransaction(async (client) => {
+    const cannonId = documentId
+      ? await updateExistingDocument(client, userId, documentId, title, body)
+      : await createNewDocument(client, userId, title, body, storyId);
 
-  return fetchCannon(cannonId);
+    return fetchCannon(cannonId, undefined, client);
+  });
 };
