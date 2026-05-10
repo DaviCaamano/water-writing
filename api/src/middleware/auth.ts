@@ -5,7 +5,7 @@ import { authConfig } from '#config/auth';
 import logger from '#config/logger';
 import { TOKEN_COOKIE_NAME } from '#config/cookie';
 import { AuthRequest } from '#types/request';
-import * as authRepo from '#repositories/auth.repository';
+import * as authRepo from '#repositories/auth/auth.repository';
 
 const extractToken = (req: AuthRequest): string | null => {
   const cookieToken = req.cookies?.[TOKEN_COOKIE_NAME];

@@ -8,10 +8,9 @@ export const insertToken = (q: Queryable, userId: string, token: string, expires
   ]);
 
 export const deleteToken = (q: Queryable, token: string) =>
-  q.query<{ user_id: string }>(
-    'DELETE FROM authentication WHERE token = $1 RETURNING user_id',
-    [token],
-  );
+  q.query<{ user_id: string }>('DELETE FROM authentication WHERE token = $1 RETURNING user_id', [
+    token,
+  ]);
 
 export const validateToken = (q: Queryable, token: string, userId: string) =>
   q.query<{ user_id: string }>(

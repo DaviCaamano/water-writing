@@ -7,9 +7,9 @@ import { fetchDocumentsForStories } from '#utils/story/fetch-documents';
 import { decompressBody } from '#utils/compression';
 import pool from '#config/database';
 import { assertFound } from '#utils/database/assert-found';
-import * as storyRepo from '#repositories/story.repository';
-import * as cannonRepo from '#repositories/cannon.repository';
-import * as documentRepo from '#repositories/document.repository';
+import * as storyRepo from '#repositories/story/story.repository';
+import * as cannonRepo from '#repositories/story/cannon.repository';
+import * as documentRepo from '#repositories/story/document.repository';
 import { mapStoryResponse } from '#utils/database/to-json-camel-case';
 
 export const fetchStory = async (storyId: string): Promise<StoryRowWithDocuments> => {

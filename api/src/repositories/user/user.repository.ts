@@ -7,9 +7,7 @@ export const findById = (q: Queryable, userId: string) =>
   q.query<UserRow>('SELECT * FROM users WHERE user_id = $1', [userId]);
 
 export const findByStripeCustomerId = (q: Queryable, customerId: string) =>
-  q.query<UserRow>('SELECT * FROM users WHERE stripe_customer_id = $1 LIMIT 1', [
-    customerId,
-  ]);
+  q.query<UserRow>('SELECT * FROM users WHERE stripe_customer_id = $1 LIMIT 1', [customerId]);
 
 export const emailExists = (q: Queryable, email: string) =>
   q.query<ExistsResult>('SELECT 1 as exists FROM users WHERE email = $1', [email]);
@@ -28,10 +26,7 @@ export const insert = (
   );
 
 export const update = (q: Queryable, updates: string[], values: (string | Date)[]) =>
-  q.query(
-    `UPDATE users SET ${updates.join(', ')} WHERE user_id = $${values.length}`,
-    values,
-  );
+  q.query(`UPDATE users SET ${updates.join(', ')} WHERE user_id = $${values.length}`, values);
 
 export const deleteById = (q: Queryable, userId: string) =>
   q.query('DELETE FROM users WHERE user_id = $1 RETURNING user_id', [userId]);

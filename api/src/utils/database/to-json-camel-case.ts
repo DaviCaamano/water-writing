@@ -18,7 +18,9 @@ import { orderLinkedDocs } from '#utils/story/order-linked-docs';
 export function toJsonCamelCase<T extends object[], R extends object[] = Record<string, unknown>[]>(
   obj: T,
 ): R;
-export function toJsonCamelCase<T extends object, R extends object = Record<string, unknown>>(obj: T): R;
+export function toJsonCamelCase<T extends object, R extends object = Record<string, unknown>>(
+  obj: T,
+): R;
 export function toJsonCamelCase<T extends object | object[], R extends object | object[] = object>(
   obj: T,
 ): R {
@@ -73,5 +75,8 @@ export const mapCannonResponse = (
   const rowWithStories = ((row as CannonRowWithStories).stories ?? stories)?.map((cannon) =>
     mapStoryResponse(cannon),
   );
-  return toJsonCamelCase({ ...row, stories: orderLinkedDocs(rowWithStories, (doc) => doc.storyId) });
+  return toJsonCamelCase({
+    ...row,
+    stories: orderLinkedDocs(rowWithStories, (doc) => doc.storyId),
+  });
 };

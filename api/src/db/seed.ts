@@ -48,7 +48,9 @@ const naturalSort = (a: string, b: string): number =>
 
 const BOOKS_DIR = path.resolve(__dirname, '..', '__tests__', 'constants', 'books');
 
-const buildLegacySeedRows = (seedUserId: string): {
+const buildLegacySeedRows = (
+  seedUserId: string,
+): {
   cannonsToInsert: SeedCannon[];
   storiesToInsert: SeedStory[];
   documentsToInsert: SeedDocument[];

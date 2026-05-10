@@ -6,8 +6,8 @@ import { Queryable, StoryRowWithDocuments } from '#types/database';
 import { fetchDocumentsForStories } from '#utils/story/fetch-documents';
 import { withTransaction } from '#utils/database/with-transaction';
 import { assertFound } from '#utils/database/assert-found';
-import * as cannonRepo from '#repositories/cannon.repository';
-import * as storyRepo from '#repositories/story.repository';
+import * as cannonRepo from '#repositories/story/cannon.repository';
+import * as storyRepo from '#repositories/story/story.repository';
 import { mapCannonResponse } from '#utils/database/to-json-camel-case';
 
 export const deleteCannon = async (userId: string, cannonId: string): Promise<void> => {

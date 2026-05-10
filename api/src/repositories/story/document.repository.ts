@@ -74,7 +74,12 @@ export const findStoryForUser = (q: Queryable, storyId: string, userId: string) 
     [storyId, userId],
   );
 
-export const insert = (q: Queryable, storyId: string, title: string, predecessorId: string | null) =>
+export const insert = (
+  q: Queryable,
+  storyId: string,
+  title: string,
+  predecessorId: string | null,
+) =>
   q.query<{ document_id: string }>(
     `INSERT INTO documents (story_id, title, predecessor_id)
       VALUES ($1, $2, $3) RETURNING document_id`,
@@ -88,16 +93,16 @@ export const updateTitle = (q: Queryable, documentId: string, title: string) =>
   ]);
 
 export const setSuccessorId = (q: Queryable, documentId: string, successorId: string | null) =>
-  q.query(
-    'UPDATE documents SET successor_id = $1, updated_at = NOW() WHERE document_id = $2',
-    [successorId, documentId],
-  );
+  q.query('UPDATE documents SET successor_id = $1, updated_at = NOW() WHERE document_id = $2', [
+    successorId,
+    documentId,
+  ]);
 
 export const setPredecessorId = (q: Queryable, documentId: string, predecessorId: string | null) =>
-  q.query(
-    'UPDATE documents SET predecessor_id = $1, updated_at = NOW() WHERE document_id = $2',
-    [predecessorId, documentId],
-  );
+  q.query('UPDATE documents SET predecessor_id = $1, updated_at = NOW() WHERE document_id = $2', [
+    predecessorId,
+    documentId,
+  ]);
 
 export const deleteById = (q: Queryable, documentId: string) =>
   q.query('DELETE FROM documents WHERE document_id = $1', [documentId]);
@@ -110,7 +115,4 @@ export const upsertContent = (q: Queryable, documentId: string, body: Buffer) =>
   );
 
 export const insertContent = (q: Queryable, documentId: string, body: Buffer) =>
-  q.query('INSERT INTO document_content (document_id, body) VALUES ($1, $2)', [
-    documentId,
-    body,
-  ]);
+  q.query('INSERT INTO document_content (document_id, body) VALUES ($1, $2)', [documentId, body]);

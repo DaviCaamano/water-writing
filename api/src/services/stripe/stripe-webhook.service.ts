@@ -11,9 +11,9 @@ import {
   syncPlanSnapshot,
 } from '#services/stripe/subscription-sync.service';
 import type { PlanRow, Queryable, UserRow } from '#types/database';
-import * as userRepo from '#repositories/user.repository';
-import * as planRepo from '#repositories/plan.repository';
-import * as billingRepo from '#repositories/billing.repository';
+import * as userRepo from '#repositories/user/user.repository';
+import * as planRepo from '#repositories/user/plan.repository';
+import * as billingRepo from '#repositories/user/billing.repository';
 
 export const handleStripeWebhook = async (event: Stripe.Event): Promise<void> => {
   switch (event.type) {

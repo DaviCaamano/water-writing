@@ -1,7 +1,7 @@
 import pool from '#config/database';
 import { DecompressedDocumentRow, Queryable } from '#types/database';
 import { decompressBody } from '#utils/compression';
-import * as documentRepo from '#repositories/document.repository';
+import * as documentRepo from '#repositories/story/document.repository';
 
 export const fetchDocumentsForStories = async (
   storyIds: string[],

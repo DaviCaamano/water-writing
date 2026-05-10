@@ -5,7 +5,7 @@ import { RenewOn } from '#types/shared/enum/renew-on';
 import { StripeSubscriptionStatus, toStripeSubscriptionStatus } from '#types/enum/stripe';
 import { StripePaymentFailed } from '#constants/error/custom-errors';
 import { env } from '#config/env';
-import * as planRepo from '#repositories/plan.repository';
+import * as planRepo from '#repositories/user/plan.repository';
 
 export const syncPlanSnapshot = async (
   client: Queryable,
@@ -87,7 +87,10 @@ export const assertBillableSubscription = (subscription: Stripe.Subscription) =>
   }
 };
 
-export const inferPlanTypeFromPriceId = (priceId: string | null, fallback: Plan = Plan.none): Plan => {
+export const inferPlanTypeFromPriceId = (
+  priceId: string | null,
+  fallback: Plan = Plan.none,
+): Plan => {
   if (!priceId) return fallback;
 
   const normalized = priceId.toLowerCase();
@@ -124,8 +127,7 @@ export const isAccessibleSubscriptionStatus = (
   status: StripeSubscriptionStatus | null | undefined,
 ): boolean => !!status && accessibleStatuses.includes(status);
 
-export const getStoredPlanType = (plan: PlanRow | null): Plan =>
-  plan?.plan_type ?? Plan.none;
+export const getStoredPlanType = (plan: PlanRow | null): Plan => plan?.plan_type ?? Plan.none;
 
 export const getUserPlan = async (queryable: Queryable, userId: string): Promise<Plan | null> => {
   const result = await planRepo.findStatusByUserId(queryable, userId);

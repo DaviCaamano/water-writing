@@ -1,4 +1,4 @@
-import { getBillingHistory } from '#services/billing/billing.service';
+import { getBillingHistory } from '#services/user/billing.service';
 import { authMiddleware } from '#middleware/auth';
 import { Router } from 'express';
 import { generalLimiter } from '#config/rate-limiters';

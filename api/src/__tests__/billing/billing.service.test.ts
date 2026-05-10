@@ -1,5 +1,5 @@
 import { mockPool } from '#__tests__/constants/mock-database';
-import { getBillingHistory } from '#services/billing/billing.service';
+import { getBillingHistory } from '#services/user/billing.service';
 import {
   MOCK_BILLING_RESPONSE,
   MOCK_BILLING_ROW,

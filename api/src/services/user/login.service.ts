@@ -9,10 +9,10 @@ import { LoginResponse } from '#types/shared/response';
 import { parseExpiration } from '#utils/database/parse-expiration';
 import { fetchLegacy } from '#services/story/cannon.service';
 import { getUserPlan } from '#services/stripe/subscription-sync.service';
-import * as userRepo from '#repositories/user.repository';
-import * as authRepo from '#repositories/auth.repository';
+import * as userRepo from '#repositories/user/user.repository';
+import * as authRepo from '#repositories/auth/auth.repository';
 
-export const login = async (data: LoginBody): Promise<LoginResponse> => {
+export const  login = async (data: LoginBody): Promise<LoginResponse> => {
   const userResult = await userRepo.findByEmail(pool, data.email);
   if (userResult.rows.length === 0) {
     logger.info({ email: data.email }, 'Login failed: unknown email');

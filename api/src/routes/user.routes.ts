@@ -18,9 +18,10 @@ import {
   SubscribeSchema,
   SubscribeBody,
 } from '#schemas/user.schemas';
-import { createUser, updateUser, deleteUser, subscribe } from '#services/user/user.service';
 import { AuthRequest, assertAuthenticated } from '#types/request';
-import { getSession, login, logout } from '#services/user/login.service';
+import * as userService from '#services/user/user.service';
+import * as billingService from '#services/user/billing.service';
+import * as loginService from '#services/user/login.service';
 import { EmailTakenError } from '#constants/error/custom-errors';
 import {
   LoginResponse,
@@ -37,7 +38,7 @@ router.post(
   loginLimiter,
   validate(LoginSchema, 'Invalid email or password'),
   async (req: Request, res: RouteResponse<Omit<LoginResponse, 'token'>>) => {
-    const { token, ...body } = await login(req.body as LoginBody);
+    const { token, ...body } = await loginService.login(req.body as LoginBody);
     res.cookie(TOKEN_COOKIE_NAME, token, tokenCookieOptions());
     res.json(body);
   },
@@ -48,7 +49,7 @@ router.post(
   authMiddleware,
   async (req: AuthRequest, res: RouteResponse<LogoutResponse>) => {
     assertAuthenticated(req);
-    await logout(req.token);
+    await loginService.logout(req.token);
     res.clearCookie(TOKEN_COOKIE_NAME, tokenCookieOptions());
     res.json({ status: 'ok' });
   },
@@ -59,7 +60,7 @@ router.get(
   authMiddleware,
   async (req: AuthRequest, res: RouteResponse<Omit<LoginResponse, 'token'>>): Promise<void> => {
     assertAuthenticated(req);
-    const result = await getSession(req.userId, req.token);
+    const result = await loginService.getSession(req.userId, req.token);
     const { token, ...body } = result;
     void token;
     res.json(body);
@@ -74,7 +75,7 @@ router.post(
   async (req: Request, res: RouteResponse<{ status: 'ok' }>): Promise<void> => {
     const user: CreateUserBody = req.body;
     try {
-      await createUser(user);
+      await userService.createUser(user);
     } catch (err) {
       if (err instanceof EmailTakenError) {
         res.status(201).json({ status: 'ok' });
@@ -93,7 +94,7 @@ router.post(
   validate(UpdateUserSchema),
   async (req: AuthRequest, res: RouteResponse<UserResponse>): Promise<void> => {
     assertAuthenticated(req);
-    res.json(await updateUser(req.userId, req.body as UpdateUserBody));
+    res.json(await userService.updateUser(req.userId, req.body as UpdateUserBody));
   },
 );
 
@@ -102,7 +103,7 @@ router.delete(
   authMiddleware,
   async (req: AuthRequest, res: RouteResponse<{ status: 'ok' }>): Promise<void> => {
     assertAuthenticated(req);
-    await deleteUser(req.userId);
+    await userService.deleteUser(req.userId);
     res.json({ status: 'ok' });
   },
 );
@@ -117,7 +118,10 @@ router.post(
     res: RouteResponse<{ status: string } & SubscriptionResponse>,
   ): Promise<void> => {
     assertAuthenticated(req);
-    res.json({ status: 'ok', ...(await subscribe(req.userId, req.body as SubscribeBody)) });
+    res.json({
+      status: 'ok',
+      ...(await billingService.subscribe(req.userId, req.body as SubscribeBody)),
+    });
   },
 );
 

@@ -7,9 +7,9 @@ import { fetchCannon } from '#services/story/cannon.service';
 import { compressBody, decompressBody } from '#utils/compression';
 import pool from '#config/database';
 import { assertFound } from '#utils/database/assert-found';
-import * as documentRepo from '#repositories/document.repository';
-import * as cannonRepo from '#repositories/cannon.repository';
-import * as storyRepo from '#repositories/story.repository';
+import * as documentRepo from '#repositories/story/document.repository';
+import * as cannonRepo from '#repositories/story/cannon.repository';
+import * as storyRepo from '#repositories/story/story.repository';
 import { toJsonCamelCase } from '#utils/database/to-json-camel-case';
 
 const toDocumentResponse = async (row: DocumentRowWithBody): Promise<DocumentResponse> =>

@@ -196,13 +196,9 @@ describe(
     });
 
     it('throws CannonNotFoundError when the cannon is missing or owned by another user', async () => {
-      mockPool.query
-        .mockResolvedValueOnce({ rows: [] })
-        .mockResolvedValueOnce({ rows: [] });
+      mockPool.query.mockResolvedValueOnce({ rows: [] }).mockResolvedValueOnce({ rows: [] });
 
-      await expect(fetchCannon(MOCK_CANNON_ID, MOCK_USER_ID)).rejects.toThrow(
-        CannonNotFoundError,
-      );
+      await expect(fetchCannon(MOCK_CANNON_ID, MOCK_USER_ID)).rejects.toThrow(CannonNotFoundError);
     });
   }),
 );

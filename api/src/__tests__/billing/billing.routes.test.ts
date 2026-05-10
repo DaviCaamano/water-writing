@@ -1,8 +1,8 @@
 jest.mock('#services/user/user.service');
-jest.mock('#services/billing/billing.service');
+jest.mock('#services/user/billing.service');
 jest.mock('#config/stripe', () => ({ __esModule: true, default: {} }));
 
-import * as billingService from '#services/billing/billing.service';
+import * as billingService from '#services/user/billing.service';
 import { MOCK_BILLING_RESPONSE, MOCK_USER_ID } from '#__tests__/constants/mock-user';
 import request from 'supertest';
 import app from '#app';
