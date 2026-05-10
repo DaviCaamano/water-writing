@@ -29,7 +29,6 @@ export const UpdateUserSchema = z
     firstName: z.string().min(1).max(100).optional(),
     lastName: z.string().min(1).max(100).optional(),
     password: strongPassword.optional(),
-    genres: z.array(z.string().min(1).max(100)).max(50, 'Maximum 50 genres allowed').optional(),
   })
   .refine((data) => Object.values(data).some((v) => v !== undefined), {
     message: 'At least one field must be provided',

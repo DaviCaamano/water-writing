@@ -1,21 +1,21 @@
-import type { Queryable, StoryRow } from '#types/database';
+import type { ExistsResult, Queryable, StoryRow } from '#types/database';
 
 export const findById = (q: Queryable, storyId: string) =>
   q.query<StoryRow>('SELECT * FROM stories WHERE story_id = $1', [storyId]);
 
 export const findByIdWithUser = (q: Queryable, storyId: string, userId: string) =>
   q.query<StoryRow>(
-    `SELECT s.* FROM stories s
-     JOIN cannons c ON c.cannon_id = s.cannon_id
-     WHERE s.story_id = $1 AND c.user_id = $2`,
+      `SELECT s.* FROM stories s
+      JOIN cannons c ON c.cannon_id = s.cannon_id
+      WHERE s.story_id = $1 AND c.user_id = $2`,
     [storyId, userId],
   );
 
 export const findByIdWithUserOwnership = (q: Queryable, storyId: string, userId: string) =>
   q.query<StoryRow & { user_id: string }>(
     `SELECT s.*, c.user_id FROM stories s
-     JOIN cannons c ON c.cannon_id = s.cannon_id
-     WHERE s.story_id = $1 AND c.user_id = $2`,
+      JOIN cannons c ON c.cannon_id = s.cannon_id
+      WHERE s.story_id = $1 AND c.user_id = $2`,
     [storyId, userId],
   );
 
@@ -31,20 +31,20 @@ export const findByCannonIds = (q: Queryable, cannonIds: string[]) =>
 
 export const findByUserId = (q: Queryable, userId: string) =>
   q.query<StoryRow>(
-    `SELECT s.*
-     FROM stories s
-     JOIN cannons c ON c.cannon_id = s.cannon_id
-     WHERE c.user_id = $1
-     ORDER BY s.created_at`,
+      `SELECT s.*
+      FROM stories s
+      JOIN cannons c ON c.cannon_id = s.cannon_id
+      WHERE c.user_id = $1
+      ORDER BY s.created_at`,
     [userId],
   );
 
 export const userOwnsStory = (q: Queryable, storyId: string, userId: string) =>
-  q.query<{ '?column?': number }>(
-    `SELECT 1
-     FROM stories s
-     JOIN cannons c ON c.cannon_id = s.cannon_id
-     WHERE s.story_id = $1 AND c.user_id = $2`,
+  q.query<ExistsResult>(
+      `SELECT 1 as exists
+      FROM stories s
+      JOIN cannons c ON c.cannon_id = s.cannon_id
+      WHERE s.story_id = $1 AND c.user_id = $2`,
     [storyId, userId],
   );
 
@@ -68,8 +68,8 @@ export const updateCannonId = (q: Queryable, storyId: string, cannonId: string) 
 
 export const deleteByIdAndUser = (q: Queryable, storyId: string, userId: string) =>
   q.query(
-    `DELETE FROM stories
-     WHERE story_id = $1
-       AND cannon_id IN (SELECT c.cannon_id FROM cannons c WHERE c.user_id = $2)`,
+      `DELETE FROM stories
+      WHERE story_id = $1
+      AND cannon_id IN (SELECT c.cannon_id FROM cannons c WHERE c.user_id = $2)`,
     [storyId, userId],
   );

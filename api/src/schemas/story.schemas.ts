@@ -44,19 +44,10 @@ export const CannonParamsSchema = z.object({
   cannonId: z.uuid('cannonId must be a valid UUID'),
 });
 
-export const GenresSchema = z.object({
-  storyId: z.uuid('storyId must be a valid UUID'),
-  genres: z
-    .array(z.string().min(1, 'Genre cannot be empty').max(100))
-    .min(1, 'At least one genre is required')
-    .max(50, 'Maximum 50 genres allowed'),
-});
-
 export type UpsertDocumentBody = z.infer<typeof UpsertDocumentSchema>;
 export type UpsertStoryBody = z.infer<typeof UpsertStorySchema>;
 export type UpsertCannonBody = z.infer<typeof UpsertCannonSchema>;
 export type EditorBody = z.infer<typeof EditorSchema>;
-export type GenresBody = z.infer<typeof GenresSchema>;
 export type DocumentParams = z.infer<typeof DocumentParamsSchema>;
 export type StoryParams = z.infer<typeof StoryParamsSchema>;
 export type CannonParams = z.infer<typeof CannonParamsSchema>;

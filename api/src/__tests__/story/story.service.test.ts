@@ -1,4 +1,4 @@
-import { MOCK_GENRES, MOCK_USER_ID } from '#__tests__/constants/mock-user';
+import { MOCK_USER_ID } from '#__tests__/constants/mock-user';
 
 jest.mock('#config/database');
 jest.mock('#utils/database/with-transaction');
@@ -20,7 +20,7 @@ import {
 import { createMockClient } from '#__tests__/constants/mock-database';
 import { mockClear } from '#__tests__/utils/test-wrappers';
 import { StoryNotFoundError, CannonNotFoundError } from '#constants/error/custom-errors';
-import { deleteStory, upsertGenre } from '#services/story/story.service';
+import { deleteStory } from '#services/story/story.service';
 
 const mockWithTransaction = withTransaction as jest.MockedFunction<typeof withTransaction>;
 
@@ -232,40 +232,6 @@ describe(
 
       await expect(storyService.fetchUserStories(MOCK_USER_ID)).resolves.toEqual([]);
       expect(mockPool.query).toHaveBeenCalledTimes(1);
-    });
-  }),
-);
-
-describe(
-  'upsertGenre',
-  mockClear(() => {
-    it('adds genres for a story owned by the user and returns the sorted list', async () => {
-      mockPool.query.mockResolvedValueOnce({ rows: [{}] }); // ownership check
-
-      const mockClient = createMockClient();
-      mockClient.query
-        .mockResolvedValueOnce(undefined) // INSERT genre 1
-        .mockResolvedValueOnce(undefined) // INSERT genre 2
-        .mockResolvedValueOnce({
-          rows: [{ genre: 'fantasy' }, { genre: 'horror' }],
-        }); // SELECT genres
-      mockWithTransaction.mockImplementationOnce((callback) => callback(mockClient));
-
-      await expect(upsertGenre(MOCK_USER_ID, MOCK_STORY_ID, MOCK_GENRES)).resolves.toEqual(
-        MOCK_GENRES,
-      );
-      expect(mockPool.query).toHaveBeenCalledWith(expect.any(String), [
-        MOCK_STORY_ID,
-        MOCK_USER_ID,
-      ]);
-    });
-
-    it('throws StoryNotFoundError when the story is missing or not owned by the user', async () => {
-      mockPool.query.mockResolvedValueOnce({ rows: [] });
-
-      await expect(upsertGenre(MOCK_USER_ID, MOCK_STORY_ID, MOCK_GENRES)).rejects.toThrow(
-        StoryNotFoundError,
-      );
     });
   }),
 );

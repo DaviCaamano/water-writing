@@ -10,7 +10,6 @@ import { assertFound } from '#utils/database/assert-found';
 import * as storyRepo from '#repositories/story.repository';
 import * as cannonRepo from '#repositories/cannon.repository';
 import * as documentRepo from '#repositories/document.repository';
-import * as genreRepo from '#repositories/genre.repository';
 import { mapStoryResponse } from '#utils/database/to-json-camel-case';
 
 export const fetchStory = async (storyId: string): Promise<StoryRowWithDocuments> => {
@@ -131,17 +130,4 @@ export const fetchUserStories = async (userId: string): Promise<StoryResponse[]>
   return storiesResult.rows.map((story) =>
     mapStoryResponse(story, docsByStory.get(story.story_id) ?? []),
   );
-};
-
-export const upsertGenre = async (userId: string, storyId: string, genres: string[]) => {
-  assertFound(await storyRepo.userOwnsStory(pool, storyId, userId), StoryNotFoundError);
-
-  return withTransaction(async (client) => {
-    for (const genre of genres) {
-      await genreRepo.insertGenre(client, storyId, genre);
-    }
-
-    const result = await genreRepo.findByStoryId(client, storyId);
-    return result.rows.map((r) => r.genre as string);
-  });
 };

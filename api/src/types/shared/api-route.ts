@@ -70,11 +70,6 @@ class StoryApiRoute {
     method: 'POST',
     includeAuth: true,
   });
-  upsertGenre = createRoute({
-    url: '/story/genre',
-    method: 'POST',
-    includeAuth: true,
-  });
   deleteCannon = createRoute({
     url: '/story/cannon/:cannonId',
     method: 'DELETE',

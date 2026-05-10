@@ -1,5 +1,5 @@
 import { BillingResponse, LoginResponse } from '#types/shared/response';
-import { BillingRow, GenreRow, PlanRow, UserRow } from '#types/database';
+import { BillingRow, PlanRow, UserRow } from '#types/database';
 import { Plan } from '#types/shared/enum/plan';
 import { CreateUserBody, SubscribeBody, UpdateUserBody } from '#schemas/user.schemas';
 export { MOCK_USER_ID } from '#__tests__/constants/mock-ids';
@@ -24,9 +24,6 @@ export const MOCK_LOGIN_LAST_NAME = 'Doe';
 export const MOCK_LOGIN_PLAN = Plan.pro;
 export const MOCK_STRONG_PASSWORD = 'P@ssword123!';
 export const MOCK_HASHED_PASSWORD = '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi';
-export const MOCK_GENRE_ID = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12';
-export const MOCK_GENRE_FIELD = 'fantasy';
-export const MOCK_GENRES = ['fantasy', 'horror'];
 export const MOCK_BILLING_ID = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bdyy0a15';
 
 export const MOCK_USER: UserRow = {
@@ -50,7 +47,6 @@ export const MOCK_NEW_USER: CreateUserBody = {
 export const MOCK_UPDATING_USER: UpdateUserBody = {
   firstName: MOCK_LOGIN_FIRST_NAME,
   lastName: MOCK_LOGIN_LAST_NAME,
-  genres: MOCK_GENRES,
   password: MOCK_STRONG_PASSWORD,
 };
 
@@ -62,12 +58,6 @@ export const MOCK_LOGIN_RESPONSE: LoginResponse = {
   lastName: MOCK_LOGIN_LAST_NAME,
   legacy: mockLegacyResponse(),
   token: MOCK_LOGIN_TOKEN,
-};
-
-export const MOCK_GENRE: GenreRow = {
-  story_id: MOCK_GENRE_ID,
-  genre: MOCK_GENRE_FIELD,
-  created_at: MOCK_DATE,
 };
 
 export const MOCK_PLAN: PlanRow = {

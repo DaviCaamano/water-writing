@@ -9,7 +9,6 @@ import { LoginResponse } from '#types/shared/response';
 import { parseExpiration } from '#utils/database/parse-expiration';
 import { fetchLegacy } from '#services/story/cannon.service';
 import { getUserPlan } from '#services/stripe/subscription-sync.service';
-import { assertFound } from '#utils/database/assert-found';
 import * as userRepo from '#repositories/user.repository';
 import * as authRepo from '#repositories/auth.repository';
 

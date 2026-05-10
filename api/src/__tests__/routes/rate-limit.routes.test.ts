@@ -68,7 +68,6 @@ const buildStoryApp = async (rateLimiters: Partial<Record<string, unknown>>, wit
     deleteStory: jest.fn(),
     fetchUserStories: jest.fn(),
     fetchUserStoryWithDocuments: jest.fn(),
-    upsertGenre: jest.fn(),
     upsertStory: jest.fn(),
   }));
   jest.doMock('#services/story/document.service', () => ({

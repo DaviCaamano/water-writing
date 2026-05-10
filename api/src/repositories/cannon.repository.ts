@@ -1,4 +1,4 @@
-import type { Queryable, CannonRow } from '#types/database';
+import { Queryable, CannonRow, ExistsResult } from '#types/database';
 import { QueryResult } from 'pg';
 import { assertFound } from '#utils/database/assert-found';
 import { CannonNotFoundError } from '#constants/error/custom-errors';
@@ -21,10 +21,10 @@ export const exists = async (
   cannonId: string,
   userId: string,
   ErrorClass: new () => Error = CannonNotFoundError,
-): Promise<{ '?column?': number }> => {
+): Promise<ExistsResult> => {
   return assertFound(
-    await q.query<{ '?column?': number }>(
-      'SELECT 1 FROM cannons WHERE cannon_id = $1 AND user_id = $2',
+    await q.query<ExistsResult>(
+      'SELECT 1 AS exists FROM cannons WHERE cannon_id = $1 AND user_id = $2',
       [cannonId, userId],
     ),
     ErrorClass,

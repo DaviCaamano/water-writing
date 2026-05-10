@@ -58,7 +58,7 @@ describe(
       });
 
       expect(res.status).toBe(200);
-      const { token: _token, ...expectedBody } = JSON.parse(JSON.stringify(MOCK_LOGIN_RESPONSE));
+      const expectedBody = JSON.parse(JSON.stringify(MOCK_LOGIN_RESPONSE));
       expect(res.body).toMatchObject(expectedBody);
       expect(res.body.token).toBeUndefined();
 
@@ -137,7 +137,7 @@ describe(
       const res = await request(app).get('/user/session').set(mockAuthHeaders()).send();
 
       expect(res.status).toBe(200);
-      const { token: _token, ...expectedBody } = JSON.parse(JSON.stringify(MOCK_LOGIN_RESPONSE));
+      const expectedBody = JSON.parse(JSON.stringify(MOCK_LOGIN_RESPONSE));
       expect(res.body).toMatchObject(expectedBody);
       expect(res.body.token).toBeUndefined();
     });

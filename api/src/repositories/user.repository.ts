@@ -1,4 +1,4 @@
-import type { Queryable, UserRow } from '#types/database';
+import type { ExistsResult, Queryable, UserRow } from '#types/database';
 
 export const findByEmail = (q: Queryable, email: string) =>
   q.query<UserRow>('SELECT * FROM users WHERE email = $1', [email]);
@@ -12,7 +12,7 @@ export const findByStripeCustomerId = (q: Queryable, customerId: string) =>
   ]);
 
 export const emailExists = (q: Queryable, email: string) =>
-  q.query<{ '?column?': number }>('SELECT 1 FROM users WHERE email = $1', [email]);
+  q.query<ExistsResult>('SELECT 1 as exists FROM users WHERE email = $1', [email]);
 
 export const insert = (
   q: Queryable,

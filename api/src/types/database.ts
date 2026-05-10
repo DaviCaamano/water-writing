@@ -5,6 +5,7 @@ import { RenewOn } from '#types/shared/enum/renew-on';
 import { StripeSubscriptionStatus } from '#types/enum/stripe';
 
 export type Queryable = Pool | PoolClient;
+export type ExistsResult = { exists: number };
 
 export interface UserRow {
   user_id: string;
@@ -15,12 +16,6 @@ export interface UserRow {
   stripe_customer_id: string | null;
   created_at: Date;
   updated_at: Date;
-}
-
-export interface GenreRow {
-  story_id: string;
-  genre: string;
-  created_at: Date;
 }
 
 export interface CannonRow {

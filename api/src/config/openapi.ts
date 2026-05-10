@@ -10,7 +10,6 @@ import {
 } from '#schemas/user.schemas';
 import {
   EditorSchema,
-  GenresSchema,
   UpsertDocumentSchema,
   UpsertStorySchema,
   UpsertCannonSchema,
@@ -88,7 +87,6 @@ const LoginResponseSchema = registry.register(
 // Registered request schemas
 const CreateUserRequest = registry.register('CreateUserRequest', CreateUserSchema);
 const EditorRequest = registry.register('EditorRequest', EditorSchema);
-const GenresRequest = registry.register('GenresRequest', GenresSchema);
 const LoginRequest = registry.register('LoginRequest', LoginSchema);
 const SubscribeRequest = registry.register('SubscribeRequest', SubscribeSchema);
 const UpsertDocumentRequest = registry.register('UpsertDocumentRequest', UpsertDocumentSchema);
@@ -179,21 +177,6 @@ registry.registerPath({
   security: secured,
   request: { body: json(UpdateUserRequest) },
   responses: { 200: { description: 'User updated' }, 400: err400, 401: err401, 500: err500 },
-});
-
-registry.registerPath({
-  method: 'post',
-  path: '/user/genres',
-  tags: ['User'],
-  summary: 'Add genres to the authenticated user',
-  security: secured,
-  request: { body: json(GenresRequest) },
-  responses: {
-    200: { description: 'Genres added', ...json(z.object({ genres: z.array(z.string()) })) },
-    400: err400,
-    401: err401,
-    500: err500,
-  },
 });
 
 registry.registerPath({

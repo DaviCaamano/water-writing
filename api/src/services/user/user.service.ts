@@ -74,7 +74,7 @@ export const updateUser = async (userId: string, data: UpdateUserBody): Promise<
     }
 
     if (updates.length > 0) {
-      updates.push(`updated_at = $${paramIdx++}`);
+      updates.push(`updated_at = $${paramIdx}`);
       values.push(new Date());
       values.push(userId);
       await userRepo.update(client, updates, values);

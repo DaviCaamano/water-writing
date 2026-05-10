@@ -22,7 +22,6 @@ import {
   deleteStory,
   fetchUserStoryWithDocuments,
   fetchUserStories,
-  upsertGenre,
   upsertStory,
 } from '#services/story/story.service';
 import { AuthRequest, assertAuthenticated } from '#types/request';
@@ -44,7 +43,6 @@ import {
   StoryResponse,
   CannonResponse,
 } from '#types/shared/response';
-import { GenresBody, GenresSchema } from '#schemas/story.schemas';
 import { mapStoryResponse } from '#utils/database/to-json-camel-case';
 
 const router = Router();
@@ -208,18 +206,6 @@ router.post(
       res.write(`data: ${JSON.stringify({ error: 'Stream interrupted' })}\n\n`);
     }
     res.end();
-  },
-);
-
-router.post(
-  '/genre',
-  authMiddleware,
-  generalLimiter,
-  validate(GenresSchema),
-  async (req: AuthRequest, res: RouteResponse<{ genres: string[] }>): Promise<void> => {
-    assertAuthenticated(req);
-    const { storyId, genres } = req.body as GenresBody;
-    res.json({ genres: await upsertGenre(req.userId, storyId, genres) });
   },
 );
 

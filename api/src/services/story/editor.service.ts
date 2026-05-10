@@ -2,7 +2,6 @@ import pool from '#config/database';
 import anthropic, { editorModel } from '#config/anthropic';
 import { DocumentRowWithBody } from '#types/database';
 import { DocumentNotFoundError, InvalidSelectionError } from '#constants/error/custom-errors';
-import { assertFound } from '#utils/database/assert-found';
 import { decompressBody } from '#utils/compression';
 
 interface ContextDocument {

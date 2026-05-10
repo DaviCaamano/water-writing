@@ -31,9 +31,7 @@ const mockUpsertStory = storyService.upsertStory as jest.Mock;
 const mockFetchUserStories = storyService.fetchUserStories as jest.Mock;
 const mockFetchUserStoryWithDocuments = storyService.fetchUserStoryWithDocuments as jest.Mock;
 const mockDeleteStory = storyService.deleteStory as jest.Mock;
-const mockAddGenres = storyService.upsertGenre as jest.MockedFunction<
-  typeof storyService.upsertGenre
->;
+
 const mockUpsertCannon = cannonService.upsertCannon as jest.Mock;
 const mockFetchUserCannon = cannonService.fetchCannon as jest.Mock;
 const mockFetchLegacy = cannonService.fetchLegacy as jest.Mock;
@@ -417,62 +415,6 @@ describe(
 
       expect(res.status).toBe(404);
       expect(res.body.error).toBe('Document not found');
-    });
-  }),
-);
-
-// POST /story/genre
-describe(
-  'POST /story/genres',
-  testAuth('/story/genre', 'post', { storyId: MOCK_STORY_ID, genres: ['Fantasy'] }, () => {
-    it('returns 400 when storyId is missing', async () => {
-      const res = await request(app)
-        .post('/story/genre')
-        .set(mockAuthHeaders())
-        .send({ genres: ['Fantasy'] });
-
-      expect(res.status).toBe(400);
-      expect(res.body.details.properties).toHaveProperty('storyId');
-      expect(mockAddGenres).not.toHaveBeenCalled();
-    });
-
-    it('returns 400 when genres is not an array', async () => {
-      const res = await request(app)
-        .post('/story/genre')
-        .set(mockAuthHeaders())
-        .send({ storyId: MOCK_STORY_ID, genres: 'Fantasy' });
-      expect(res.status).toBe(400);
-      expect(res.body.details.properties).toHaveProperty('genres');
-      expect(mockAddGenres).not.toHaveBeenCalled();
-    });
-
-    it('returns 200 with updated genre list', async () => {
-      const headers = mockAuthHeaders();
-      mockAddGenres.mockResolvedValueOnce(['Fantasy', 'Sci-Fi']);
-
-      const res = await request(app)
-        .post('/story/genre')
-        .set(headers)
-        .send({ storyId: MOCK_STORY_ID, genres: ['Fantasy', 'Sci-Fi'] });
-
-      expect(res.status).toBe(200);
-      expect(res.body.genres).toEqual(['Fantasy', 'Sci-Fi']);
-      expect(mockAddGenres).toHaveBeenCalledWith(MOCK_USER_ID, MOCK_STORY_ID, [
-        'Fantasy',
-        'Sci-Fi',
-      ]);
-    });
-
-    it('returns 404 when the story is not found', async () => {
-      mockAddGenres.mockRejectedValueOnce(new StoryNotFoundError());
-
-      const res = await request(app)
-        .post('/story/genre')
-        .set(mockAuthHeaders())
-        .send({ storyId: MOCK_STORY_ID, genres: ['Fantasy'] });
-
-      expect(res.status).toBe(404);
-      expect(res.body.error).toBe('Story not found');
     });
   }),
 );
