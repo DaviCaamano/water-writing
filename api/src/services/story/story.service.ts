@@ -134,10 +134,12 @@ export const fetchUserStories = async (userId: string): Promise<StoryResponse[]>
 export const upsertGenre = async (userId: string, storyId: string, genres: string[]) => {
   assertFound(await storyRepo.userOwnsStory(pool, storyId, userId), StoryNotFoundError);
 
-  for (const genre of genres) {
-    await genreRepo.insertGenre(pool, storyId, genre);
-  }
+  return withTransaction(async (client) => {
+    for (const genre of genres) {
+      await genreRepo.insertGenre(client, storyId, genre);
+    }
 
-  const result = await genreRepo.findByStoryId(pool, storyId);
-  return result.rows.map((r) => r.genre as string);
+    const result = await genreRepo.findByStoryId(client, storyId);
+    return result.rows.map((r) => r.genre as string);
+  });
 };

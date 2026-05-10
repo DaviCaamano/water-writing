@@ -240,13 +240,16 @@ describe(
   'upsertGenre',
   mockClear(() => {
     it('adds genres for a story owned by the user and returns the sorted list', async () => {
-      mockPool.query
-        .mockResolvedValueOnce({ rows: [{}] })
-        .mockResolvedValueOnce(undefined)
-        .mockResolvedValueOnce(undefined)
+      mockPool.query.mockResolvedValueOnce({ rows: [{}] }); // ownership check
+
+      const mockClient = createMockClient();
+      mockClient.query
+        .mockResolvedValueOnce(undefined) // INSERT genre 1
+        .mockResolvedValueOnce(undefined) // INSERT genre 2
         .mockResolvedValueOnce({
           rows: [{ genre: 'fantasy' }, { genre: 'horror' }],
-        });
+        }); // SELECT genres
+      mockWithTransaction.mockImplementationOnce((callback) => callback(mockClient));
 
       await expect(upsertGenre(MOCK_USER_ID, MOCK_STORY_ID, MOCK_GENRES)).resolves.toEqual(
         MOCK_GENRES,
