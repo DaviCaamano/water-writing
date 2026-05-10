@@ -24,7 +24,7 @@ export const SubscriptionSection = ({ colorMap }: { colorMap: SettingsColorMap }
 
   const handleCancelSubscription = async () => {
     try {
-      await queryApi(apiRoutes.user.subscribe(), { body: { plan, yearly } });
+      await queryApi(apiRoutes.billing.subscribe(), { body: { plan, yearly } });
     } catch (e) {
       console.error('Cancel failed:', e);
     }
