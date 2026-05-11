@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import type { Editor as TiptapEditor } from '@tiptap/react';
 import { useEditorStore } from '~store/useEditorStore';
 import { useNavigationStore } from '~store/useNavigationStore';
@@ -40,20 +40,25 @@ export const Editor = () => {
   // Handle (Ctrl|Meta)+K Shortcut for adding a Link to the document
   const { handleLink } = useEditorKeyHandler(editor);
 
-  useKeyDown([
-    {
-      key: 'k',
-      modifiers: [[KeyDownModifier.ctrl], [KeyDownModifier.meta]], // ctrl or meta key
-      preventDefault: true,
-      handler: handleLink,
-    },
-    {
-      key: 's',
-      modifiers: [[KeyDownModifier.ctrl], [KeyDownModifier.meta]], // ctrl or meta key
-      preventDefault: true,
-      handler: handleSave,
-    },
-  ]);
+  useKeyDown(
+    useMemo(
+      () => [
+        {
+          key: 'k',
+          modifiers: [[KeyDownModifier.ctrl], [KeyDownModifier.meta]],
+          preventDefault: true,
+          handler: handleLink,
+        },
+        {
+          key: 's',
+          modifiers: [[KeyDownModifier.ctrl], [KeyDownModifier.meta]],
+          preventDefault: true,
+          handler: handleSave,
+        },
+      ],
+      [handleLink, handleSave],
+    ),
+  );
 
   const handleChange = useCallback(
     (next: { title: string; body: string }) => {
