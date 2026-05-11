@@ -81,7 +81,7 @@ export const TextEditor = ({
       attributes: {
         class: 'tiptap-body flex-1 w-full min-h-0 outline-none px-12 pt-0 pb-4 overflow-y-auto',
       },
-      // Save the document when the user uses the CTRL+S shortcut
+
       handleKeyDown: (_view, event) => {
         if ((event.ctrlKey || event.metaKey) && event.key === 's') {
           event.preventDefault();

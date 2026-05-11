@@ -23,13 +23,12 @@ export const Editor = () => {
   const { fontSize, fontFamily, markDirty, markSaved } = useEditorStore();
   const { currentDocumentId, currentStoryId } = useNavigationStore();
 
-  // Initialize Document Data
   useEditorQuery(currentDocumentId, (documentData: DocumentResponse) => {
     setTitle(documentData.title);
     setBody(documentData.body);
   });
 
-  // Handle Save Behaviors
+  // Handle (Ctrl|Meta)+S Shortcut for saving the document
   const handleSave = useEditorSave({
     currentStoryId,
     currentDocumentId,
@@ -38,14 +37,23 @@ export const Editor = () => {
     title,
   });
 
-  // Handle Ctrl+K Shortcut for adding a Link to the document
+  // Handle (Ctrl|Meta)+K Shortcut for adding a Link to the document
   const { handleLink } = useEditorKeyHandler(editor);
-  useKeyDown({
-    key: 'k',
-    modifiers: [[KeyDownModifier.ctrl], [KeyDownModifier.meta]], // ctrl or meta key
-    preventDefault: true,
-    handler: handleLink,
-  });
+
+  useKeyDown([
+    {
+      key: 'k',
+      modifiers: [[KeyDownModifier.ctrl], [KeyDownModifier.meta]], // ctrl or meta key
+      preventDefault: true,
+      handler: handleLink,
+    },
+    {
+      key: 's',
+      modifiers: [[KeyDownModifier.ctrl], [KeyDownModifier.meta]], // ctrl or meta key
+      preventDefault: true,
+      handler: handleSave,
+    },
+  ]);
 
   const handleChange = useCallback(
     (next: { title: string; body: string }) => {
@@ -73,7 +81,6 @@ export const Editor = () => {
           body={body}
           onChange={handleChange}
           onEditorReady={setEditor}
-          onSave={handleSave}
           fontSize={fontSize}
           fontFamily={fontFamily}
         />
