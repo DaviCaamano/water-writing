@@ -64,7 +64,7 @@ export const SubscriptionSection = ({ colorMap }: { colorMap: SettingsColorMap }
       <div className='flex items-center justify-between mb-5'>
         <SectionHeading>Plans</SectionHeading>
 
-        {/* Billing cycle toggle — pill track */}
+        {/* Billing cycle toggle - pill track */}
         <div className={cn('flex p-1 rounded-full gap-1', settingsTrackStyle)}>
           {[
             { v: false, label: 'Monthly' },

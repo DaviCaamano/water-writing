@@ -52,7 +52,7 @@ export const SubscribeSchema = z.discriminatedUnion('planType', [
   }),
 ]);
 
-// Inferred types — use these instead of manually typing req.body
+// Inferred types - use these instead of manually typing req.body
 export type LoginBody = z.infer<typeof LoginSchema>;
 export type CreateUserBody = z.infer<typeof CreateUserSchema>;
 export type UpdateUserBody = z.infer<typeof UpdateUserSchema>;

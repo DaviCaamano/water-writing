@@ -42,6 +42,6 @@ export const ViewMode = {
   legacy: 'legacy',
 } as const;
 
-export type ViewMode = (typeof ViewMode)[keyof typeof ViewMode];
+export type ViewMode = Enum<typeof ViewMode>;
 
 export type EditorTheme = 'light' | 'dark' | 'sepia';

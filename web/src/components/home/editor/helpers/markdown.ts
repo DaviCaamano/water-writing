@@ -13,17 +13,20 @@ const turndown = new TurndownService({
   emDelimiter: '_',
 });
 
+// Handle Strikethrough tags and convert to markdown
 turndown.addRule('strikethrough', {
   filter: ['s', 'del'],
   replacement: (content) => `~~${content}~~`,
 });
 
+// Handle List tags and convert to markdown tasklists
 turndown.addRule('taskListWrapper', {
   filter: (node) =>
     node.nodeName === 'UL' && (node as HTMLElement).getAttribute('data-type') === 'taskList',
   replacement: (content) => `\n\n${content.replace(/\n+$/, '')}\n\n`,
 });
 
+// Handle List Item tags and convert to markdown tasklist items
 turndown.addRule('taskListItem', {
   filter: (node) => {
     if (node.nodeName !== 'LI') return false;
@@ -39,6 +42,7 @@ turndown.addRule('taskListItem', {
   },
 });
 
+// Convert HTML check lists to markdown task lists
 const transformTaskLists = (html: string): string => {
   if (!html.includes('type="checkbox"')) return html;
   if (typeof document === 'undefined') return html;
@@ -106,7 +110,8 @@ const escapeHtml = (s: string): string => {
   return div.innerHTML;
 };
 
-const wrapParagraphBlock = (block: string, maxLength = MAX_EDITOR_LINE_LENGTH): string[] => {
+// Break text into lines that fit within the specified maximum character length
+const getTextLines = (block: string, maxLength = MAX_EDITOR_LINE_LENGTH): string[] => {
   const text = block.replace(/\s+/g, ' ').trim();
 
   if (!text) {
@@ -142,20 +147,37 @@ const wrapParagraphBlock = (block: string, maxLength = MAX_EDITOR_LINE_LENGTH): 
   return lines;
 };
 
+/*
+  Checks if a block of text is a structured markdown block.
+  A structured markdown block is a block of text that starts with a markdown syntax character.
+  Examples of structured markdown blocks:
+  - Code blocks (```)
+  - Headings (##, ###, ...)
+  - Blockquotes (>)
+  - Lists (*, -, ...)
+  - Numbered lists (1., 2., ...)
+  - Bold, italic, and strikethrough text (**, *, ~~)
+  - Horizontal rules (---, ***, _)
+ */
 const isStructuredMarkdownBlock = (block: string): boolean => {
   const trimmed = block.trim();
 
   return (
-    /^(```|~~~)/.test(trimmed) ||
-    /^(#{1,6})\s/.test(trimmed) ||
-    /^>\s/.test(trimmed) ||
-    /^([-+*])\s/.test(trimmed) ||
-    /^\d+\.\s/.test(trimmed) ||
-    /^(-{3,}|\*{3,}|_{3,})$/.test(trimmed) ||
-    /^\|/.test(trimmed)
+    /^(```|~~~)/.test(trimmed) || // Code blocks (```)
+    /^(#{1,6})\s/.test(trimmed) || // Headings (##, ###, ...)
+    /^>\s/.test(trimmed) || // Blockquotes (>)
+    /^([-+*])\s/.test(trimmed) || // Lists (*, -, ...)
+    /^\d+\.\s/.test(trimmed) || // Numbered lists (1., 2., ...)
+    /^(-{3,}|\*{3,}|_{3,})$/.test(trimmed) || // Bold, italic, and strikethrough text (**, *, ~~)
+    /^\|/.test(trimmed) // Horizontal rules (---, ***, _)
   );
 };
 
+/*
+  Performs the following normalizations to the editor text
+  - Normalizes line endings - converts \r\n and \r to \n, trims whitespace
+  - Word wrap text paragraphs before or at 65 characters.
+ */
 export const normalizeEditorBody = (body: string, maxLength = MAX_EDITOR_LINE_LENGTH): string => {
   const normalized = body.replace(/\r\n?/g, '\n').trim();
 
@@ -175,18 +197,23 @@ export const normalizeEditorBody = (body: string, maxLength = MAX_EDITOR_LINE_LE
       continue;
     }
 
-    outputBlocks.push(...wrapParagraphBlock(trimmedBlock, maxLength));
+    outputBlocks.push(...getTextLines(trimmedBlock, maxLength));
   }
 
   return outputBlocks.join('\n\n');
 };
 
+// Takes a title and body string and converts them into an HTML string that TipTap loads
+// as its document.
+// Inverse of splitEditorHtml
 export const buildEditorHtml = (title: string, body: string): string => {
   const bodyHtml = markdownToHtml(normalizeEditorBody(body)).trim();
   const normalizedBodyHtml = bodyHtml.length > 0 ? bodyHtml : '<p></p>';
   return `<h1 data-title>${escapeHtml(title)}</h1>${normalizedBodyHtml}`;
 };
 
+// Takes an HTML string and converts into a title and body string.
+// Inverse of buildEditorHtml
 export const splitEditorHtml = (html: string): { title: string; body: string } => {
   if (typeof document === 'undefined') return { title: '', body: htmlToMarkdown(html) };
   const wrapper = document.createElement('div');

@@ -4,7 +4,7 @@ export const SettingsSection = {
   billing: 'billing',
 } as const;
 
-export type SettingsSection = (typeof SettingsSection)[keyof typeof SettingsSection];
+export type SettingsSection = Enum<typeof SettingsSection>;
 
 export type SettingsColorMap = {
   default: string;

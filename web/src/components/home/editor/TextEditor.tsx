@@ -7,14 +7,14 @@ import TaskItem from '@tiptap/extension-task-item';
 import Placeholder from '@tiptap/extension-placeholder';
 import { useEffect, useRef, useState } from 'react';
 import { cn } from '~utils/merge-css-classes';
-import { buildEditorHtml, splitEditorHtml } from './markdown';
+import { buildEditorHtml, splitEditorHtml } from './helpers/markdown';
 import { Title, TitleDocument } from './extensions/Title';
 import { Entity } from '~components/home/editor/extensions/Entity';
 import { Candidate } from '~components/home/editor/extensions/Candidate';
 import { Paragraph } from '~components/home/editor/extensions/Paragraph';
 import { RejectedEntity } from '~components/home/editor/extensions/RejectedEntity';
 
-interface RichEditorProps {
+interface TextEditorProps {
   title: string;
   body: string;
   onChange: (next: { title: string; body: string }) => void;
@@ -28,7 +28,7 @@ interface RichEditorProps {
 
 const SERIALIZE_DEBOUNCE_MS = 150;
 
-export const RichEditor = ({
+export const TextEditor = ({
   title,
   body,
   onChange,
@@ -38,8 +38,10 @@ export const RichEditor = ({
   fontFamily,
   titlePlaceholder = 'Untitled Document',
   bodyPlaceholder = 'Start writing...',
-}: RichEditorProps) => {
+}: TextEditorProps) => {
   const lastEmittedRef = useRef<{ title: string; body: string }>({ title, body });
+  // Wait until the user has stopped typing to update the text body/title and mark it as dirty.
+  // Tiptap's editor handles the UI state, so this is only posting text to the api.
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const onSaveRef = useRef(onSave);
   const [isAtBottom, setIsAtBottom] = useState(false);
@@ -79,6 +81,7 @@ export const RichEditor = ({
       attributes: {
         class: 'tiptap-body flex-1 w-full min-h-0 outline-none px-12 pt-0 pb-4 overflow-y-auto',
       },
+      // Save the document when the user uses the CTRL+S shortcut
       handleKeyDown: (_view, event) => {
         if ((event.ctrlKey || event.metaKey) && event.key === 's') {
           event.preventDefault();
@@ -111,12 +114,14 @@ export const RichEditor = ({
     lastEmittedRef.current = { title, body };
   }, [title, body, editor]);
 
+  // Clear the debounced
   useEffect(() => {
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
   }, []);
 
+  // Check if editor is scrolled to the bottom to hide the fade effect at the bottom of the editor.
   useEffect(() => {
     if (!editor) return;
     const el = editor.view.dom as HTMLElement;

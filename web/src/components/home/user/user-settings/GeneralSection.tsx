@@ -84,7 +84,7 @@ export const GeneralSection = () => {
           <div
             className={cn('rounded-full px-5 py-2.5 text-[14px] text-muted', settingsInsetStyle)}
           >
-            {email || '—'}
+            {email || '-'}
           </div>
         </div>
       </div>

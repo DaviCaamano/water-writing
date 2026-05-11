@@ -77,21 +77,21 @@
   /* primary-foreground: readable text/icon color on primary */
   --primary-foreground: oklch(0.832 0.028 248.17);
   /* secondary: lower-emphasis supporting action/surface color */
-  --secondary: #28454a;
+  --secondary: oklch(0.37 0.036 209.59);
   /* secondary-foreground: readable text/icon color on secondary */
-  --secondary-foreground: #81f0ff;
+  --secondary-foreground: oklch(0.895 0.104 206.947);
   /* accent: interactive highlight color or highlighted surface */
-  --accent: #115078;
+  --accent: oklch(0.414 0.09 242.522);
   /* accent-foreground: readable text/icon color on accent */
-  --accent-foreground: #88d1f8;
+  --accent-foreground: oklch(0.827 0.091 232.753);
   /* muted: subdued background or less-emphasized surface */
-  --muted: #98b5bc;
+  --muted: oklch(0.754 0.033 213.962);
   /* muted-foreground: subdued text color for secondary information */
-  --muted-foreground: #505e61;
+  --muted-foreground: oklch(0.471 0.018 212.073);
   /* destructive: dangerous actions, destructive buttons, errors */
-  --destructive: #602a2a;
+  --destructive: oklch(0.36 0.079 21.805);
   /* destructive-foreground: readable content on destructive surfaces */
-  --destructive-foreground: #f89e9e;
+  --destructive-foreground: oklch(0.79 0.108 19.756);
   /* success: positive actions, success messages */
   --success: oklch(0.55 0.14 150);
   /* success-foreground: readable content on success surfaces */

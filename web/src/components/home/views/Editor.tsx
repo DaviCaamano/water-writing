@@ -1,95 +1,51 @@
 'use client';
 
-import { useEffect, useRef, useCallback, useMemo, useState } from 'react';
+import { useCallback, useState } from 'react';
 import type { Editor as TiptapEditor } from '@tiptap/react';
-import { editorStoreSnapshot, useEditorStore } from '~store/useEditorStore';
+import { useEditorStore } from '~store/useEditorStore';
 import { useNavigationStore } from '~store/useNavigationStore';
-import { useDocumentQuery } from '~lib/queries/story';
-import { useUpsertDocumentMutation } from '~lib/mutations/story';
 import { cn } from '~utils/merge-css-classes';
 import { EditorToolbar } from '~components/home/editor/EditorToolbar';
-import { RichEditor } from '~components/home/editor/RichEditor';
+import { TextEditor } from '~components/home/editor/TextEditor';
 import { EditorWordCount } from '~components/home/editor/EditorWordCount';
-import { normalizeEditorBody } from '~components/home/editor/markdown';
+import { normalizeEditorBody } from '~components/home/editor/helpers/markdown';
+import { useEditorQuery } from '~components/home/editor/hooks/useEditorQuery';
+import { DocumentResponse } from '#types/shared/response';
+import { useEditorSave } from '~components/home/editor/hooks/useEditorSave';
+import { KeyDownModifier, useKeyDown } from '~hooks/useKeyDown';
+import { useEditorKeyHandler } from '~components/home/editor/hooks/useEditorKeyHandler';
 
 export const Editor = () => {
-  const { fontSize, fontFamily, markDirty, markSaved } = useEditorStore();
-  const { currentDocumentId, currentStoryId } = useNavigationStore();
-  const { data: documentData } = useDocumentQuery(currentDocumentId);
-
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
-  const hasInitialized = useRef(false);
-  const titleRef = useRef(title);
-  const bodyRef = useRef(body);
-
-  useEffect(() => {
-    titleRef.current = title;
-    bodyRef.current = body;
-  });
-
   const [editor, setEditor] = useState<TiptapEditor | null>(null);
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const upsertDocument = useUpsertDocumentMutation();
 
-  // One-time initialization from query data
-  useEffect(() => {
-    if (!documentData || hasInitialized.current) return;
-    hasInitialized.current = true;
+  const { fontSize, fontFamily, markDirty, markSaved } = useEditorStore();
+  const { currentDocumentId, currentStoryId } = useNavigationStore();
+
+  // Initialize Document Data
+  useEditorQuery(currentDocumentId, (documentData: DocumentResponse) => {
     setTitle(documentData.title);
     setBody(documentData.body);
-  }, [documentData]);
+  });
 
-  const wordCount = useMemo(() => {
-    const trimmed = body.trim();
-    return trimmed.length === 0 ? 0 : trimmed.split(/\s+/).length;
-  }, [body]);
+  // Handle Save Behaviors
+  const handleSave = useEditorSave({
+    currentStoryId,
+    currentDocumentId,
+    body,
+    markSaved,
+    title,
+  });
 
-  const charCount = body.length;
-
-  const handleSave = useCallback(async () => {
-    const snapshot = editorStoreSnapshot();
-    if (!snapshot.isDirty || !currentDocumentId) return;
-    try {
-      await upsertDocument.mutateAsync({
-        documentId: currentDocumentId,
-        storyId: currentStoryId ?? undefined,
-        title: titleRef.current,
-        body: bodyRef.current,
-      });
-      markSaved();
-    } catch (e) {
-      console.error('Auto-save failed:', e);
-    }
-  }, [upsertDocument, markSaved, currentDocumentId, currentStoryId]);
-
-  useEffect(() => {
-    intervalRef.current = setInterval(handleSave, 5 * 60 * 1000);
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    };
-  }, [handleSave]);
-
-  useEffect(() => {
-    if (!editor) return;
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (!(e.ctrlKey || e.metaKey)) return;
-      if (e.key === 'k') {
-        if (!editor.isFocused) return;
-        e.preventDefault();
-        const previous = editor.getAttributes('link').href as string | undefined;
-        const url = window.prompt('Link URL', previous ?? 'https://');
-        if (url === null) return;
-        if (url === '') {
-          editor.chain().focus().extendMarkRange('link').unsetLink().run();
-          return;
-        }
-        editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
-      }
-    };
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [editor]);
+  // Handle Ctrl+K Shortcut for adding a Link to the document
+  const { handleLink } = useEditorKeyHandler(editor);
+  useKeyDown({
+    key: 'k',
+    modifiers: [[KeyDownModifier.ctrl], [KeyDownModifier.meta]], // ctrl or meta key
+    preventDefault: true,
+    handler: handleLink,
+  });
 
   const handleChange = useCallback(
     (next: { title: string; body: string }) => {
@@ -112,7 +68,7 @@ export const Editor = () => {
         )}
       >
         <EditorToolbar editor={editor} />
-        <RichEditor
+        <TextEditor
           title={title}
           body={body}
           onChange={handleChange}
@@ -122,7 +78,7 @@ export const Editor = () => {
           fontFamily={fontFamily}
         />
       </div>
-      <EditorWordCount charCount={charCount} wordCount={wordCount} />
+      <EditorWordCount text={body} />
     </div>
   );
 };

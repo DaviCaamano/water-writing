@@ -1,10 +1,18 @@
 import { cn } from '~utils/merge-css-classes';
+import { useMemo } from 'react';
 
 export interface EditorWordCountProps {
-  charCount: number;
-  wordCount: number;
+  text: string;
 }
-export const EditorWordCount = ({ charCount, wordCount }: EditorWordCountProps) => {
+export const EditorWordCount = ({ text }: EditorWordCountProps) => {
+
+  const charCount = text.length;
+
+  const wordCount = useMemo(() => {
+    const trimmed = text.trim();
+    return trimmed.length === 0 ? 0 : trimmed.split(/\s+/).length;
+  }, [text]);
+
   return (
     <div
       className={cn(

@@ -285,7 +285,7 @@ export const generateOpenApiDocument = (): ReturnType<OpenApiGeneratorV31['gener
     info: {
       title: 'Writers Bot API',
       version: '1.0.0',
-      description: 'Writing management platform — documents, stories, and cannons.',
+      description: 'Writing management platform - documents, stories, and cannons.',
     },
     servers: [{ url: process.env.API_URL ?? 'http://localhost:3001' }],
   };

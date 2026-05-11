@@ -9,4 +9,4 @@ export const Plan = {
   max: 'max-plan',
 } as const;
 
-export type Plan = (typeof Plan)[keyof typeof Plan];
+export type Plan = Enum<typeof Plan>;

@@ -154,7 +154,7 @@ describe(
         [9, 3, 5, 1],
       ]);
 
-      // fetchCannon handles one cannon at a time — provide only the first cannon's stories/docs
+      // fetchCannon handles one cannon at a time - provide only the first cannon's stories/docs
       const singleCannon = cannons[0]!;
       const cannonList = [{ ...singleCannon, stories: undefined }];
       const storyList = (singleCannon.stories as StoryRowWithDocuments[]).map(
@@ -311,7 +311,7 @@ describe(
     it('should skip the documents query when there are no stories', async () => {
       mockPool.query
         .mockResolvedValueOnce({ rows: [MOCK_CANNON] })
-        .mockResolvedValueOnce({ rows: [] }); // no stories — documents query should NOT fire
+        .mockResolvedValueOnce({ rows: [] }); // no stories - documents query should NOT fire
 
       const result = await fetchLegacy(MOCK_USER_ID);
 

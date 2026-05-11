@@ -5,4 +5,4 @@ export const ClaudeModel = {
   Haiku4_5: 'claude-haiku-4-5',
 } as const;
 
-export type ClaudeModel = (typeof ClaudeModel)[keyof typeof ClaudeModel];
+export type ClaudeModel = Enum<typeof ClaudeModel>

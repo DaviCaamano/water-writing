@@ -80,7 +80,7 @@ export const waterWrite = async (
 The user will provide you with story context in a <story> tag,
 two indexes which represent a substring of the story text inside <startSelectionIndex> and <endSelectionIndex> tags,
 and instructions for how to replace substring inside an <instructions> tag.
-Return ONLY the replacement text — no preamble, no explanation, no quotation marks around the output.`,
+Return ONLY the replacement text - no preamble, no explanation, no quotation marks around the output.`,
     messages: [
       {
         role: 'user',

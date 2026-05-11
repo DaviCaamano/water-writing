@@ -45,7 +45,7 @@ export const WaterRippleFade = ({
   const animRafRef = useRef<number | null>(null);
   const liveRafRef = useRef<number | null>(null);
 
-  // Drive the enter / exit animation — all setState calls happen inside the async rAF tick
+  // Drive the enter / exit animation - all setState calls happen inside the async rAF tick
   useEffect(() => {
     if (animRafRef.current !== null) cancelAnimationFrame(animRafRef.current);
 
@@ -98,7 +98,7 @@ export const WaterRippleFade = ({
     };
   }, [open, liveTurbulence]);
 
-  // Invisible and not animating toward visible — skip rendering entirely
+  // Invisible and not animating toward visible - skip rendering entirely
   if (opacity === 0 && !open) return null;
 
   // Animate baseFrequency a touch with the seed for a "water moving" feel

@@ -94,7 +94,7 @@ const SettingsModalContent = ({
             <X className='size-4' />
           </button>
 
-          {/* Sidebar nav — pill rail */}
+          {/* Sidebar nav - pill rail */}
           <nav className='w-48 shrink-0 flex flex-col gap-3 pt-1'>
             <DialogPrimitive.Title asChild>
               <h2 className='text-[22px] text-foreground font-bold tracking-tight pl-2 pb-2'>
@@ -125,7 +125,7 @@ const SettingsModalContent = ({
             </div>
           </nav>
 
-          {/* Content panel — inset surface */}
+          {/* Content panel - inset surface */}
           <div className='flex-1 rounded-[24px] overflow-y-auto p-7 '>
             {activeSection === SettingsSection.general && <GeneralSection />}
             {activeSection === SettingsSection.plan && <SubscriptionSection colorMap={colorMap} />}

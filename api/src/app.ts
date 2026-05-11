@@ -79,7 +79,7 @@ app.use('/docs', docsRoutes);
 app.use('/story', storyRoutes);
 app.use('/user', userRoutes);
 
-// Health check — probes the database so load balancers get accurate signal
+// Health check - probes the database so load balancers get accurate signal
 app.get('/health', async (_req, res) => {
   try {
     await pool.query('SELECT 1');
@@ -90,7 +90,7 @@ app.get('/health', async (_req, res) => {
 });
 
 // Global error handler
-// Express 5 natively forwards async errors to this handler — no monkey-patching needed.
+// Express 5 natively forwards async errors to this handler - no monkey-patching needed.
 app.use(
   (
     err: Error & { status?: number; type?: string },

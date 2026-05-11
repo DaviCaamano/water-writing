@@ -24,6 +24,7 @@ import {
 import { WaterRipple } from '~components/visual-effects/WaterRipple';
 import { Tooltip, TooltipContent, TooltipTrigger } from '~components/ui/tooltip';
 import { cn } from '~utils/merge-css-classes';
+import { useEditorKeyHandler } from '~components/home/editor/hooks/useEditorKeyHandler';
 
 interface EditorToolbarProps {
   editor: TiptapEditor | null;
@@ -42,7 +43,7 @@ const ToolButton = ({ icon, label, shortcut, active, disabled, onClick }: ToolBu
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <WaterRipple className='rounded-md' maxTilt={3} disabled={disabled}>
+        <WaterRipple className='rounded-md' disabled={disabled}>
           <button
             type='button'
             onMouseDown={(e) => e.preventDefault()}
@@ -123,6 +124,8 @@ export const EditorToolbar = ({ editor }: EditorToolbarProps) => {
     },
   });
 
+  const { handleLink } = useEditorKeyHandler(editor);
+
   const run = useCallback(
     (fn: (chain: ReturnType<TiptapEditor['chain']>) => ReturnType<TiptapEditor['chain']>) => {
       if (!editor) return;
@@ -130,18 +133,6 @@ export const EditorToolbar = ({ editor }: EditorToolbarProps) => {
     },
     [editor],
   );
-
-  const handleLink = useCallback(() => {
-    if (!editor) return;
-    const previous = editor.getAttributes('link').href as string | undefined;
-    const url = window.prompt('Link URL', previous ?? 'https://');
-    if (url === null) return;
-    if (url === '') {
-      editor.chain().focus().extendMarkRange('link').unsetLink().run();
-      return;
-    }
-    editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
-  }, [editor]);
 
   const disabled = !editor;
   const inTitle = state?.inTitle ?? false;

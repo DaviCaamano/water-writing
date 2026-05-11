@@ -9,8 +9,7 @@ export const StripeSubscriptionStatus = {
   paused: 'paused',
 } as const;
 
-export type StripeSubscriptionStatus =
-  (typeof StripeSubscriptionStatus)[keyof typeof StripeSubscriptionStatus];
+export type StripeSubscriptionStatus = Enum<typeof StripeSubscriptionStatus>;
 
 const stripeStatusValues = new Set<string>(Object.values(StripeSubscriptionStatus));
 
