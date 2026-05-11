@@ -5,6 +5,7 @@ import { Dialog, DialogPortal, DialogOverlay } from '~components/ui/dialog';
 import { WaterRipple } from '~components/visual-effects/WaterRipple';
 import { useUserStore } from '~store/useUserStore';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
+import * as VisuallyHidden from '@radix-ui/react-visually-hidden';
 
 interface AuthDialogProps {
   open: boolean;
@@ -134,6 +135,11 @@ export const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
           aria-describedby={undefined}
           className='fixed left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2 outline-none data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95'
         >
+          <VisuallyHidden.Root>
+            <DialogPrimitive.Title>
+              {mode === 'login' ? 'Log In' : 'Create Account'}
+            </DialogPrimitive.Title>
+          </VisuallyHidden.Root>
           <div className='w-85 rounded-[32px] px-9 py-11 flex flex-col gap-6' style={neuCard}>
             {/* Wordmark */}
             <div className='text-center -mb-2'>
