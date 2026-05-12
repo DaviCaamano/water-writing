@@ -10,6 +10,7 @@ import { EditorSettingsPopover } from '~components/home/editor/EditorSettingsPop
 import { NavButton } from '~components/home/NavButton';
 import { useToggleSettings } from '~components/home/user/user-settings/useToggleSettings';
 import { useNavigationStore } from '~store/useNavigationStore';
+import { WaterDropTransition } from '~components/visual-effects/WaterDropTransition';
 import { cn } from '~utils/merge-css-classes';
 
 function getDepth(pathname: string): number {
@@ -82,6 +83,7 @@ export default function ShellLayout({ children }: { children: React.ReactNode })
             </motion.div>
           </AnimatePresence>
         </div>
+        <WaterDropTransition />
         <AuthDialog open={authOpen} onOpenChange={setAuthOpen} />
         <SettingsModal
           open={settingsOpen}
