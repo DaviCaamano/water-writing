@@ -1,4 +1,5 @@
 import { WorldView } from '~components/home/views/WorldView';
 
-const WorldPage = () => <WorldView />;
-export default WorldPage;
+export default function WorldPage() {
+  return <WorldView />;
+}

@@ -34,7 +34,12 @@ export const useNavigationStore = (): NavigationStore => {
       ...state,
 
       navigateToLegacy: () => {
-        navigationStore.setState((s) => ({ ...s, selectedDocumentId: null }));
+        navigationStore.setState((s) => ({
+          ...s,
+          currentCannonId: null,
+          currentStoryId: null,
+          selectedDocumentId: null,
+        }));
         router.push('/');
       },
 
@@ -70,11 +75,21 @@ export const useNavigationStore = (): NavigationStore => {
       },
 
       navigateUp: () => {
-        const { currentStoryId, currentCannonId } = navigationStore.state;
+        const { currentCannonId, currentStoryId } = navigationStore.state;
         if (pathname.startsWith('/editor')) {
-          router.push(currentStoryId ? `/story/${currentStoryId}` : '/');
+          if (currentStoryId) {
+            router.push(`/story/${currentStoryId}`);
+          } else if (currentCannonId) {
+            router.push(`/world/${currentCannonId}`);
+          } else {
+            router.push('/');
+          }
         } else if (pathname.startsWith('/story')) {
-          router.push(currentCannonId ? `/world/${currentCannonId}` : '/');
+          if (currentCannonId) {
+            router.push(`/world/${currentCannonId}`);
+          } else {
+            router.push('/');
+          }
         } else if (pathname.startsWith('/world')) {
           router.push('/');
         }
