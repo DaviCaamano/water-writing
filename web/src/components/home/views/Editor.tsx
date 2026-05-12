@@ -23,11 +23,6 @@ export const Editor = () => {
   const { fontSize, fontFamily, markDirty, markSaved } = useEditorStore();
   const { currentDocumentId, currentStoryId } = useNavigationStore();
 
-  useEditorQuery(currentDocumentId, (documentData: DocumentResponse) => {
-    setTitle(documentData.title);
-    setBody(documentData.body);
-  });
-
   const handleSave = useEditorSave({
     currentStoryId,
     currentDocumentId,
@@ -37,6 +32,11 @@ export const Editor = () => {
   });
 
   const handleLink = useEditorLink(editor);
+
+  useEditorQuery(currentDocumentId, (documentData: DocumentResponse) => {
+    setTitle(documentData.title);
+    setBody(documentData.body);
+  });
 
   useKeyDown(
     useMemo(

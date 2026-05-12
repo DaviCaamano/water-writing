@@ -54,9 +54,9 @@ export const TextEditor = ({
   bodyPlaceholder = 'Start writing...',
 }: TextEditorProps) => {
   // Stores previous render of title and body of document being edited.
-  const stickyDocument = useRef<{ title: string; body: string }>({ title, body });
+  const stickyEditor = useRef<{ title: string; body: string }>({ title, body });
 
-  const onUpdate = useEditorUpdate({ onChange, stickyDocument });
+  const onUpdate = useEditorUpdate({ onChange, stickyEditor });
   const placeholder = useEditorPlaceholder({ bodyPlaceholder, titlePlaceholder });
 
   const editor = useEditor({
@@ -88,11 +88,11 @@ export const TextEditor = ({
   // Update the editor content when the title or body changes.
   useEffect(() => {
     if (!editor) return;
-    const last = stickyDocument.current;
+    const last = stickyEditor.current;
     // If the editor content is the same as the last emitted content, don't update the editor.'
     if (title === last.title && body === last.body) return;
     editor.commands.setContent(buildEditorHtml(title, body), { emitUpdate: false });
-    stickyDocument.current = { title, body };
+    stickyEditor.current = { title, body };
   }, [title, body, editor]);
 
   const isAtBottom = useEditorFadeEffect(editor);
