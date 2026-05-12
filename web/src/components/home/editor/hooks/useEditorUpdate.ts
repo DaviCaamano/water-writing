@@ -19,7 +19,7 @@ export const useEditorUpdate = ({ onChange, stickyEditor }: UseEditorUpdateProps
   }, []);
 
   // Time gate update requests for the title and body of the document being edited.
-  // Updates should wait until the user has stopped typing 
+  // Updates should wait until the user has stopped typing
   return useCallback(
     ({ editor }: EditorEvents['update']) => {
       if (debounceRef.current) clearTimeout(debounceRef.current);

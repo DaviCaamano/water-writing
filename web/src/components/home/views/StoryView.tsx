@@ -12,6 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '~components/ui/dropdown-menu';
+import { useParams } from 'next/navigation';
 import { useNavigationStore } from '~store/useNavigationStore';
 import { useStoryQuery, useCannonQuery } from '~lib/queries/story';
 import { useDeleteDocumentMutation, useUpsertDocumentMutation } from '~lib/mutations/story';
@@ -35,8 +36,9 @@ const summarizeDocument = (body: string): string => {
 };
 
 export const StoryView = () => {
-  const { currentCannonId, currentStoryId, navigateToEditor } = useNavigationStore();
-  const { data: currentStory } = useStoryQuery(currentStoryId);
+  const { storyId } = useParams<{ storyId: string }>();
+  const { currentCannonId, navigateToEditor } = useNavigationStore();
+  const { data: currentStory } = useStoryQuery(storyId ?? null);
   const { data: currentCannon } = useCannonQuery(currentCannonId);
   const queryClient = useQueryClient();
   const upsertDocument = useUpsertDocumentMutation();

@@ -1,10 +1,9 @@
 import { useMemo } from 'react';
 import { Store, useStore } from '@tanstack/react-store';
+import { useRouter, usePathname } from 'next/navigation';
 import { NavigationState } from '~types/state/navigation-state';
-import { ViewMode } from '~types/story';
 
 export const createInitialNavigationState = (): NavigationState => ({
-  currentView: ViewMode.legacy,
   currentCannonId: null,
   currentStoryId: null,
   currentDocumentId: null,
@@ -12,7 +11,6 @@ export const createInitialNavigationState = (): NavigationState => ({
 });
 
 export interface NavigationActions {
-  setView: (view: ViewMode) => void;
   navigateUp: () => void;
   navigateToEditor: (documentId: string, storyId: string, cannonId: string) => void;
   navigateToStory: (storyId: string, cannonId: string) => void;
@@ -24,84 +22,72 @@ export interface NavigationActions {
 
 export const navigationStore = new Store<NavigationState>(createInitialNavigationState());
 
-export const navigationActions: NavigationActions = {
-  setView: (view) => {
-    navigationStore.setState((state) => ({ ...state, currentView: view }));
-  },
-
-  navigateUp: () => {
-    navigationStore.setState((state) => {
-      switch (state.currentView) {
-        case ViewMode.editor:
-          return { ...state, currentView: ViewMode.storyView };
-        case ViewMode.storyView:
-          return { ...state, currentView: ViewMode.cannonView };
-        case ViewMode.cannonView:
-          return { ...state, currentView: ViewMode.legacy };
-        default:
-          return state;
-      }
-    });
-  },
-
-  navigateToEditor: (documentId, storyId, cannonId) => {
-    navigationStore.setState((state) => ({
-      ...state,
-      currentView: ViewMode.editor,
-      currentCannonId: cannonId,
-      currentStoryId: storyId,
-      currentDocumentId: documentId,
-      selectedDocumentId: documentId,
-    }));
-  },
-
-  navigateToStory: (storyId, cannonId) => {
-    navigationStore.setState((state) => ({
-      ...state,
-      currentView: ViewMode.storyView,
-      currentCannonId: cannonId,
-      currentStoryId: storyId,
-      selectedDocumentId: null,
-    }));
-  },
-
-  navigateToCannon: (cannonId) => {
-    navigationStore.setState((state) => ({
-      ...state,
-      currentView: ViewMode.cannonView,
-      currentCannonId: cannonId,
-      currentStoryId: null,
-      selectedDocumentId: null,
-    }));
-  },
-
-  navigateToLegacy: () => {
-    navigationStore.setState((state) => ({
-      ...state,
-      currentView: ViewMode.legacy,
-      selectedDocumentId: null,
-    }));
-  },
-
-  selectDocument: (id) => {
-    navigationStore.setState((state) => ({ ...state, selectedDocumentId: id }));
-  },
-
-  setCurrentDocument: (documentId) => {
-    navigationStore.setState((state) => ({ ...state, currentDocumentId: documentId }));
-  },
-};
-
 type NavigationStore = NavigationState & NavigationActions;
 
 export const useNavigationStore = (): NavigationStore => {
-  const state = useStore(navigationStore, (currentState) => currentState);
+  const state = useStore(navigationStore, (s) => s);
+  const router = useRouter();
+  const pathname = usePathname();
 
   return useMemo(
     () => ({
       ...state,
-      ...navigationActions,
+
+      navigateToLegacy: () => {
+        navigationStore.setState((s) => ({ ...s, selectedDocumentId: null }));
+        router.push('/');
+      },
+
+      navigateToCannon: (cannonId: string) => {
+        navigationStore.setState((s) => ({
+          ...s,
+          currentCannonId: cannonId,
+          currentStoryId: null,
+          selectedDocumentId: null,
+        }));
+        router.push(`/world/${cannonId}`);
+      },
+
+      navigateToStory: (storyId: string, cannonId: string) => {
+        navigationStore.setState((s) => ({
+          ...s,
+          currentCannonId: cannonId,
+          currentStoryId: storyId,
+          selectedDocumentId: null,
+        }));
+        router.push(`/story/${storyId}`);
+      },
+
+      navigateToEditor: (documentId: string, storyId: string, cannonId: string) => {
+        navigationStore.setState((s) => ({
+          ...s,
+          currentCannonId: cannonId,
+          currentStoryId: storyId,
+          currentDocumentId: documentId,
+          selectedDocumentId: documentId,
+        }));
+        router.push(`/editor/${documentId}`);
+      },
+
+      navigateUp: () => {
+        const { currentStoryId, currentCannonId } = navigationStore.state;
+        if (pathname.startsWith('/editor')) {
+          router.push(currentStoryId ? `/story/${currentStoryId}` : '/');
+        } else if (pathname.startsWith('/story')) {
+          router.push(currentCannonId ? `/world/${currentCannonId}` : '/');
+        } else if (pathname.startsWith('/world')) {
+          router.push('/');
+        }
+      },
+
+      selectDocument: (id: string | null) => {
+        navigationStore.setState((s) => ({ ...s, selectedDocumentId: id }));
+      },
+
+      setCurrentDocument: (documentId: string | null) => {
+        navigationStore.setState((s) => ({ ...s, currentDocumentId: documentId }));
+      },
     }),
-    [state],
+    [state, router, pathname],
   );
 };

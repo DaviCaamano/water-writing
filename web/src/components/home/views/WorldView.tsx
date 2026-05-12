@@ -15,6 +15,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '~components/ui/dropdown-menu';
+import { useParams } from 'next/navigation';
 import { useNavigationStore } from '~store/useNavigationStore';
 import { useUserStore } from '~store/useUserStore';
 import { useLegacyQuery, useCannonQuery } from '~lib/queries/story';
@@ -36,8 +37,9 @@ const summarizeStory = (documentCount: number): string => {
 
 export const WorldView = () => {
   const { userId } = useUserStore();
-  const { currentCannonId, navigateToStory } = useNavigationStore();
-  const { data: currentCannon } = useCannonQuery(currentCannonId);
+  const { cannonId } = useParams<{ cannonId: string }>();
+  const { navigateToStory } = useNavigationStore();
+  const { data: currentCannon } = useCannonQuery(cannonId ?? null);
   const { data: cannons = [] } = useLegacyQuery(userId);
   const upsertStory = useUpsertStoryMutation();
   const deleteStory = useDeleteStoryMutation();
