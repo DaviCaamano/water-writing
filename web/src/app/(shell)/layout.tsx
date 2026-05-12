@@ -10,6 +10,7 @@ import { EditorSettingsPopover } from '~components/home/editor/EditorSettingsPop
 import { NavButton } from '~components/home/NavButton';
 import { useToggleSettings } from '~components/home/user/user-settings/useToggleSettings';
 import { useNavigationStore } from '~store/useNavigationStore';
+import { WaterDropTransition } from '~components/visual-effects/WaterDropTransition';
 import { cn } from '~utils/merge-css-classes';
 
 function getDepth(pathname: string): number {
@@ -26,15 +27,17 @@ export default function ShellLayout({ children }: { children: React.ReactNode })
   const { navigateUp } = useNavigationStore();
   const pathname = usePathname();
 
-  const prevPathnameRef = useRef(pathname);
+  const currentDepth = getDepth(pathname);
+  const prevDepthRef = useRef(currentDepth);
   const directionRef = useRef(1);
-  if (prevPathnameRef.current !== pathname) {
-    directionRef.current = getDepth(pathname) >= getDepth(prevPathnameRef.current) ? 1 : -1;
-    prevPathnameRef.current = pathname;
+  if (prevDepthRef.current !== currentDepth) {
+    directionRef.current = currentDepth >= prevDepthRef.current ? 1 : -1;
+    prevDepthRef.current = currentDepth;
   }
   const direction = directionRef.current;
 
   const isEditor = pathname.startsWith('/editor');
+  const showBackButton = pathname !== '/';
 
   return (
     <div className='-home- h-screen overflow-hidden bg-background'>
@@ -55,7 +58,7 @@ export default function ShellLayout({ children }: { children: React.ReactNode })
             'pointer-events-none',
           )}
         >
-          <NavButton navigateUp={navigateUp} showBackButton={pathname !== '/'} />
+          <NavButton navigateUp={navigateUp} showBackButton={showBackButton} />
           <UserMenu onOpenAuth={() => setAuthOpen(true)} onOpenSettings={handleOpenSettings} />
         </div>
         {isEditor && <EditorSettingsPopover />}
@@ -80,6 +83,7 @@ export default function ShellLayout({ children }: { children: React.ReactNode })
             </motion.div>
           </AnimatePresence>
         </div>
+        <WaterDropTransition />
         <AuthDialog open={authOpen} onOpenChange={setAuthOpen} />
         <SettingsModal
           open={settingsOpen}
