@@ -1,8 +1,8 @@
 import type { Editor as TiptapEditor } from '@tiptap/react';
 import { useCallback } from 'react';
 
-export const useEditorKeyHandler = (editor: TiptapEditor | null) => {
-  const handleLink = useCallback(() => {
+export const useEditorLink = (editor: TiptapEditor | null) => {
+  return useCallback(() => {
     if (!editor) return;
     const previous = editor.getAttributes('link').href as string | undefined;
     const url = window.prompt('Link URL', previous ?? 'https://');
@@ -13,6 +13,4 @@ export const useEditorKeyHandler = (editor: TiptapEditor | null) => {
     }
     editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
   }, [editor]);
-
-  return { handleLink };
 };

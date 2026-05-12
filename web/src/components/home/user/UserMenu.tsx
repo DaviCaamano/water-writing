@@ -39,8 +39,8 @@ export const UserMenu = ({ onOpenAuth, onOpenSettings }: UserMenuProps) => {
   const handleLogout = async () => {
     try {
       void logout();
-    } catch (e) {
-      console.error('Logout failed:', e);
+    } catch (err) {
+      console.error('Logout failed:', err);
     }
   };
 

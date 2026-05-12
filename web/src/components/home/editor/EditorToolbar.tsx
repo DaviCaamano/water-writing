@@ -24,7 +24,7 @@ import {
 import { WaterRipple } from '~components/visual-effects/WaterRipple';
 import { Tooltip, TooltipContent, TooltipTrigger } from '~components/ui/tooltip';
 import { cn } from '~utils/merge-css-classes';
-import { useEditorKeyHandler } from '~components/home/editor/hooks/useEditorKeyHandler';
+import { useEditorLink } from '~components/home/editor/hooks/useEditorLink';
 
 interface EditorToolbarProps {
   editor: TiptapEditor | null;
@@ -124,7 +124,7 @@ export const EditorToolbar = ({ editor }: EditorToolbarProps) => {
     },
   });
 
-  const { handleLink } = useEditorKeyHandler(editor);
+  const handleLink = useEditorLink(editor);
 
   const run = useCallback(
     (fn: (chain: ReturnType<TiptapEditor['chain']>) => ReturnType<TiptapEditor['chain']>) => {

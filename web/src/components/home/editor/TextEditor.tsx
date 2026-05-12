@@ -5,133 +5,97 @@ import Link from '@tiptap/extension-link';
 import TaskList from '@tiptap/extension-task-list';
 import TaskItem from '@tiptap/extension-task-item';
 import Placeholder from '@tiptap/extension-placeholder';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { cn } from '~utils/merge-css-classes';
-import { buildEditorHtml, splitEditorHtml } from './helpers/markdown';
+import { buildEditorHtml } from './helpers/markdown';
 import { Title, TitleDocument } from './extensions/Title';
 import { Entity } from '~components/home/editor/extensions/Entity';
 import { Candidate } from '~components/home/editor/extensions/Candidate';
 import { Paragraph } from '~components/home/editor/extensions/Paragraph';
 import { RejectedEntity } from '~components/home/editor/extensions/RejectedEntity';
+import { useEditorPlaceholder } from '~components/home/editor/hooks/useEditorPlaceholder';
+import { useEditorFadeEffect } from '~components/home/editor/hooks/useEditorFadeEffect';
+import { useEditorUpdate } from '~components/home/editor/hooks/useEditorUpdate';
+
+// Editor CSS
+const editorProps = {
+  attributes: {
+    class: 'tiptap-body flex-1 w-full min-h-0 outline-none px-12 pt-0 pb-4 overflow-y-auto',
+  },
+};
+// Editor Default Markup Extensions
+const starterKit = StarterKit.configure({ link: false, document: false, paragraph: false });
+// Editor Extensions
+const linkExtension = Link.configure({
+  openOnClick: false,
+  autolink: true,
+  HTMLAttributes: { rel: 'noopener noreferrer', target: '_blank' },
+});
+const taskItem = TaskItem.configure({ nested: true });
 
 interface TextEditorProps {
   title: string;
   body: string;
   onChange: (next: { title: string; body: string }) => void;
-  onEditorReady: (editor: TiptapEditor | null) => void;
-  onSave?: () => void;
+  setEditor: Setter<TiptapEditor | null>;
   fontSize: number;
   fontFamily: string;
   titlePlaceholder?: string;
   bodyPlaceholder?: string;
 }
-
-const SERIALIZE_DEBOUNCE_MS = 150;
-
 export const TextEditor = ({
   title,
   body,
   onChange,
-  onEditorReady,
-  onSave,
+  setEditor,
   fontSize,
   fontFamily,
   titlePlaceholder = 'Untitled Document',
   bodyPlaceholder = 'Start writing...',
 }: TextEditorProps) => {
-  const lastEmittedRef = useRef<{ title: string; body: string }>({ title, body });
-  // Wait until the user has stopped typing to update the text body/title and mark it as dirty.
-  // Tiptap's editor handles the UI state, so this is only posting text to the api.
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const onSaveRef = useRef(onSave);
-  const [isAtBottom, setIsAtBottom] = useState(false);
+  // Stores previous render of title and body of document being edited.
+  const stickyDocument = useRef<{ title: string; body: string }>({ title, body });
 
-  useEffect(() => {
-    onSaveRef.current = onSave;
-  }, [onSave]);
+  const onUpdate = useEditorUpdate({ onChange, stickyDocument });
+  const placeholder = useEditorPlaceholder({ bodyPlaceholder, titlePlaceholder });
 
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
-      StarterKit.configure({
-        link: false,
-        document: false,
-        paragraph: false,
-      }),
+      starterKit,
       Paragraph,
       Candidate,
       Entity,
       TitleDocument,
       Title,
-      Link.configure({
-        openOnClick: false,
-        autolink: true,
-        HTMLAttributes: { rel: 'noopener noreferrer', target: '_blank' },
-      }),
+      linkExtension,
       TaskList,
-      TaskItem.configure({ nested: true }),
-      Placeholder.configure({
-        placeholder: ({ node }) =>
-          node.type.name === 'title' ? titlePlaceholder : bodyPlaceholder,
-      }),
+      taskItem,
+      Placeholder.configure({ placeholder }),
       RejectedEntity,
     ],
     content: buildEditorHtml(title, body),
-    editorProps: {
-      attributes: {
-        class: 'tiptap-body flex-1 w-full min-h-0 outline-none px-12 pt-0 pb-4 overflow-y-auto',
-      },
-
-      handleKeyDown: (_view, event) => {
-        if ((event.ctrlKey || event.metaKey) && event.key === 's') {
-          event.preventDefault();
-          onSaveRef.current?.();
-          return true;
-        }
-        return false;
-      },
-    },
-    onUpdate: ({ editor }) => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-      debounceRef.current = setTimeout(() => {
-        const next = splitEditorHtml(editor.getHTML());
-        lastEmittedRef.current = next;
-        onChange(next);
-      }, SERIALIZE_DEBOUNCE_MS);
-    },
+    editorProps,
+    onUpdate,
   });
 
+  // Pass and revoke a reference to the tiptap editor and store it as state for the editor component.
   useEffect(() => {
-    onEditorReady(editor);
-    return () => onEditorReady(null);
-  }, [editor, onEditorReady]);
+    setEditor(editor);
+    return () => setEditor(null);
+  }, [editor, setEditor]);
 
+  // Update the editor content when the title or body changes.
   useEffect(() => {
     if (!editor) return;
-    const last = lastEmittedRef.current;
+    const last = stickyDocument.current;
+    // If the editor content is the same as the last emitted content, don't update the editor.'
     if (title === last.title && body === last.body) return;
     editor.commands.setContent(buildEditorHtml(title, body), { emitUpdate: false });
-    lastEmittedRef.current = { title, body };
+    stickyDocument.current = { title, body };
   }, [title, body, editor]);
 
-  // Clear the debounced
-  useEffect(() => {
-    return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-    };
-  }, []);
-
-  // Check if editor is scrolled to the bottom to hide the fade effect at the bottom of the editor.
-  useEffect(() => {
-    if (!editor) return;
-    const el = editor.view.dom as HTMLElement;
-    const check = () => {
-      setIsAtBottom(el.scrollTop + el.clientHeight >= el.scrollHeight - 4);
-    };
-    check();
-    el.addEventListener('scroll', check);
-    return () => el.removeEventListener('scroll', check);
-  }, [editor]);
+  const isAtBottom = useEditorFadeEffect(editor);
 
   return (
     <div

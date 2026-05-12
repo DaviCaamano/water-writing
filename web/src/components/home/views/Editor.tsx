@@ -13,7 +13,7 @@ import { useEditorQuery } from '~components/home/editor/hooks/useEditorQuery';
 import { DocumentResponse } from '#types/shared/response';
 import { useEditorSave } from '~components/home/editor/hooks/useEditorSave';
 import { KeyDownModifier, useKeyDown } from '~hooks/useKeyDown';
-import { useEditorKeyHandler } from '~components/home/editor/hooks/useEditorKeyHandler';
+import { useEditorLink } from '~components/home/editor/hooks/useEditorLink';
 
 export const Editor = () => {
   const [title, setTitle] = useState('');
@@ -28,7 +28,6 @@ export const Editor = () => {
     setBody(documentData.body);
   });
 
-  // Handle (Ctrl|Meta)+S Shortcut for saving the document
   const handleSave = useEditorSave({
     currentStoryId,
     currentDocumentId,
@@ -37,23 +36,24 @@ export const Editor = () => {
     title,
   });
 
-  // Handle (Ctrl|Meta)+K Shortcut for adding a Link to the document
-  const { handleLink } = useEditorKeyHandler(editor);
+  const handleLink = useEditorLink(editor);
 
   useKeyDown(
     useMemo(
       () => [
-        {
-          key: 'k',
-          modifiers: [[KeyDownModifier.ctrl], [KeyDownModifier.meta]],
-          preventDefault: true,
-          handler: handleLink,
-        },
+        // Handle (Ctrl|Meta)+S Shortcut for saving the document
         {
           key: 's',
           modifiers: [[KeyDownModifier.ctrl], [KeyDownModifier.meta]],
           preventDefault: true,
           handler: handleSave,
+        },
+        // Handle (Ctrl|Meta)+K Shortcut for adding a Link to the document
+        {
+          key: 'k',
+          modifiers: [[KeyDownModifier.ctrl], [KeyDownModifier.meta]],
+          preventDefault: true,
+          handler: handleLink,
         },
       ],
       [handleLink, handleSave],
@@ -85,7 +85,7 @@ export const Editor = () => {
           title={title}
           body={body}
           onChange={handleChange}
-          onEditorReady={setEditor}
+          setEditor={setEditor}
           fontSize={fontSize}
           fontFamily={fontFamily}
         />

@@ -25,8 +25,8 @@ export const SubscriptionSection = ({ colorMap }: { colorMap: SettingsColorMap }
   const handleCancelSubscription = async () => {
     try {
       await queryApi(apiRoutes.billing.subscribe(), { body: { plan, yearly } });
-    } catch (e) {
-      console.error('Cancel failed:', e);
+    } catch (err) {
+      console.error('Cancel failed:', err);
     }
   };
 
@@ -34,8 +34,8 @@ export const SubscriptionSection = ({ colorMap }: { colorMap: SettingsColorMap }
     try {
       await deleteAccount();
       setShowDeleteConfirm(true);
-    } catch (e) {
-      console.error('Delete failed:', e);
+    } catch (err) {
+      console.error('Delete failed:', err);
     }
   };
 

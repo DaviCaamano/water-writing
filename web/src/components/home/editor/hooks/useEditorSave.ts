@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef } from 'react';
 import { editorStoreSnapshot } from '~store/useEditorStore';
 import { useUpsertDocumentMutation } from '~lib/mutations/story';
 
+const FIVE_MINUTES = 5 * 60 * 1000;
 interface UseEditorSaveProps {
   body: string;
   currentDocumentId: string | null | undefined;
@@ -23,8 +24,8 @@ export const useEditorSave = ({
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const upsertDocument = useUpsertDocumentMutation();
 
-  // Update the refs when the title or body changes.
-  // Becaise
+  // Refs let handleSave always read the latest title/body without being in its dependency array,
+  // which would otherwise recreate the interval on every keystroke.
   useEffect(() => {
     titleRef.current = title;
     bodyRef.current = body;
@@ -41,13 +42,14 @@ export const useEditorSave = ({
         body: bodyRef.current,
       });
       markSaved();
-    } catch (e) {
-      console.error('Auto-save failed:', e);
+    } catch (err) {
+      console.error('Auto-save failed:', err);
     }
   }, [upsertDocument, markSaved, currentDocumentId, currentStoryId]);
 
+  // After the first save, start an interval to save every 5 minutes.
   useEffect(() => {
-    intervalRef.current = setInterval(handleSave, 5 * 60 * 1000);
+    intervalRef.current = setInterval(handleSave, FIVE_MINUTES);
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
