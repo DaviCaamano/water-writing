@@ -99,11 +99,18 @@
   /* border: default border colo r */
   --border: #ffffff;
   /* input: input border/background-related tone */
-  --input: red;
+  --input: oklch(0.754 0.033 213.962);
   /* ring: focus ring color */
-  --ring: red;
+  --ring: oklch(0.278 0.073 247.723);
   /* shadow: box shadows */
   --shadow: oklch(0.717 0.041 257.926 / 0.55);
+  --shadow-highlight: rgba(255, 255, 255, 0.5);
+  /* neumorphism tokens (auth dialog) */
+  --neu-bg: oklch(0.965 0.014 237);
+  --neu-shadow: rgba(148, 165, 190, 0.55);
+  --neu-highlight: rgba(255, 255, 255, 0.88);
+  --neu-text: oklch(0.32 0.01 240);
+  --neu-text-muted: oklch(0.58 0.01 240);
 }
 
 .dark {
@@ -134,7 +141,7 @@
   /* destructive: dangerous actions, destructive buttons, errors */
   --destructive: oklch(0.704 0.191 22.216);
   /* destructive-foreground: readable content on destructive surfaces */
-  --destructive-foreground: red;
+  --destructive-foreground: oklch(0.985 0 0);
   /* success: positive actions, success messages */
   --success: oklch(0.55 0.14 150);
   /* success-foreground: readable content on success surfaces */
@@ -147,6 +154,13 @@
   --ring: oklch(0.556 0 0);
   /* shadow: box shadows */
   --shadow: oklch(0.717 0.041 257.926 / 0.55);
+  --shadow-highlight: rgba(255, 255, 255, 0.05);
+  /* neumorphism tokens (auth dialog) */
+  --neu-bg: oklch(0.22 0.01 240);
+  --neu-shadow: rgba(0, 0, 0, 0.5);
+  --neu-highlight: rgba(255, 255, 255, 0.08);
+  --neu-text: oklch(0.92 0.01 240);
+  --neu-text-muted: oklch(0.65 0.01 240);
 }
 
 .sepia {
@@ -177,7 +191,7 @@
   /* destructive: dangerous actions, destructive buttons, errors */
   --destructive: oklch(0.577 0.245 27.325);
   /* destructive-foreground: readable content on destructive surfaces */
-  --destructive-foreground: red;
+  --destructive-foreground: oklch(0.96 0.04 85);
   /* success: positive actions, success messages */
   --success: oklch(0.55 0.14 150);
   /* success-foreground: readable content on success surfaces */
@@ -190,6 +204,13 @@
   --ring: oklch(0.6 0.05 60);
   /* shadow: box shadows */
   --shadow: oklch(0.717 0.041 257.926 / 0.55);
+  --shadow-highlight: rgba(255, 248, 230, 0.5);
+  /* neumorphism tokens (auth dialog) */
+  --neu-bg: oklch(0.94 0.04 80);
+  --neu-shadow: rgba(120, 100, 70, 0.4);
+  --neu-highlight: rgba(255, 248, 230, 0.88);
+  --neu-text: oklch(0.32 0.05 50);
+  --neu-text-muted: oklch(0.55 0.05 60);
 }
 
 @layer base {
@@ -197,8 +218,8 @@
     @apply border-border outline-ring/50;
   }
   body {
-    background-image: linear-gradient(to bottom right, white, var(--background), var(--background));
-    color: black;
+    background-image: linear-gradient(to bottom right, var(--background), var(--background), var(--background));
+    color: var(--foreground);
   }
   html {
     @apply font-sans;
@@ -210,7 +231,7 @@
   .debossed {
     box-shadow:
       12px 12px 28px var(--shadow),
-      -12px -12px 28px rgba(255, 255, 255, 0.5);
+      -12px -12px 28px var(--shadow-highlight);
     @apply border-2 border-transparent;
   }
 
@@ -242,6 +263,24 @@
   --ww-ripple-color: 74, 144, 226;
 
   --lh: 28px;
+}
+
+.dark {
+  --ww-bg-gradient: linear-gradient(180deg, oklch(0.16 0 0) 0%, oklch(0.18 0.01 260) 100%);
+  --ww-catalog-glow-a: rgba(56, 189, 248, 0.15);
+  --ww-catalog-glow-b: rgba(251, 146, 60, 0.1);
+  --ww-shadow-card: 0 24px 65px -36px rgba(0, 0, 0, 0.8);
+  --ww-shadow-empty: 0 15px 45px -35px rgba(0, 0, 0, 0.7);
+  --ww-shadow-surface: 0 25px 80px -28px rgba(0, 0, 0, 0.85);
+}
+
+.sepia {
+  --ww-bg-gradient: linear-gradient(180deg, oklch(0.96 0.04 85) 0%, oklch(0.94 0.05 80) 100%);
+  --ww-catalog-glow-a: rgba(180, 140, 60, 0.25);
+  --ww-catalog-glow-b: rgba(200, 120, 40, 0.2);
+  --ww-shadow-card: 0 24px 65px -36px rgba(60, 40, 15, 0.45);
+  --ww-shadow-empty: 0 15px 45px -35px rgba(60, 40, 15, 0.35);
+  --ww-shadow-surface: 0 25px 80px -28px rgba(60, 40, 15, 0.5);
 }
 
 .ww-eyebrow {

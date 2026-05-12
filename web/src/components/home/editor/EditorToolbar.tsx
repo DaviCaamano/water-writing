@@ -76,7 +76,7 @@ const ToolButton = ({ icon, label, shortcut, active, disabled, onClick }: ToolBu
 };
 
 const Separator = () => {
-  return <div aria-hidden='true' className='mx-1 h-3.5 w-px bg-temp opacity-15 shrink-0' />;
+  return <div aria-hidden='true' className='mx-1 h-3.5 w-px bg-foreground opacity-15 shrink-0' />;
 };
 
 export const EditorToolbar = ({ editor }: EditorToolbarProps) => {

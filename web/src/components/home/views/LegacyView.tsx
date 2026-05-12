@@ -108,7 +108,7 @@ export const LegacyView = () => {
                         type='button'
                         size='icon-sm'
                         variant='secondary'
-                        className='bg-temp/75 text-black hover:bg-temp'
+                        className='bg-card/75 text-foreground hover:bg-card'
                         aria-label={`Cannon actions for ${cannon.title}`}
                       >
                         <EllipsisVertical />
@@ -156,10 +156,10 @@ export const LegacyView = () => {
           onClick={handleAddCannon}
         >
           <div className='mx-auto max-w-2xl space-y-3'>
-            <h2 className='text-2xl font-semibold text-black'>
+            <h2 className='text-2xl font-semibold text-foreground'>
               Create the first cannon in your legacy
             </h2>
-            <p className='text-sm leading-6 text-black sm:text-base'>
+            <p className='text-sm leading-6 text-foreground sm:text-base'>
               Once a cannon exists here, clicking its card will open the cannon view and reveal its
               stories.
             </p>
