@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
 import { UserMenu } from '~components/home/user/UserMenu';
@@ -10,6 +10,7 @@ import { EditorSettingsPopover } from '~components/home/editor/EditorSettingsPop
 import { NavButton } from '~components/home/NavButton';
 import { useToggleSettings } from '~components/home/user/user-settings/useToggleSettings';
 import { useNavigationStore } from '~store/useNavigationStore';
+import { WaterDropTransition } from '~components/visual-effects/WaterDropTransition';
 import { cn } from '~utils/merge-css-classes';
 
 function getDepth(pathname: string): number {
@@ -26,13 +27,14 @@ export default function ShellLayout({ children }: { children: React.ReactNode })
   const { navigateUp } = useNavigationStore();
   const pathname = usePathname();
 
-  const prevPathnameRef = useRef(pathname);
-  const directionRef = useRef(1);
-  if (prevPathnameRef.current !== pathname) {
-    directionRef.current = getDepth(pathname) >= getDepth(prevPathnameRef.current) ? 1 : -1;
-    prevPathnameRef.current = pathname;
+  const currentDepth = getDepth(pathname);
+  const [prevDepth, setPrevDepth] = useState(currentDepth);
+  const [direction, setDirection] = useState(1);
+
+  if (prevDepth !== currentDepth) {
+    setPrevDepth(currentDepth);
+    setDirection(currentDepth >= prevDepth ? 1 : -1);
   }
-  const direction = directionRef.current;
 
   const isEditor = pathname.startsWith('/editor');
 
@@ -80,6 +82,7 @@ export default function ShellLayout({ children }: { children: React.ReactNode })
             </motion.div>
           </AnimatePresence>
         </div>
+        <WaterDropTransition />
         <AuthDialog open={authOpen} onOpenChange={setAuthOpen} />
         <SettingsModal
           open={settingsOpen}
