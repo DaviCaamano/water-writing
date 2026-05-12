@@ -12,31 +12,30 @@ interface AuthDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-const NEU_BG = 'oklch(0.965 0.014 237)';
 const neuCard: React.CSSProperties = {
-  background: NEU_BG,
-  boxShadow: '12px 12px 28px rgba(148,165,190,0.55), -12px -12px 28px rgba(255,255,255,0.88)',
+  background: 'var(--neu-bg)',
+  boxShadow: '12px 12px 28px var(--neu-shadow), -12px -12px 28px var(--neu-highlight)',
 };
 const neuInputStyle: React.CSSProperties = {
-  background: NEU_BG,
+  background: 'var(--neu-bg)',
   boxShadow:
-    'inset 5px 5px 11px rgba(148,165,190,0.55), inset -5px -5px 11px rgba(255,255,255,0.88)',
+    'inset 5px 5px 11px var(--neu-shadow), inset -5px -5px 11px var(--neu-highlight)',
 };
 const neuBtnStyle: React.CSSProperties = {
-  background: NEU_BG,
-  boxShadow: '6px 6px 14px rgba(148,165,190,0.55), -6px -6px 14px rgba(255,255,255,0.88)',
+  background: 'var(--neu-bg)',
+  boxShadow: '6px 6px 14px var(--neu-shadow), -6px -6px 14px var(--neu-highlight)',
 };
 const neuTrackStyle: React.CSSProperties = {
-  background: NEU_BG,
-  boxShadow: 'inset 4px 4px 9px rgba(148,165,190,0.55), inset -4px -4px 9px rgba(255,255,255,0.88)',
+  background: 'var(--neu-bg)',
+  boxShadow: 'inset 4px 4px 9px var(--neu-shadow), inset -4px -4px 9px var(--neu-highlight)',
 };
 const neuTabActiveStyle: React.CSSProperties = {
-  background: NEU_BG,
-  boxShadow: '4px 4px 10px rgba(148,165,190,0.55), -4px -4px 10px rgba(255,255,255,0.88)',
+  background: 'var(--neu-bg)',
+  boxShadow: '4px 4px 10px var(--neu-shadow), -4px -4px 10px var(--neu-highlight)',
 };
 
-const textColor = 'oklch(0.32 0.01 240)';
-const mutedColor = 'oklch(0.58 0.01 240)';
+const textColor = 'var(--neu-text)';
+const mutedColor = 'var(--neu-text-muted)';
 
 type AuthMode = 'login' | 'signup';
 
@@ -171,7 +170,7 @@ export const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
             </div>
 
             {/* Error */}
-            {error && <div className='text-black text-sm text-center -my-2'>{error}</div>}
+            {error && <div className='text-destructive-foreground text-sm text-center -my-2'>{error}</div>}
 
             {/* Fields */}
             <form onSubmit={handleSubmit} className='flex flex-col gap-4.5'>
@@ -296,8 +295,8 @@ export const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
                   type='button'
                   className='text-[13px] cursor-pointer bg-transparent border-none transition-colors duration-150'
                   style={{ color: mutedColor }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = 'oklch(0.45 0.06 240)')}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = mutedColor)}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--neu-text)')}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--neu-text-muted)')}
                 >
                   Forgot password?
                 </button>

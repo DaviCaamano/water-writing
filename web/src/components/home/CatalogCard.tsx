@@ -83,7 +83,7 @@ export const CatalogCard = ({
   };
 
   return (
-    <Card className='h-full overflow-hidden border border-border/80 bg-temp/85 shadow-[0_24px_65px_-36px_rgba(15,23,42,0.55)] backdrop-blur transition-transform duration-300 hover:-translate-y-1'>
+    <Card className='h-full overflow-hidden border border-border/80 bg-card/85 shadow-[var(--ww-shadow-card)] backdrop-blur transition-transform duration-300 hover:-translate-y-1'>
       <input
         id={coverInputId}
         type='file'
@@ -95,7 +95,7 @@ export const CatalogCard = ({
       <div
         role='button'
         tabIndex={0}
-        className='flex h-full cursor-pointer flex-col outline-none focus-visible:ring-2 focus-visible:ring-sky-500'
+        className='flex h-full cursor-pointer flex-col outline-none focus-visible:ring-2 focus-visible:ring-ring'
         onClick={onOpen}
         onKeyDown={handleKeyDown}
       >
@@ -112,21 +112,21 @@ export const CatalogCard = ({
           ) : (
             <div
               className={cn(
-                'flex h-full w-full items-end justify-between bg-temp p-5 text-black',
+                'flex h-full w-full items-end justify-between bg-card p-5 text-card-foreground',
                 accentClassName,
               )}
             >
               <div className='space-y-2'>
-                <p className='text-[11px] uppercase tracking-[0.35em] text-black/70'>{itemLabel}</p>
+                <p className='text-[11px] uppercase tracking-[0.35em] text-muted-foreground'>{itemLabel}</p>
                 <div className='max-w-56 text-xl font-semibold leading-tight'>{title}</div>
               </div>
               {Icon}
             </div>
           )}
 
-          <div className='absolute inset-0 bg-temp from-slate-950/70 via-slate-950/20 to-transparent' />
+          <div className='absolute inset-0 bg-linear-to-b from-black/70 via-black/20 to-transparent' />
           <div className='absolute inset-x-4 top-4 z-20 flex items-start justify-between gap-3'>
-            <Badge className='bg-temp/90 text-black shadow-sm'>{badgeText}</Badge>
+            <Badge className='bg-card/90 text-card-foreground shadow-sm'>{badgeText}</Badge>
             <div
               className='pointer-events-auto'
               onClick={(event) => event.stopPropagation()}
@@ -140,12 +140,12 @@ export const CatalogCard = ({
         <CardHeader className='space-y-3'>
           <div className='space-y-2'>
             <CardTitle className='line-clamp-2 text-lg'>{title}</CardTitle>
-            <p className='min-h-12 text-sm leading-6 text-black'>{description}</p>
+            <p className='min-h-12 text-sm leading-6 text-foreground'>{description}</p>
           </div>
         </CardHeader>
 
         <CardContent className='mt-auto pt-0'>
-          <div className='rounded-2xl border border-border bg-temp px-3 py-2 text-xs font-medium uppercase tracking-[0.22em] text-black'>
+          <div className='rounded-2xl border border-border bg-muted px-3 py-2 text-xs font-medium uppercase tracking-[0.22em] text-foreground'>
             {meta}
           </div>
         </CardContent>

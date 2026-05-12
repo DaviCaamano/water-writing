@@ -41,7 +41,7 @@ function DropdownMenuContent({
         className={cn(
           'z-50 max-h-(--radix-dropdown-menu-content-available-height) min-w-32',
           'origin-(--radix-dropdown-menu-content-transform-origin)',
-          'overflow-x-hidden overflow-y-auto rounded-lg bg-temp p-1 text-card-foreground',
+          'overflow-x-hidden overflow-y-auto rounded-lg bg-card p-1 text-card-foreground',
           'shadow-md ring-1 ring-foreground/10 duration-100 outline-none',
           'data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2',
           'data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2',
@@ -100,9 +100,9 @@ function DropdownMenuItem({
         'focus:bg-primary focus:text-primary-foreground',
         'not-data-[variant=destructive]:focus:**:text-card-foreground',
         'data-[inset]:pl-7 data-[variant=destructive]:text-destructive',
-        'data-[variant=destructive]:focus:bg-temp/10',
+        'data-[variant=destructive]:focus:bg-destructive/10',
         'data-[variant=destructive]:focus:text-destructive',
-        'dark:data-[variant=destructive]:focus:bg-temp/20',
+        'dark:data-[variant=destructive]:focus:bg-destructive/20',
         'data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
         "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         'data-[variant=destructive]:*:[svg]:text-destructive',
@@ -132,9 +132,9 @@ function DropdownMenuSubTrigger({
       className={cn(
         'flex cursor-pointer items-center gap-1.5 rounded-md px-1.5 py-1',
         'text-sm outline-hidden select-none',
-        'focus:bg-temp focus:text-card-foreground',
+        'focus:bg-accent focus:text-card-foreground',
         'not-data-[variant=destructive]:focus:**:text-card-foreground',
-        'data-[inset]:pl-7 data-[state=open]:bg-temp data-[state=open]:text-card-foreground',
+        'data-[inset]:pl-7 data-[state=open]:bg-accent data-[state=open]:text-card-foreground',
         "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         className,
       )}
@@ -155,7 +155,7 @@ function DropdownMenuSubContent({
       data-slot='dropdown-menu-sub-content'
       className={cn(
         'z-50 min-w-[96px] origin-(--radix-dropdown-menu-content-transform-origin)',
-        'overflow-hidden rounded-lg bg-temp p-1 text-card-foreground',
+        'overflow-hidden rounded-lg bg-card p-1 text-card-foreground',
         'shadow-lg ring-1 ring-foreground/10 duration-100',
         'data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2',
         'data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2',
@@ -185,7 +185,7 @@ function DropdownMenuCheckboxItem({
       className={cn(
         'relative flex cursor-pointer items-center gap-1.5 rounded-md',
         'py-1 pr-8 pl-1.5 text-sm outline-hidden select-none',
-        'focus:bg-temp focus:text-card-foreground focus:**:text-card-foreground',
+        'focus:bg-accent focus:text-card-foreground focus:**:text-card-foreground',
         'data-[inset]:pl-7 data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
         "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         className,
@@ -227,7 +227,7 @@ function DropdownMenuRadioItem({
       className={cn(
         'relative flex cursor-pointer items-center gap-1.5 rounded-md',
         'py-1 pr-8 pl-1.5 text-sm outline-hidden select-none',
-        'focus:bg-temp focus:text-card-foreground focus:**:text-card-foreground',
+        'focus:bg-accent focus:text-card-foreground focus:**:text-card-foreground',
         'data-[inset]:pl-7 data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
         "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         className,
@@ -254,7 +254,7 @@ function DropdownMenuSeparator({
   return (
     <DropdownMenuPrimitive.Separator
       data-slot='dropdown-menu-separator'
-      className={cn('-mx-1 my-1 h-px bg-temp', className)}
+      className={cn('-mx-1 my-1 h-px bg-border', className)}
       {...props}
     />
   );

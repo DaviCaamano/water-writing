@@ -37,7 +37,7 @@ export default function ShellLayout({ children }: { children: React.ReactNode })
   const isEditor = pathname.startsWith('/editor');
 
   return (
-    <div className='-home- h-screen overflow-hidden bg-temp'>
+    <div className='-home- h-screen overflow-hidden bg-background'>
       <div
         className={cn(
           '-home-view-content-',

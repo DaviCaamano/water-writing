@@ -7,7 +7,7 @@ import { cn } from '~utils/merge-css-classes';
 const buttonVariants = cva(
   cn(
     'group/button inline-flex shrink-0 items-center justify-center rounded-lg',
-    'border border-transparent bg-temp text-sm font-medium whitespace-nowrap',
+    'border border-transparent bg-transparent text-sm font-medium whitespace-nowrap',
     'transition-all outline-none select-none cursor-pointer',
     'focus-visible:border-border focus-visible:ring-3 focus-visible:ring-ring/50',
     'active:not-aria-[haspopup]:translate-y-px',

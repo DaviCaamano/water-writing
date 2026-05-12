@@ -23,7 +23,7 @@ function Tabs({
 
 const tabsListVariants = cva(
   cn(
-    'group/tabs-list inline-flex w-fit items-center justify-center rounded-lg p-[3px] text-black',
+    'group/tabs-list inline-flex w-fit items-center justify-center rounded-lg p-[3px] text-foreground',
     'group-data-[orientation=horizontal]/tabs:h-8',
     'group-data-[orientation=vertical]/tabs:h-fit',
     'group-data-[orientation=vertical]/tabs:flex-col',
@@ -32,8 +32,8 @@ const tabsListVariants = cva(
   {
     variants: {
       variant: {
-        default: 'bg-temp',
-        line: 'gap-1 bg-temp',
+        default: 'bg-muted',
+        line: 'gap-1 bg-transparent',
       },
     },
     defaultVariants: {
@@ -69,22 +69,22 @@ function TabsTrigger({ className, ...props }: React.ComponentProps<typeof TabsPr
         'group-data-[orientation=vertical]/tabs:justify-start',
         'hover:text-foreground',
         'focus-visible:border-border focus-visible:ring-[3px] focus-visible:ring-ring/50',
-        'focus-visible:outline-1 focus-visible:outline-temp',
+        'focus-visible:outline-1 focus-visible:outline-ring',
         'disabled:pointer-events-none disabled:opacity-50',
         'has-data-[icon=inline-end]:pr-1 has-data-[icon=inline-start]:pl-1',
         'aria-disabled:pointer-events-none aria-disabled:opacity-50',
-        'dark:text-black dark:hover:text-foreground',
+        'dark:text-muted-foreground dark:hover:text-foreground',
         'group-data-[variant=default]/tabs-list:data-[state=active]:shadow-sm',
         'group-data-[variant=line]/tabs-list:data-[state=active]:shadow-none',
         "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
-        'group-data-[variant=line]/tabs-list:bg-temp',
-        'group-data-[variant=line]/tabs-list:data-[state=active]:bg-temp',
+        'group-data-[variant=line]/tabs-list:bg-transparent',
+        'group-data-[variant=line]/tabs-list:data-[state=active]:bg-transparent',
         'dark:group-data-[variant=line]/tabs-list:data-[state=active]:border-transparent',
-        'dark:group-data-[variant=line]/tabs-list:data-[state=active]:bg-temp',
-        'data-[state=active]:bg-temp data-[state=active]:text-foreground',
-        'dark:data-[state=active]:border-border dark:data-[state=active]:bg-temp/30',
+        'dark:group-data-[variant=line]/tabs-list:data-[state=active]:bg-transparent',
+        'data-[state=active]:bg-background data-[state=active]:text-foreground',
+        'dark:data-[state=active]:border-border dark:data-[state=active]:bg-muted/30',
         'dark:data-[state=active]:text-foreground',
-        'after:absolute after:bg-temp after:opacity-0 after:transition-opacity',
+        'after:absolute after:bg-primary after:opacity-0 after:transition-opacity',
         'group-data-[orientation=horizontal]/tabs:after:inset-x-0',
         'group-data-[orientation=horizontal]/tabs:after:bottom-[-5px]',
         'group-data-[orientation=horizontal]/tabs:after:h-0.5',
