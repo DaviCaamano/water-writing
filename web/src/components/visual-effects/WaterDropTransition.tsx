@@ -2,61 +2,89 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
-import { motion } from 'framer-motion';
 
-const RING_COUNT = 5;
-const RING_STAGGER = 0.11; // seconds between each ring
-const RING_DURATION = 1.05; // seconds for each ring to expand
-const BURST_TTL = (RING_DURATION + RING_STAGGER * (RING_COUNT - 1)) * 1000 + 400;
+// Grid config — pre-computed at module load, not per render
+const SPACING = 100; // SVG units between dot centres
+const R = 2; // dot radius (stroke dominates, this is cosmetic)
+const STROKE_FULL = 74; // stroke-width at peak — dots slightly overlap neighbours
+const STAGGER = 27; // ms of extra delay per grid-distance unit from centre
+const COVER_MS = 290; // each dot's expansion duration
+const REVEAL_MS = 250; // each dot's contraction duration
 
-let nextBurstId = 0;
+const H_COLS = 10; // grid extends ±H_COLS columns from centre (21 total)
+const H_ROWS = 8; // grid extends ±H_ROWS rows from centre (17 total)
 
-function RippleBurst() {
+interface Dot {
+  x: number;
+  y: number;
+  delay: number;
+}
+
+const DOTS: Dot[] = [];
+let MAX_DELAY = 0;
+
+for (let r = -H_ROWS; r <= H_ROWS; r++) {
+  for (let c = -H_COLS; c <= H_COLS; c++) {
+    const delay = Math.sqrt(c * c + r * r) * STAGGER;
+    if (delay > MAX_DELAY) MAX_DELAY = delay;
+    DOTS.push({ x: c * SPACING, y: r * SPACING, delay });
+  }
+}
+
+const VB_W = (2 * H_COLS + 1) * SPACING;
+const VB_H = (2 * H_ROWS + 1) * SPACING;
+const COVER_TOTAL = MAX_DELAY + COVER_MS; // ms until screen is fully covered
+const BURST_TTL = COVER_TOTAL + 60 + MAX_DELAY + REVEAL_MS + 300;
+
+let nextId = 0;
+
+function Burst() {
+  const [sw, setSw] = useState(0);
+  const [phase, setPhase] = useState<'cover' | 'reveal'>('cover');
+
+  useEffect(() => {
+    // Trigger expansion on next paint so the 0→STROKE_FULL transition fires
+    const raf = requestAnimationFrame(() => setSw(STROKE_FULL));
+
+    // Switch to reveal once the screen is fully covered
+    const t = setTimeout(() => {
+      setPhase('reveal');
+      setSw(0);
+    }, COVER_TOTAL + 60);
+
+    return () => {
+      cancelAnimationFrame(raf);
+      clearTimeout(t);
+    };
+  }, []);
+
+  const dur = phase === 'cover' ? COVER_MS : REVEAL_MS;
+  const ease = phase === 'cover' ? 'ease-in' : 'ease-out';
+
   return (
-    <div
-      className='fixed inset-0 z-[200] pointer-events-none overflow-hidden'
-      aria-hidden='true'
-    >
-      {/* droplet impact */}
-      <motion.div
-        className='absolute top-1/2 left-1/2 rounded-full'
-        style={{
-          translateX: '-50%',
-          translateY: '-50%',
-          background: 'var(--primary)',
-          boxShadow: '0 0 12px 4px var(--primary)',
-        }}
-        initial={{ width: '0vmax', height: '0vmax', opacity: 0 }}
-        animate={{
-          width: ['0vmax', '0.6vmax', '0.6vmax', '0vmax'],
-          height: ['0vmax', '0.6vmax', '0.6vmax', '0vmax'],
-          opacity: [0, 1, 1, 0],
-        }}
-        transition={{ duration: 0.28, times: [0, 0.25, 0.65, 1], ease: 'easeOut' }}
-      />
-
-      {/* expanding rings */}
-      {Array.from({ length: RING_COUNT }, (_, i) => (
-        <motion.div
-          key={i}
-          className='absolute top-1/2 left-1/2 rounded-full'
-          style={{
-            translateX: '-50%',
-            translateY: '-50%',
-            borderStyle: 'solid',
-            borderColor: 'var(--primary)',
-            borderWidth: Math.max(0.5, 1.8 - i * 0.22),
-            boxShadow: `0 0 ${6 - i}px 0 var(--primary)`,
-          }}
-          initial={{ width: '0vmax', height: '0vmax', opacity: 0.65 - i * 0.04 }}
-          animate={{ width: '160vmax', height: '160vmax', opacity: 0 }}
-          transition={{
-            duration: RING_DURATION + i * 0.04,
-            delay: i * RING_STAGGER,
-            ease: [0.1, 0.55, 0.3, 1],
-          }}
-        />
-      ))}
+    <div className='fixed inset-0 z-[200] pointer-events-none' aria-hidden='true'>
+      <svg
+        width='100%'
+        height='100%'
+        viewBox={`${-VB_W / 2} ${-VB_H / 2} ${VB_W} ${VB_H}`}
+        preserveAspectRatio='xMidYMid slice'
+      >
+        {DOTS.map(({ x, y, delay }, i) => (
+          <circle
+            key={i}
+            cx={x}
+            cy={y}
+            r={R}
+            style={{
+              fill: 'none',
+              stroke: 'var(--primary)',
+              strokeWidth: sw,
+              transition: `stroke-width ${dur}ms ${ease}`,
+              transitionDelay: `${delay}ms`,
+            }}
+          />
+        ))}
+      </svg>
     </div>
   );
 }
@@ -74,7 +102,7 @@ export const WaterDropTransition = () => {
     const isEditor = pathname.startsWith('/editor');
 
     if (wasEditor !== isEditor) {
-      const id = ++nextBurstId;
+      const id = ++nextId;
       setBursts((b) => [...b, id]);
       setTimeout(() => setBursts((b) => b.filter((x) => x !== id)), BURST_TTL);
     }
@@ -83,7 +111,7 @@ export const WaterDropTransition = () => {
   return (
     <>
       {bursts.map((id) => (
-        <RippleBurst key={id} />
+        <Burst key={id} />
       ))}
     </>
   );
