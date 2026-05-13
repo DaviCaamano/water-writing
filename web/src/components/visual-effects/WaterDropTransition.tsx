@@ -5,19 +5,25 @@ import { Dimensions, useViewport } from '~hooks/useViewport';
 import { motion, useAnimationControls } from 'framer-motion';
 import { ZIndex } from '~constants/z-index';
 import { indexArray } from '~utils/indexArray';
-import { TransitionPhase, usePageTransition } from '~context/PageTransitionContext';
+import {
+  TransitionPhase,
+  usePageTransition,
+  WATER_DROP_TRANSITION_DURATION,
+} from '~context/PageTransitionContext';
 
 const RIPPLE_WIDTH = 100;
-const TRANSITION_DURATION = 0.5;
 
 const ANIMATIONS = {
   [TransitionPhase.idle]: { strokeWidth: 0, transition: { duration: 0 } },
-  [TransitionPhase.covering]: {
-    strokeWidth: RIPPLE_WIDTH + 5,
-    transition: { duration: TRANSITION_DURATION },
-  },
-  [TransitionPhase.revealing]: { strokeWidth: 0, transition: { duration: TRANSITION_DURATION } },
-} as const;
+  [TransitionPhase.covering]: (index: number) => ({
+    strokeWidth: RIPPLE_WIDTH,
+    transition: { duration: WATER_DROP_TRANSITION_DURATION, delay: index * 0.1 },
+  }),
+  [TransitionPhase.revealing]: (index: number) => ({
+    strokeWidth: 0,
+    transition: { duration: WATER_DROP_TRANSITION_DURATION, delay: index * 0.1 },
+  }),
+};
 
 export const WaterDropTransition = () => {
   const { phase, onCoverComplete, onRevealComplete } = usePageTransition();
@@ -48,9 +54,9 @@ export const WaterDropTransition = () => {
       }}
     >
       {indexArray(ripples, (index) => (
-        <>
+        <g key={index}>
           <motion.circle
-            key={index}
+            custom={index}
             cx='50%'
             cy='50%'
             r={RIPPLE_WIDTH * (index + 1)}
@@ -63,7 +69,7 @@ export const WaterDropTransition = () => {
             fill='transparent'
           />
           <motion.circle
-            key={index}
+            custom={index}
             cx='50%'
             cy='50%'
             r={RIPPLE_WIDTH * (index + 1)}
@@ -74,7 +80,7 @@ export const WaterDropTransition = () => {
             style={{ zIndex: ZIndex.pageTransition - index * 2, pointerEvents: 'none' }}
             fill='transparent'
           />
-        </>
+        </g>
       ))}
       {/* Outer circle visible outside the viewport in case the viewport size changes*/}
       {phase === 'covering' && (

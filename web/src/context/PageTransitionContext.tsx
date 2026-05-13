@@ -6,7 +6,9 @@ import { useRouter } from 'next/navigation';
 export const TransitionPhase = {
   idle: 'idle',
   covering: 'covering',
+  firstCovering: 'first-covering',
   revealing: 'revealing',
+  firstRevealing: 'first-revealing',
 } as const;
 export type TransitionPhase = Enum<typeof TransitionPhase>;
 
@@ -16,7 +18,8 @@ interface PageTransitionContextValue {
   onCoverComplete: () => void;
   onRevealComplete: () => void;
 }
-
+export const WATER_DROP_TRANSITION_DURATION = 0.2;
+export const TRANSITION_HANG_DURATION = 0.15;
 const PageTransitionContext = createContext<PageTransitionContextValue | null>(null);
 
 export function PageTransitionProvider({ children }: { children: React.ReactNode }) {
@@ -36,7 +39,7 @@ export function PageTransitionProvider({ children }: { children: React.ReactNode
           pendingHref.current = null;
           setPhase(TransitionPhase.revealing);
         }
-      }, 700);
+      }, (WATER_DROP_TRANSITION_DURATION + TRANSITION_HANG_DURATION) * 1000);
     },
     [phase, router],
   );
@@ -48,7 +51,7 @@ export function PageTransitionProvider({ children }: { children: React.ReactNode
         pendingHref.current = null;
       }
       setPhase(TransitionPhase.revealing);
-    }, 200);
+    }, TRANSITION_HANG_DURATION * 1000);
   }, [router]);
 
   const onRevealComplete = useCallback(() => {

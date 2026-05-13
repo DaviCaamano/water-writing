@@ -8,11 +8,11 @@ import { queryKeys } from '~types/lib/tanstack-query/query-keys';
 import { useSessionQuery } from '~lib/queries/user';
 
 interface AuthState {
-  isAuthenticated: boolean;
+  loggedOut: boolean;
 }
 
 const authStore = new Store<AuthState>({
-  isAuthenticated: typeof document !== 'undefined' && document.cookie.includes('token='),
+  loggedOut: false,
 });
 
 export interface UserActions {
@@ -30,9 +30,9 @@ export interface UserActions {
 }
 
 export const useUserStore = () => {
-  const { isAuthenticated } = useStore(authStore);
+  const { loggedOut } = useStore(authStore);
   const queryClient = useQueryClient();
-  const { data: session } = useSessionQuery(isAuthenticated);
+  const { data: session } = useSessionQuery(!loggedOut);
 
   const actions = useMemo<UserActions>(
     () => ({
@@ -40,13 +40,13 @@ export const useUserStore = () => {
         const data = await queryApi<LoginResponse>(apiRoutes.user.login(), {
           body: { email, password },
         });
-        authStore.setState(() => ({ isAuthenticated: true }));
+        authStore.setState(() => ({ loggedOut: false }));
         queryClient.setQueryData(queryKeys.user.session, data);
       },
 
       signup: async (signupData) => {
         const data = await queryApi<LoginResponse>(apiRoutes.user.create(), { body: signupData });
-        authStore.setState(() => ({ isAuthenticated: true }));
+        authStore.setState(() => ({ loggedOut: false }));
         queryClient.setQueryData(queryKeys.user.session, data);
       },
 
@@ -54,7 +54,7 @@ export const useUserStore = () => {
         try {
           await queryApi(apiRoutes.user.logout());
         } finally {
-          authStore.setState(() => ({ isAuthenticated: false }));
+          authStore.setState(() => ({ loggedOut: true }));
           queryClient.clear();
         }
       },
@@ -71,7 +71,7 @@ export const useUserStore = () => {
       },
 
       reset: () => {
-        authStore.setState(() => ({ isAuthenticated: false }));
+        authStore.setState(() => ({ loggedOut: true }));
         queryClient.clear();
       },
     }),

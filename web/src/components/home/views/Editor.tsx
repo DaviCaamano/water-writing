@@ -2,6 +2,7 @@
 
 import { useCallback, useMemo, useState } from 'react';
 import type { Editor as TiptapEditor } from '@tiptap/react';
+import { useParams } from 'next/navigation';
 import { useEditorStore } from '~store/useEditorStore';
 import { useNavigationStore } from '~store/useNavigationStore';
 import { cn } from '~utils/merge-css-classes';
@@ -20,12 +21,13 @@ export const Editor = () => {
   const [body, setBody] = useState('');
   const [editor, setEditor] = useState<TiptapEditor | null>(null);
 
+  const { documentId } = useParams<{ documentId: string }>();
   const { fontSize, fontFamily, markDirty, markSaved } = useEditorStore();
-  const { currentDocumentId, currentStoryId } = useNavigationStore();
+  const { currentStoryId } = useNavigationStore();
 
   const handleSave = useEditorSave({
     currentStoryId,
-    currentDocumentId,
+    currentDocumentId: documentId,
     body,
     markSaved,
     title,
@@ -33,7 +35,7 @@ export const Editor = () => {
 
   const handleLink = useEditorLink(editor);
 
-  useEditorQuery(currentDocumentId, (documentData: DocumentResponse) => {
+  useEditorQuery(documentId, (documentData: DocumentResponse) => {
     setTitle(documentData.title);
     setBody(documentData.body);
   });
