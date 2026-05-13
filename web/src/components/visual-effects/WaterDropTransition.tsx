@@ -1,18 +1,17 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { usePageTransition } from '~context/PageTransitionContext';
 
-// Grid config — pre-computed at module load, not per render
-const SPACING = 100; // SVG units between dot centres
-const R = 2; // dot radius (stroke dominates, this is cosmetic)
-const STROKE_FULL = 74; // stroke-width at peak — dots slightly overlap neighbours
-const STAGGER = 27; // ms of extra delay per grid-distance unit from centre
-const COVER_MS = 290; // each dot's expansion duration
-const REVEAL_MS = 250; // each dot's contraction duration
+const SPACING = 100;
+const R = 2;
+const STROKE_FULL = 74;
+const STAGGER = 27;
+const COVER_MS = 290;
+const REVEAL_MS = 250;
 
-const H_COLS = 10; // grid extends ±H_COLS columns from centre (21 total)
-const H_ROWS = 8; // grid extends ±H_ROWS rows from centre (17 total)
+const H_COLS = 10;
+const H_ROWS = 8;
 
 interface Dot {
   x: number;
@@ -33,33 +32,37 @@ for (let r = -H_ROWS; r <= H_ROWS; r++) {
 
 const VB_W = (2 * H_COLS + 1) * SPACING;
 const VB_H = (2 * H_ROWS + 1) * SPACING;
-const COVER_TOTAL = MAX_DELAY + COVER_MS; // ms until screen is fully covered
-const BURST_TTL = COVER_TOTAL + 60 + MAX_DELAY + REVEAL_MS + 300;
+const COVER_TOTAL = MAX_DELAY + COVER_MS;
+const REVEAL_TOTAL = MAX_DELAY + REVEAL_MS;
 
-let nextId = 0;
-
-function Burst() {
+export const WaterDropTransition = () => {
+  const { phase, onCoverComplete, onRevealComplete } = usePageTransition();
   const [sw, setSw] = useState(0);
-  const [phase, setPhase] = useState<'cover' | 'reveal'>('cover');
+  const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    // Trigger expansion on next paint so the 0→STROKE_FULL transition fires
-    const raf = requestAnimationFrame(() => setSw(STROKE_FULL));
-
-    // Switch to reveal once the screen is fully covered
-    const t = setTimeout(() => {
-      setPhase('reveal');
+    if (phase === 'covering') {
+      setVisible(true);
+      const raf = requestAnimationFrame(() => setSw(STROKE_FULL));
+      const t = setTimeout(onCoverComplete, COVER_TOTAL + 60);
+      return () => {
+        cancelAnimationFrame(raf);
+        clearTimeout(t);
+      };
+    } else if (phase === 'revealing') {
       setSw(0);
-    }, COVER_TOTAL + 60);
+      const t = setTimeout(() => {
+        onRevealComplete();
+        setVisible(false);
+      }, REVEAL_TOTAL + 50);
+      return () => clearTimeout(t);
+    }
+  }, [phase, onCoverComplete, onRevealComplete]);
 
-    return () => {
-      cancelAnimationFrame(raf);
-      clearTimeout(t);
-    };
-  }, []);
+  if (!visible) return null;
 
-  const dur = phase === 'cover' ? COVER_MS : REVEAL_MS;
-  const ease = phase === 'cover' ? 'ease-in' : 'ease-out';
+  const dur = phase === 'covering' ? COVER_MS : REVEAL_MS;
+  const ease = phase === 'covering' ? 'ease-in' : 'ease-out';
 
   return (
     <div className='fixed inset-0 z-[200] pointer-events-none' aria-hidden='true'>
@@ -86,33 +89,5 @@ function Burst() {
         ))}
       </svg>
     </div>
-  );
-}
-
-export const WaterDropTransition = () => {
-  const pathname = usePathname();
-  const prevPathRef = useRef(pathname);
-  const [bursts, setBursts] = useState<number[]>([]);
-
-  useEffect(() => {
-    const prev = prevPathRef.current;
-    prevPathRef.current = pathname;
-
-    const wasEditor = prev.startsWith('/editor');
-    const isEditor = pathname.startsWith('/editor');
-
-    if (wasEditor !== isEditor) {
-      const id = ++nextId;
-      setBursts((b) => [...b, id]);
-      setTimeout(() => setBursts((b) => b.filter((x) => x !== id)), BURST_TTL);
-    }
-  }, [pathname]);
-
-  return (
-    <>
-      {bursts.map((id) => (
-        <Burst key={id} />
-      ))}
-    </>
   );
 };

@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { Store, useStore } from '@tanstack/react-store';
 import { useRouter, usePathname } from 'next/navigation';
 import { NavigationState } from '~types/state/navigation-state';
+import { usePageTransition } from '~context/PageTransitionContext';
 
 export const createInitialNavigationState = (): NavigationState => ({
   currentCannonId: null,
@@ -28,6 +29,7 @@ export const useNavigationStore = (): NavigationStore => {
   const state = useStore(navigationStore, (s) => s);
   const router = useRouter();
   const pathname = usePathname();
+  const { navigate: transitionNavigate } = usePageTransition();
 
   return useMemo(
     () => ({
@@ -66,13 +68,13 @@ export const useNavigationStore = (): NavigationStore => {
           currentDocumentId: documentId,
           selectedDocumentId: documentId,
         }));
-        router.push(`/editor/${documentId}`);
+        transitionNavigate(`/editor/${documentId}`);
       },
 
       navigateUp: () => {
         const { currentStoryId, currentCannonId } = navigationStore.state;
         if (pathname.startsWith('/editor')) {
-          router.push(currentStoryId ? `/story/${currentStoryId}` : '/');
+          transitionNavigate(currentStoryId ? `/story/${currentStoryId}` : '/');
         } else if (pathname.startsWith('/story')) {
           router.push(currentCannonId ? `/world/${currentCannonId}` : '/');
         } else if (pathname.startsWith('/world')) {
@@ -88,6 +90,6 @@ export const useNavigationStore = (): NavigationStore => {
         navigationStore.setState((s) => ({ ...s, currentDocumentId: documentId }));
       },
     }),
-    [state, router, pathname],
+    [state, router, pathname, transitionNavigate],
   );
 };

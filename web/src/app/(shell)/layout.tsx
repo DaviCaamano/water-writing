@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { usePathname } from 'next/navigation';
-import { AnimatePresence, motion } from 'framer-motion';
 import { UserMenu } from '~components/home/user/UserMenu';
 import { AuthDialog } from '~components/home/login/AuthDialog';
 import { SettingsModal } from '~components/home/user/user-settings/SettingsModal';
@@ -11,30 +10,23 @@ import { NavButton } from '~components/home/NavButton';
 import { useToggleSettings } from '~components/home/user/user-settings/useToggleSettings';
 import { useNavigationStore } from '~store/useNavigationStore';
 import { WaterDropTransition } from '~components/visual-effects/WaterDropTransition';
+import { PageTransitionProvider } from '~context/PageTransitionContext';
 import { cn } from '~utils/merge-css-classes';
 
-function getDepth(pathname: string): number {
-  if (pathname.startsWith('/editor')) return 3;
-  if (pathname.startsWith('/story')) return 2;
-  if (pathname.startsWith('/world')) return 1;
-  return 0;
+export default function ShellLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <PageTransitionProvider>
+      <ShellContent>{children}</ShellContent>
+    </PageTransitionProvider>
+  );
 }
 
-export default function ShellLayout({ children }: { children: React.ReactNode }) {
+function ShellContent({ children }: { children: React.ReactNode }) {
   const [authOpen, setAuthOpen] = useState(false);
   const { handleOpenSettings, settingsOpen, setSettingsOpen, settingsSection } =
     useToggleSettings();
   const { navigateUp } = useNavigationStore();
   const pathname = usePathname();
-
-  const currentDepth = getDepth(pathname);
-  const [prevDepth, setPrevDepth] = useState(currentDepth);
-  const [direction, setDirection] = useState(1);
-
-  if (prevDepth !== currentDepth) {
-    setPrevDepth(currentDepth);
-    setDirection(currentDepth >= prevDepth ? 1 : -1);
-  }
 
   const isEditor = pathname.startsWith('/editor');
 
@@ -62,25 +54,7 @@ export default function ShellLayout({ children }: { children: React.ReactNode })
         </div>
         {isEditor && <EditorSettingsPopover />}
         <div className='-home-view- relative h-full'>
-          <AnimatePresence mode='sync'>
-            <motion.div
-              key={pathname}
-              className='absolute inset-0 z-10'
-              initial={{ opacity: 0.88, scale: 0.985, filter: 'blur(6px)' }}
-              animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
-              exit={{
-                opacity: 0,
-                scale: 0.58,
-                x: direction > 0 ? 220 : -220,
-                y: -140,
-                filter: 'blur(12px)',
-                transition: { duration: 0.48, ease: [0.32, 0.72, 0, 1] },
-              }}
-              transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
-            >
-              {children}
-            </motion.div>
-          </AnimatePresence>
+          {children}
         </div>
         <WaterDropTransition />
         <AuthDialog open={authOpen} onOpenChange={setAuthOpen} />
