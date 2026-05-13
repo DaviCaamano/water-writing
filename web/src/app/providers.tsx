@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ThemeProvider } from 'next-themes';
+import { ThemeProvider } from '~providers/theme';
 import { TooltipProvider } from '~components/ui/tooltip';
 
 export const Providers = ({ children }: { children: React.ReactNode }) => {

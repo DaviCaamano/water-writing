@@ -9,7 +9,7 @@ import {
   SelectValue,
 } from '~components/ui/select';
 import { useEditorStore } from '~store/useEditorStore';
-import { useTheme } from 'next-themes';
+import { useTheme } from '~providers/theme';
 import type { EditorTheme } from '~types/story';
 import { WaterRippleFade } from '~components/visual-effects/WaterRippleFade';
 import { cn } from '~utils/merge-css-classes';

@@ -1,4 +1,4 @@
-import { useTheme } from 'next-themes';
+import { useTheme } from '~providers/theme';
 import type { EditorTheme } from '~types/story';
 
 export type ThemeColors = {
