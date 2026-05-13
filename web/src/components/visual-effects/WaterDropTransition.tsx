@@ -8,12 +8,12 @@ import { indexArray } from '~utils/indexArray';
 import { TransitionPhase, usePageTransition } from '~context/PageTransitionContext';
 
 const RIPPLE_WIDTH = 100;
-const TRANSITION_DURATION = 0.2;
+const TRANSITION_DURATION = 0.5;
 
 const ANIMATIONS = {
   [TransitionPhase.idle]: { strokeWidth: 0, transition: { duration: 0 } },
   [TransitionPhase.covering]: {
-    strokeWidth: RIPPLE_WIDTH,
+    strokeWidth: RIPPLE_WIDTH + 5,
     transition: { duration: TRANSITION_DURATION },
   },
   [TransitionPhase.revealing]: { strokeWidth: 0, transition: { duration: TRANSITION_DURATION } },
@@ -56,8 +56,8 @@ export const WaterDropTransition = () => {
           animate={controls}
           variants={ANIMATIONS}
           initial={TransitionPhase.idle}
-          stroke='var(--background)'
-          style={{ zIndex: ZIndex.pageTransition - (index + 1) }}
+          stroke='var(--foreground)'
+          style={{ zIndex: ZIndex.pageTransition - (index + 1), pointerEvents: 'none' }}
           fill='transparent'
         />
       ))}

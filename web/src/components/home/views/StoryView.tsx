@@ -37,9 +37,9 @@ const summarizeDocument = (body: string): string => {
 
 export const StoryView = () => {
   const { storyId } = useParams<{ storyId: string }>();
-  const { currentCannonId, navigateToEditor } = useNavigationStore();
+  const { navigateToEditor } = useNavigationStore();
   const { data: currentStory } = useStoryQuery(storyId ?? null);
-  const { data: currentCannon } = useCannonQuery(currentCannonId);
+  const { data: currentCannon } = useCannonQuery(currentStory?.cannonId ?? null);
   const queryClient = useQueryClient();
   const upsertDocument = useUpsertDocumentMutation();
   const deleteDocument = useDeleteDocumentMutation();
@@ -59,13 +59,13 @@ export const StoryView = () => {
   };
 
   const handleOpenDocument = (documentId: string) => {
-    if (!currentStory || !currentCannonId) return;
+    if (!currentStory) return;
 
     const document = documents.find((entry) => entry.documentId === documentId);
     if (!document) return;
 
     queryClient.setQueryData(queryKeys.documents.detail(documentId), document);
-    navigateToEditor(document.documentId, document.storyId, currentCannonId);
+    navigateToEditor(document.documentId, document.storyId, currentStory.cannonId);
   };
 
   const handleRenameDocument = (documentId: string, currentTitle: string) => {

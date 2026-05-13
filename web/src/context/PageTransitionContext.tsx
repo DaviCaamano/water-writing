@@ -30,16 +30,25 @@ export function PageTransitionProvider({ children }: { children: React.ReactNode
       pendingHref.current = href;
       router.prefetch(href);
       setPhase(TransitionPhase.covering);
+      setTimeout(() => {
+        if (pendingHref.current) {
+          router.push(pendingHref.current);
+          pendingHref.current = null;
+          setPhase(TransitionPhase.revealing);
+        }
+      }, 700);
     },
     [phase, router],
   );
 
   const onCoverComplete = useCallback(() => {
-    if (pendingHref.current) {
-      router.push(pendingHref.current);
-      pendingHref.current = null;
-    }
-    setPhase(TransitionPhase.revealing);
+    setTimeout(() => {
+      if (pendingHref.current) {
+        router.push(pendingHref.current);
+        pendingHref.current = null;
+      }
+      setPhase(TransitionPhase.revealing);
+    }, 200);
   }, [router]);
 
   const onRevealComplete = useCallback(() => {
