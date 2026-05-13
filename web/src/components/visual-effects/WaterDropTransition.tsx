@@ -48,18 +48,33 @@ export const WaterDropTransition = () => {
       }}
     >
       {indexArray(ripples, (index) => (
-        <motion.circle
-          key={index}
-          cx='50%'
-          cy='50%'
-          r={RIPPLE_WIDTH * (index + 1)}
-          animate={controls}
-          variants={ANIMATIONS}
-          initial={TransitionPhase.idle}
-          stroke='var(--foreground)'
-          style={{ zIndex: ZIndex.pageTransition - (index + 1), pointerEvents: 'none' }}
-          fill='transparent'
-        />
+        <>
+          <motion.circle
+            key={index}
+            cx='50%'
+            cy='50%'
+            r={RIPPLE_WIDTH * (index + 1)}
+            animate={controls}
+            variants={ANIMATIONS}
+            initial={TransitionPhase.idle}
+            stroke='var(--muted)'
+            strokeWidth={2}
+            style={{ zIndex: ZIndex.pageTransition - (index * 2 - 1), pointerEvents: 'none' }}
+            fill='transparent'
+          />
+          <motion.circle
+            key={index}
+            cx='50%'
+            cy='50%'
+            r={RIPPLE_WIDTH * (index + 1)}
+            animate={controls}
+            variants={ANIMATIONS}
+            initial={TransitionPhase.idle}
+            stroke='var(--background)'
+            style={{ zIndex: ZIndex.pageTransition - index * 2, pointerEvents: 'none' }}
+            fill='transparent'
+          />
+        </>
       ))}
       {/* Outer circle visible outside the viewport in case the viewport size changes*/}
       {phase === 'covering' && (
