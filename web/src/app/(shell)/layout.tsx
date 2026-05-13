@@ -10,7 +10,10 @@ import { EditorSettingsPopover } from '~components/home/editor/EditorSettingsPop
 import { NavButton } from '~components/home/NavButton';
 import { useToggleSettings } from '~components/home/user/user-settings/useToggleSettings';
 import { useNavigationStore } from '~store/useNavigationStore';
-import { WaterDropTransition } from '~components/visual-effects/WaterDropTransition';
+import {
+  WaterDropTransition,
+  WaterDropTransitionPhase,
+} from '~components/visual-effects/WaterDropTransition';
 import { cn } from '~utils/merge-css-classes';
 
 function getDepth(pathname: string): number {
@@ -61,28 +64,7 @@ export default function ShellLayout({ children }: { children: React.ReactNode })
           <UserMenu onOpenAuth={() => setAuthOpen(true)} onOpenSettings={handleOpenSettings} />
         </div>
         {isEditor && <EditorSettingsPopover />}
-        <div className='-home-view- relative h-full'>
-          <AnimatePresence mode='sync'>
-            <motion.div
-              key={pathname}
-              className='absolute inset-0 z-10'
-              initial={{ opacity: 0.88, scale: 0.985, filter: 'blur(6px)' }}
-              animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
-              exit={{
-                opacity: 0,
-                scale: 0.58,
-                x: direction > 0 ? 220 : -220,
-                y: -140,
-                filter: 'blur(12px)',
-                transition: { duration: 0.48, ease: [0.32, 0.72, 0, 1] },
-              }}
-              transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
-            >
-              {children}
-            </motion.div>
-          </AnimatePresence>
-        </div>
-        <WaterDropTransition />
+        <div className='-home-view- relative h-full'>{children}</div>
         <AuthDialog open={authOpen} onOpenChange={setAuthOpen} />
         <SettingsModal
           open={settingsOpen}
@@ -90,6 +72,7 @@ export default function ShellLayout({ children }: { children: React.ReactNode })
           initialSection={settingsSection}
         />
       </div>
+      <WaterDropTransition phase={WaterDropTransitionPhase.empty} />
     </div>
   );
 }

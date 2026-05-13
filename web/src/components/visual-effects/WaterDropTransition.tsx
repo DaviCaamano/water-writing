@@ -1,118 +1,96 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import { usePathname } from 'next/navigation';
+import { useCallback, useState } from 'react';
+import { Dimensions, useViewport } from '~hooks/useViewport';
+import { motion, useAnimationControls } from 'framer-motion';
+import { ZIndex } from '~constants/z-index';
+import { indexArray } from '~utils/indexArray';
+import { useSticky } from '~hooks/useSticky';
 
-// Grid config — pre-computed at module load, not per render
-const SPACING = 100; // SVG units between dot centres
-const R = 2; // dot radius (stroke dominates, this is cosmetic)
-const STROKE_FULL = 74; // stroke-width at peak — dots slightly overlap neighbours
-const STAGGER = 27; // ms of extra delay per grid-distance unit from centre
-const COVER_MS = 290; // each dot's expansion duration
-const REVEAL_MS = 250; // each dot's contraction duration
+const RIPPLE_WIDTH = 100;
 
-const H_COLS = 10; // grid extends ±H_COLS columns from centre (21 total)
-const H_ROWS = 8; // grid extends ±H_ROWS rows from centre (17 total)
+export const WaterDropTransitionPhase = {
+  empty: 'empty', // Transition animation is uncovering the new screen
+  fill: 'fill', // Transitoon animation is not active and covers none of the screen.
+} as const;
+export type WaterDropTransitionPhase = Enum<typeof WaterDropTransitionPhase>;
 
-interface Dot {
-  x: number;
-  y: number;
-  delay: number;
+const ANIMATIONS = {
+  [WaterDropTransitionPhase.empty]: { strokeWidth: 0, transition: { duration: 0.2 } },
+  [WaterDropTransitionPhase.fill]: { stokeWidth: RIPPLE_WIDTH, transition: { duration: 0.3 } },
+} as const;
+
+export interface WaterDropTransitionProps {
+  enabled?: boolean;
+  phase: WaterDropTransitionPhase;
 }
+export const WaterDropTransition = ({ enabled = true, phase }: WaterDropTransitionProps) => {
+  const [ripples, setRipples] = useState<number>(0);
+  const handleResize = useCallback((size: Dimensions) => setRipples(getCircleCount(size)), []);
+  const size = useViewport(handleResize);
 
-const DOTS: Dot[] = [];
-let MAX_DELAY = 0;
+  const controls = useAnimationControls();
 
-for (let r = -H_ROWS; r <= H_ROWS; r++) {
-  for (let c = -H_COLS; c <= H_COLS; c++) {
-    const delay = Math.sqrt(c * c + r * r) * STAGGER;
-    if (delay > MAX_DELAY) MAX_DELAY = delay;
-    DOTS.push({ x: c * SPACING, y: r * SPACING, delay });
-  }
-}
-
-const VB_W = (2 * H_COLS + 1) * SPACING;
-const VB_H = (2 * H_ROWS + 1) * SPACING;
-const COVER_TOTAL = MAX_DELAY + COVER_MS; // ms until screen is fully covered
-const BURST_TTL = COVER_TOTAL + 60 + MAX_DELAY + REVEAL_MS + 300;
-
-let nextId = 0;
-
-function Burst() {
-  const [sw, setSw] = useState(0);
-  const [phase, setPhase] = useState<'cover' | 'reveal'>('cover');
-
-  useEffect(() => {
-    // Trigger expansion on next paint so the 0→STROKE_FULL transition fires
-    const raf = requestAnimationFrame(() => setSw(STROKE_FULL));
-
-    // Switch to reveal once the screen is fully covered
-    const t = setTimeout(() => {
-      setPhase('reveal');
-      setSw(0);
-    }, COVER_TOTAL + 60);
-
-    return () => {
-      cancelAnimationFrame(raf);
-      clearTimeout(t);
-    };
-  }, []);
-
-  const dur = phase === 'cover' ? COVER_MS : REVEAL_MS;
-  const ease = phase === 'cover' ? 'ease-in' : 'ease-out';
-
-  return (
-    <div className='fixed inset-0 z-[200] pointer-events-none' aria-hidden='true'>
-      <svg
-        width='100%'
-        height='100%'
-        viewBox={`${-VB_W / 2} ${-VB_H / 2} ${VB_W} ${VB_H}`}
-        preserveAspectRatio='xMidYMid slice'
-      >
-        {DOTS.map(({ x, y, delay }, i) => (
-          <circle
-            key={i}
-            cx={x}
-            cy={y}
-            r={R}
-            style={{
-              fill: 'none',
-              stroke: 'var(--primary)',
-              strokeWidth: sw,
-              transition: `stroke-width ${dur}ms ${ease}`,
-              transitionDelay: `${delay}ms`,
-            }}
-          />
-        ))}
-      </svg>
-    </div>
-  );
-}
-
-export const WaterDropTransition = () => {
-  const pathname = usePathname();
-  const prevPathRef = useRef(pathname);
-  const [bursts, setBursts] = useState<number[]>([]);
-
-  useEffect(() => {
-    const prev = prevPathRef.current;
-    prevPathRef.current = pathname;
-
-    const wasEditor = prev.startsWith('/editor');
-    const isEditor = pathname.startsWith('/editor');
-
-    if (wasEditor !== isEditor) {
-      const id = ++nextId;
-      setBursts((b) => [...b, id]);
-      setTimeout(() => setBursts((b) => b.filter((x) => x !== id)), BURST_TTL);
+  useSticky(phase, (prevPhase) => {
+    if (prevPhase === WaterDropTransitionPhase.empty && phase === WaterDropTransitionPhase.fill) {
+      controls.start(WaterDropTransitionPhase.fill);
+    } else if (
+      prevPhase === WaterDropTransitionPhase.fill &&
+      phase === WaterDropTransitionPhase.empty
+    ) {
+      controls.start(WaterDropTransitionPhase.empty);
     }
-  }, [pathname]);
+  });
+
+  if (!enabled) return null;
+
+  const largestDimension = getDiagonalDistance(size.width ?? 0, size.height ?? 0);
 
   return (
-    <>
-      {bursts.map((id) => (
-        <Burst key={id} />
+    <motion.svg
+      width='100vw'
+      height='100vh'
+      viewBox={`0 0 ${size.width} ${size.height}`}
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: ZIndex.top,
+        pointerEvents: 'none',
+      }}
+
+    >
+      {indexArray(ripples, (index) => (
+        <motion.circle
+          key={index}
+          cx='50%'
+          cy='50%'
+          r={RIPPLE_WIDTH}
+          animate={controls}
+          variants={ANIMATIONS}
+        />
       ))}
-    </>
+      {phase === WaterDropTransitionPhase.fill && (
+        <circle
+          key='outter-circle'
+          cx='50%'
+          cy='50%'
+          r={largestDimension * 2}
+          style={{
+            fill: 'none',
+            stroke: 'var(--background)',
+            strokeWidth: largestDimension,
+          }}
+        />
+      )}
+    </motion.svg>
   );
+};
+
+const getDiagonalDistance = (width: number, height: number) => {
+  return Math.sqrt(width ** 2 + height ** 2);
+};
+
+const getCircleCount = (size: Dimensions): number => {
+  const largestDimension = getDiagonalDistance(size.width ?? 0, size.height ?? 0);
+  return Math.ceil(largestDimension / RIPPLE_WIDTH);
 };
