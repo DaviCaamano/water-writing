@@ -1,2 +1,4 @@
-export const indexArray = <T>(array: number, callback: (num: number) => T) =>
-  Array.from({ length: array }, (_, index) => callback(index));
+export const indexArray = <T>(count: number, callback: (num: number) => T) => {
+  const abs = Math.abs(count);
+  return Array.from({ length: abs }, (_, i) => callback(count < 0 ? abs - 1 - i : i));
+};

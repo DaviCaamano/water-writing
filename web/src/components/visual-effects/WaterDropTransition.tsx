@@ -1,48 +1,37 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useEffect } from 'react';
 import { Dimensions, useViewport } from '~hooks/useViewport';
 import { motion, useAnimationControls } from 'framer-motion';
 import { ZIndex } from '~constants/z-index';
 import { indexArray } from '~utils/indexArray';
-import { useSticky } from '~hooks/useSticky';
+import { TransitionPhase, usePageTransition } from '~context/PageTransitionContext';
 
 const RIPPLE_WIDTH = 100;
-
-export const WaterDropTransitionPhase = {
-  empty: 'empty', // Transition animation is uncovering the new screen
-  fill: 'fill', // Transitoon animation is not active and covers none of the screen.
-} as const;
-export type WaterDropTransitionPhase = Enum<typeof WaterDropTransitionPhase>;
+const TRANSITION_DURATION = 0.2;
 
 const ANIMATIONS = {
-  [WaterDropTransitionPhase.empty]: { strokeWidth: 0, transition: { duration: 0.2 } },
-  [WaterDropTransitionPhase.fill]: { stokeWidth: RIPPLE_WIDTH, transition: { duration: 0.3 } },
+  [TransitionPhase.idle]: { strokeWidth: 0, transition: { duration: 0 } },
+  [TransitionPhase.covering]: {
+    strokeWidth: RIPPLE_WIDTH,
+    transition: { duration: TRANSITION_DURATION },
+  },
+  [TransitionPhase.revealing]: { strokeWidth: 0, transition: { duration: TRANSITION_DURATION } },
 } as const;
 
-export interface WaterDropTransitionProps {
-  enabled?: boolean;
-  phase: WaterDropTransitionPhase;
-}
-export const WaterDropTransition = ({ enabled = true, phase }: WaterDropTransitionProps) => {
-  const [ripples, setRipples] = useState<number>(0);
-  const handleResize = useCallback((size: Dimensions) => setRipples(getCircleCount(size)), []);
-  const size = useViewport(handleResize);
-
+export const WaterDropTransition = () => {
+  const { phase, onCoverComplete, onRevealComplete } = usePageTransition();
+  const size = useViewport();
+  const ripples = getCircleCount(size);
   const controls = useAnimationControls();
 
-  useSticky(phase, (prevPhase) => {
-    if (prevPhase === WaterDropTransitionPhase.empty && phase === WaterDropTransitionPhase.fill) {
-      controls.start(WaterDropTransitionPhase.fill);
-    } else if (
-      prevPhase === WaterDropTransitionPhase.fill &&
-      phase === WaterDropTransitionPhase.empty
-    ) {
-      controls.start(WaterDropTransitionPhase.empty);
+  useEffect(() => {
+    if (phase === TransitionPhase.covering) {
+      requestAnimationFrame(() => controls.start(TransitionPhase.covering).then(onCoverComplete));
+    } else if (phase === TransitionPhase.revealing) {
+      controls.start(TransitionPhase.revealing).then(onRevealComplete);
     }
-  });
-
-  if (!enabled) return null;
+  }, [phase, controls, onCoverComplete, onRevealComplete]);
 
   const largestDimension = getDiagonalDistance(size.width ?? 0, size.height ?? 0);
 
@@ -54,22 +43,26 @@ export const WaterDropTransition = ({ enabled = true, phase }: WaterDropTransiti
       style={{
         position: 'fixed',
         inset: 0,
-        zIndex: ZIndex.top,
+        zIndex: ZIndex.pageTransition,
         pointerEvents: 'none',
       }}
-
     >
       {indexArray(ripples, (index) => (
         <motion.circle
           key={index}
           cx='50%'
           cy='50%'
-          r={RIPPLE_WIDTH}
+          r={RIPPLE_WIDTH * (index + 1)}
           animate={controls}
           variants={ANIMATIONS}
+          initial={TransitionPhase.idle}
+          stroke='var(--background)'
+          style={{ zIndex: ZIndex.pageTransition - (index + 1) }}
+          fill='transparent'
         />
       ))}
-      {phase === WaterDropTransitionPhase.fill && (
+      {/* Outer circle visible outside the viewport in case the viewport size changes*/}
+      {phase === 'covering' && (
         <circle
           key='outter-circle'
           cx='50%'
@@ -79,6 +72,7 @@ export const WaterDropTransition = ({ enabled = true, phase }: WaterDropTransiti
             fill: 'none',
             stroke: 'var(--background)',
             strokeWidth: largestDimension,
+            zIndex: ZIndex.pageTransition,
           }}
         />
       )}
