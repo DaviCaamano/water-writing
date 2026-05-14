@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import { useRef, useState } from 'react';
-import { Popover, PopoverTrigger } from '~components/ui/popover';
+import { Popover, PopoverTrigger } from '~components/primitives/popover';
 import { WaterRipple } from '~components/visual-effects/WaterRipple';
 import { EditorSettingsContent } from '~components/home/editor/EditorSettingsContent';
 

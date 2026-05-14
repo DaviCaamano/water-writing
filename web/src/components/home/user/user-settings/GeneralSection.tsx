@@ -1,12 +1,9 @@
 import { useUserStore } from '~store/useUserStore';
 import { useState } from 'react';
 import { cn } from '~utils/merge-css-classes';
-import {
-  FieldLabel,
-  NeuIconBtn,
-  NeuInput,
-  SectionHeading,
-} from '~components/home/user/user-settings/index';
+import { FieldLabel, SectionHeading } from '~components/home/user/user-settings/index';
+import { Button } from '~components/primitives/button';
+import { Input } from '~components/primitives/input';
 import { Check, Pencil, X } from 'lucide-react';
 
 export const GeneralSection = () => {
@@ -43,35 +40,50 @@ export const GeneralSection = () => {
           <FieldLabel>Name</FieldLabel>
           {editingName ? (
             <div className={cn('flex items-end gap-2')}>
-              <div className='flex-1'>
-                <NeuInput
-                  value={editFirst}
-                  onChange={(e) => setEditFirst(e.target.value)}
-                  placeholder='First'
-                />
-              </div>
-              <div className='flex-1'>
-                <NeuInput
-                  value={editLast}
-                  onChange={(e) => setEditLast(e.target.value)}
-                  placeholder='Last'
-                />
-              </div>
-              <NeuIconBtn onClick={saveName} aria-label='Save'>
+              <Input
+                size='pill'
+                value={editFirst}
+                onChange={(e) => setEditFirst(e.target.value)}
+                placeholder='First'
+                className='flex-1'
+              />
+              <Input
+                size='pill'
+                value={editLast}
+                onChange={(e) => setEditLast(e.target.value)}
+                placeholder='Last'
+                className='flex-1'
+              />
+              <Button
+                variant='default'
+                size='icon'
+                onClick={saveName}
+                aria-label='Save'
+              >
                 <Check className='size-4' />
-              </NeuIconBtn>
-              <NeuIconBtn onClick={cancelNameEdit} aria-label='Cancel'>
+              </Button>
+              <Button
+                variant='default'
+                size='icon'
+                onClick={cancelNameEdit}
+                aria-label='Cancel'
+              >
                 <X className='size-4' />
-              </NeuIconBtn>
+              </Button>
             </div>
           ) : (
             <div className='flex items-center gap-3'>
               <div className={'flex-1 rounded-full px-5 py-2.5 text-[14px] embossed'}>
                 {firstName} {lastName}
               </div>
-              <NeuIconBtn onClick={startNameEdit} aria-label='Edit name'>
+              <Button
+                variant='default'
+                size='icon'
+                onClick={startNameEdit}
+                aria-label='Edit name'
+              >
                 <Pencil className='size-3.5' />
-              </NeuIconBtn>
+              </Button>
             </div>
           )}
         </div>

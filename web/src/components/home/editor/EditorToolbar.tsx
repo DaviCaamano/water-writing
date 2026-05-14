@@ -22,7 +22,7 @@ import {
   Code2,
 } from 'lucide-react';
 import { WaterRipple } from '~components/visual-effects/WaterRipple';
-import { Tooltip, TooltipContent, TooltipTrigger } from '~components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger } from '~components/primitives/tooltip';
 import { cn } from '~utils/merge-css-classes';
 import { useEditorLink } from '~components/home/editor/hooks/useEditorLink';
 

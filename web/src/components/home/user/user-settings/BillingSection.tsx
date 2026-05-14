@@ -1,7 +1,7 @@
 import { useUserStore } from '~store/useUserStore';
 import { useBillingHistoryQuery } from '~lib/queries/billing';
 import { NeuDivider, SectionHeading } from '~components/home/user/user-settings/index';
-import { Skeleton } from '~components/ui/skeleton';
+import { Skeleton } from '~components/primitives/skeleton';
 import { cn } from '~utils/merge-css-classes';
 
 export const BillingSection = () => {

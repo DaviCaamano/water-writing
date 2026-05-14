@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import { Providers } from './providers';
+import { ColorSwap } from '~components/color-swap';
 import '~styles/globals.css';
 
 const geistSans = Geist({
@@ -29,7 +30,10 @@ const RootLayout = ({
     suppressHydrationWarning
   >
     <body className='min-h-full flex flex-col'>
-      <Providers>{children}</Providers>
+      <Providers>
+        {children}
+        <ColorSwap />
+      </Providers>
     </body>
   </html>
 );

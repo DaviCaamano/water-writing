@@ -4,7 +4,7 @@ import * as React from 'react';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 
 import { cn } from '~utils/merge-css-classes';
-import { Button } from '~components/ui/button';
+import { Button } from '~components/primitives/button';
 import { XIcon } from 'lucide-react';
 
 function Dialog({
@@ -48,9 +48,12 @@ function DialogContent({
   className,
   children,
   showCloseButton = true,
+  bare = false,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean;
+  /** When true, strips the default card-style container (bg, padding, max-width, ring) but keeps the dialog mechanics (portal, overlay, positioning, animation). Caller controls all visual styling. */
+  bare?: boolean;
 }) {
   return (
     <DialogPortal>
@@ -58,21 +61,24 @@ function DialogContent({
       <DialogPrimitive.Content
         data-slot='dialog-content'
         className={cn(
-          'fixed top-1/2 left-1/2 z-50 grid w-full',
-          'max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2',
-          'gap-4 rounded-xl bg-card p-4 text-sm text-card-foreground',
-          'ring-1 ring-foreground/10 duration-100 outline-none sm:max-w-sm',
+          'fixed top-1/2 left-1/2 z-50 -translate-x-1/2 -translate-y-1/2 outline-none',
+          'duration-100',
           'data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95',
           'data-[state=closed]:animate-out',
           'data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95',
+          !bare && [
+            'grid w-full max-w-[calc(100%-2rem)] sm:max-w-sm',
+            'gap-4 rounded-xl bg-card p-4 text-sm text-card-foreground',
+            'ring-1 ring-foreground/10',
+          ],
           className,
         )}
         {...props}
       >
         {children}
-        {showCloseButton && (
+        {showCloseButton && !bare && (
           <DialogPrimitive.Close data-slot='dialog-close' asChild>
-            <Button variant='ghost' className='absolute top-2 right-2' size='icon-sm'>
+            <Button variant='muted' className='absolute top-2 right-2' size='icon-sm'>
               <XIcon />
               <span className='sr-only'>Close</span>
             </Button>
@@ -110,7 +116,7 @@ function DialogFooter({
       {children}
       {showCloseButton && (
         <DialogPrimitive.Close asChild>
-          <Button variant='outline'>Close</Button>
+          <Button variant='secondary'>Close</Button>
         </DialogPrimitive.Close>
       )}
     </div>

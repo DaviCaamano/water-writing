@@ -11,6 +11,7 @@ import { useToggleSettings } from '~components/home/user/user-settings/useToggle
 import { WaterDropTransition } from '~components/visual-effects/WaterDropTransition';
 import { WaterRipple } from '~components/visual-effects/WaterRipple';
 import { PageTransitionProvider } from '~context/PageTransitionContext';
+import { Button } from '~components/primitives/button';
 import { cn } from '~utils/merge-css-classes';
 
 export default function ShellLayout({ children }: { children: React.ReactNode }) {
@@ -47,18 +48,14 @@ function ShellContent({ children }: { children: React.ReactNode }) {
           )}
         >
           <WaterRipple className='pointer-events-auto'>
-            <button
-              type='button'
+            <Button
+              variant='default'
+              size='icon-lg'
               onClick={() => setDrawerOpen(true)}
               aria-label='Open sidebar'
-              className={cn(
-                'size-9 flex items-center justify-center',
-                'cursor-pointer transition-transform active:translate-y-px text-foreground',
-                'embossed-lg  rounded-full ',
-              )}
             >
               <Menu className='size-4' />
-            </button>
+            </Button>
           </WaterRipple>
           <UserMenu onOpenAuth={() => setAuthOpen(true)} onOpenSettings={handleOpenSettings} />
         </div>

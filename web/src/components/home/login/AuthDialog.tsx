@@ -1,10 +1,12 @@
 'use client';
 
 import { useReducer } from 'react';
-import { Dialog, DialogPortal, DialogOverlay } from '~components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle } from '~components/primitives/dialog';
+import { Button } from '~components/primitives/button';
+import { Input } from '~components/primitives/input';
+import { Switch } from '~components/primitives/switch';
 import { WaterRipple } from '~components/visual-effects/WaterRipple';
 import { useUserStore } from '~store/useUserStore';
-import * as DialogPrimitive from '@radix-ui/react-dialog';
 import * as VisuallyHidden from '@radix-ui/react-visually-hidden';
 
 interface AuthDialogProps {
@@ -15,23 +17,6 @@ interface AuthDialogProps {
 const neuCard: React.CSSProperties = {
   background: 'var(--neu-bg)',
   boxShadow: '12px 12px 28px var(--neu-shadow), -12px -12px 28px var(--neu-highlight)',
-};
-const neuInputStyle: React.CSSProperties = {
-  background: 'var(--neu-bg)',
-  boxShadow:
-    'inset 5px 5px 11px var(--neu-shadow), inset -5px -5px 11px var(--neu-highlight)',
-};
-const neuBtnStyle: React.CSSProperties = {
-  background: 'var(--neu-bg)',
-  boxShadow: '6px 6px 14px var(--neu-shadow), -6px -6px 14px var(--neu-highlight)',
-};
-const neuTrackStyle: React.CSSProperties = {
-  background: 'var(--neu-bg)',
-  boxShadow: 'inset 4px 4px 9px var(--neu-shadow), inset -4px -4px 9px var(--neu-highlight)',
-};
-const neuTabActiveStyle: React.CSSProperties = {
-  background: 'var(--neu-bg)',
-  boxShadow: '4px 4px 10px var(--neu-shadow), -4px -4px 10px var(--neu-highlight)',
 };
 
 const textColor = 'var(--neu-text)';
@@ -128,17 +113,10 @@ export const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogPortal>
-        <DialogOverlay />
-        <DialogPrimitive.Content
-          aria-describedby={undefined}
-          className='fixed left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2 outline-none data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95'
-        >
-          <VisuallyHidden.Root>
-            <DialogPrimitive.Title>
-              {mode === 'login' ? 'Log In' : 'Create Account'}
-            </DialogPrimitive.Title>
-          </VisuallyHidden.Root>
+      <DialogContent bare showCloseButton={false} aria-describedby={undefined}>
+        <VisuallyHidden.Root>
+          <DialogTitle>{mode === 'login' ? 'Log In' : 'Create Account'}</DialogTitle>
+        </VisuallyHidden.Root>
           <div className='w-85 rounded-[32px] px-9 py-11 flex flex-col gap-6' style={neuCard}>
             {/* Wordmark */}
             <div className='text-center -mb-2'>
@@ -151,26 +129,18 @@ export const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
             </div>
 
             {/* Tab toggle */}
-            <div className='flex rounded-full p-1 gap-1' style={neuTrackStyle}>
-              {(['login', 'signup'] as const).map((tab) => (
-                <button
-                  key={tab}
-                  type='button'
-                  className='flex-1 rounded-full py-2 text-[13px] font-medium transition-all duration-200 cursor-pointer'
-                  style={
-                    mode === tab
-                      ? { ...neuTabActiveStyle, color: textColor, fontWeight: 600 }
-                      : { background: 'transparent', color: mutedColor }
-                  }
-                  onClick={() => dispatch({ type: 'SET_MODE', mode: tab })}
-                >
-                  {tab === 'login' ? 'Log In' : 'Sign Up'}
-                </button>
-              ))}
-            </div>
+            <Switch
+              offLabel='Log In'
+              onLabel='Sign Up'
+              checked={mode === 'signup'}
+              onCheckedChange={(v) => dispatch({ type: 'SET_MODE', mode: v ? 'signup' : 'login' })}
+              className='w-full'
+            />
 
             {/* Error */}
-            {error && <div className='text-destructive-foreground text-sm text-center -my-2'>{error}</div>}
+            {error && (
+              <div className='text-destructive-foreground text-sm text-center -my-2'>{error}</div>
+            )}
 
             {/* Fields */}
             <form onSubmit={handleSubmit} className='flex flex-col gap-4.5'>
@@ -180,32 +150,28 @@ export const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
                     <label className='text-[15px] font-semibold pl-1' style={{ color: textColor }}>
                       First name
                     </label>
-                    <input
-                      type='text'
+                    <Input
+                      size='pill-lg'
                       value={firstName}
                       onChange={(e) =>
                         dispatch({ type: 'SET_FIELD', field: 'firstName', value: e.target.value })
                       }
                       placeholder='Jane'
                       required
-                      className='rounded-full px-5 py-3.5 text-[15px] border-none outline-none w-full'
-                      style={{ ...neuInputStyle, color: textColor, fontFamily: 'inherit' }}
                     />
                   </div>
                   <div className='flex flex-col gap-2'>
                     <label className='text-[15px] font-semibold pl-1' style={{ color: textColor }}>
                       Last name
                     </label>
-                    <input
-                      type='text'
+                    <Input
+                      size='pill-lg'
                       value={lastName}
                       onChange={(e) =>
                         dispatch({ type: 'SET_FIELD', field: 'lastName', value: e.target.value })
                       }
                       placeholder='Doe'
                       required
-                      className='rounded-full px-5 py-3.5 text-[15px] border-none outline-none w-full'
-                      style={{ ...neuInputStyle, color: textColor, fontFamily: 'inherit' }}
                     />
                   </div>
                 </div>
@@ -215,8 +181,9 @@ export const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
                 <label className='text-[15px] font-semibold pl-1' style={{ color: textColor }}>
                   Email
                 </label>
-                <input
+                <Input
                   type='email'
+                  size='pill-lg'
                   value={email}
                   onChange={(e) =>
                     dispatch({ type: 'SET_FIELD', field: 'email', value: e.target.value })
@@ -224,8 +191,6 @@ export const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
                   placeholder='you@example.com'
                   autoComplete='email'
                   required
-                  className='rounded-full px-[22px] py-3.5 text-[15px] border-none outline-none w-full'
-                  style={{ ...neuInputStyle, color: textColor, fontFamily: 'inherit' }}
                 />
               </div>
 
@@ -233,8 +198,9 @@ export const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
                 <label className='text-[15px] font-semibold pl-1' style={{ color: textColor }}>
                   Password
                 </label>
-                <input
+                <Input
                   type='password'
+                  size='pill-lg'
                   value={password}
                   onChange={(e) =>
                     dispatch({ type: 'SET_FIELD', field: 'password', value: e.target.value })
@@ -242,8 +208,6 @@ export const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
                   placeholder='••••••••••'
                   autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
                   required
-                  className='rounded-full px-[22px] py-3.5 text-[15px] border-none outline-none w-full'
-                  style={{ ...neuInputStyle, color: textColor, fontFamily: 'inherit' }}
                 />
               </div>
 
@@ -252,8 +216,9 @@ export const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
                   <label className='text-[15px] font-semibold pl-1' style={{ color: textColor }}>
                     Confirm password
                   </label>
-                  <input
+                  <Input
                     type='password'
+                    size='pill-lg'
                     value={confirm}
                     onChange={(e) =>
                       dispatch({ type: 'SET_FIELD', field: 'confirm', value: e.target.value })
@@ -261,8 +226,6 @@ export const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
                     placeholder='••••••••••'
                     autoComplete='new-password'
                     required
-                    className='rounded-full px-[22px] py-3.5 text-[15px] border-none outline-none w-full'
-                    style={{ ...neuInputStyle, color: textColor, fontFamily: 'inherit' }}
                   />
                 </div>
               )}
@@ -270,11 +233,12 @@ export const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
               {/* Submit button */}
               <div className='flex justify-center mt-1'>
                 <WaterRipple className='rounded-full'>
-                  <button
+                  <Button
                     type='submit'
+                    variant='default'
+                    size='pill-lg'
                     disabled={loading}
-                    className='rounded-full px-12 py-3.5 text-[16px] font-semibold tracking-[-0.01em] cursor-pointer border-none disabled:opacity-60'
-                    style={{ ...neuBtnStyle, color: textColor, fontFamily: 'inherit' }}
+                    className='px-12'
                   >
                     {loading
                       ? mode === 'login'
@@ -283,7 +247,7 @@ export const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
                       : mode === 'login'
                         ? 'Log In'
                         : 'Create Account'}
-                  </button>
+                  </Button>
                 </WaterRipple>
               </div>
             </form>
@@ -303,8 +267,7 @@ export const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
               </div>
             )}
           </div>
-        </DialogPrimitive.Content>
-      </DialogPortal>
+      </DialogContent>
     </Dialog>
   );
 };

@@ -31,7 +31,8 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '~components/ui/dropdown-menu';
+} from '~components/primitives/dropdown-menu';
+import { Button } from '~components/primitives/button';
 import { CannonResponse, StoryResponse } from '#types/shared/response';
 
 const DRAWER_WIDTH = 340;
@@ -85,18 +86,15 @@ export const EditorSidebar = ({
             style={{ width: DRAWER_WIDTH }}
           >
             <div className='flex items-center justify-end'>
-              <button
-                type='button'
+              <Button
+                variant='default'
+                size='icon'
                 onClick={() => onOpenChange(false)}
                 aria-label='Close sidebar'
-                className={cn(
-                  'size-8 flex items-center justify-center',
-                  'cursor-pointer transition-transform active:translate-y-px text-foreground',
-                  'embossed-lg rounded-full mr-0.5',
-                )}
+                className='mr-0.5'
               >
                 <X className='size-4' />
-              </button>
+              </Button>
             </div>
             <div className='flex-1 min-h-0 overflow-hidden'>
               <CannonsView documentId={documentId} onPickDocument={() => onOpenChange(false)} />
@@ -448,19 +446,9 @@ const SidebarPanel = ({
     <div className='flex flex-col gap-3 h-full min-h-0'>
       <div className='flex items-center gap-2 px-1'>
         {onBack && (
-          <button
-            type='button'
-            onClick={onBack}
-            aria-label='Back'
-            className={cn(
-              'size-8 flex items-center justify-center',
-              'cursor-pointer active:translate-y-px text-foreground',
-              'embossed rounded-lg transition-transformrounded-full shrink-0',
-              'hover:bg-accent/25',
-            )}
-          >
+          <Button variant='default' size='icon' onClick={onBack} aria-label='Back'>
             <ChevronLeft className='size-4' />
-          </button>
+          </Button>
         )}
         <div className='flex-1 min-w-0'>
           <h3 className='text-[14px] font-bold text-foreground truncate'>{header}</h3>
@@ -470,19 +458,15 @@ const SidebarPanel = ({
             </span>
           )}
         </div>
-        <button
-          type='button'
+        <Button
+          variant='default'
+          size='icon'
           onClick={onAdd}
           aria-label={addLabel}
           title={addLabel}
-          className={cn(
-            'size-8 flex items-center justify-center',
-            'cursor-pointer active:translate-y-px text-foreground',
-            'rounded-full shrink-0 transition-transform embossed-lg hover:bg-accent/25',
-          )}
         >
           <Plus className='size-4' />
-        </button>
+        </Button>
       </div>
       <div className='flex-1 min-h-0'>{children}</div>
     </div>

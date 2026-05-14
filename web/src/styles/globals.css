@@ -1,6 +1,5 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
-@import 'shadcn/tailwind.css';
 @import './tiptap.css';
 
 @custom-variant dark (&:is(.dark *));
@@ -37,7 +36,7 @@
   /* destructive-foreground: readable content on destructive surfaces */
   --color-destructive-foreground: var(--destructive-foreground);
   /* success: positive actions, success messages */
-  --color-success: var(--success-foreground);
+  --color-success: var(--success);
   /* success-foreground: readable content on success surfaces */
   --color-success-foreground: var(--success-foreground);
   /* border: default border colo r */
@@ -48,6 +47,8 @@
   --color-ring: var(--ring);
   /* shadow: box shadows */
   --color-shadow: var(--shadow);
+  /* surface: anchor for neumorphic shadow utilities; does NOT shift with theme/preview swaps */
+  --color-surface: var(--surface);
 
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
@@ -66,6 +67,8 @@
 :root {
   /* background: the main page/app background */
   --background: oklch(0.874 0.034 263.561);
+  /* surface: anchor color for neumorphic shadows; matches the original page bg */
+  --surface: oklch(0.874 0.034 263.561);
   /* foreground: the default text/icon color on background */
   --foreground: oklch(0.227 0.018 227.798);
   /* card: surface for cards, panels, containers */
@@ -89,13 +92,13 @@
   /* muted-foreground: subdued text color for secondary information */
   --muted-foreground: oklch(0.471 0.018 212.073);
   /* destructive: dangerous actions, destructive buttons, errors */
-  --destructive: oklch(0.36 0.079 21.805);
+  --destructive: oklch(0.352 0.125 26.502);
   /* destructive-foreground: readable content on destructive surfaces */
   --destructive-foreground: oklch(0.79 0.108 19.756);
   /* success: positive actions, success messages */
-  --success: oklch(0.55 0.14 150);
+  --success: oklch(0.798 0.063 158.442);
   /* success-foreground: readable content on success surfaces */
-  --success-foreground: oklch(0.905 0.093 156.784);
+  --success-foreground: oklch(0.18 0.06 150);
   /* border: default border colo r */
   --border: oklch(0.362 0.042 246.575);
   /* input: input border/background-related tone */
@@ -116,6 +119,8 @@
 .dark {
   /* background: the main page/app background */
   --background: oklch(0.145 0 0);
+  /* surface: anchor color for neumorphic shadows; matches the original page bg */
+  --surface: oklch(0.145 0 0);
   /* foreground: the default text/icon color on background */
   --foreground: oklch(0.985 0 0);
   /* card: surface for cards, panels, containers */
@@ -168,6 +173,8 @@
 .sepia {
   /* background: the main page/app background */
   --background: oklch(0.96 0.04 85);
+  /* surface: anchor color for neumorphic shadows; matches the original page bg */
+  --surface: oklch(0.96 0.04 85);
   /* foreground: the default text/icon color on background */
   --foreground: oklch(0.27 0.05 50);
   /* card: surface for cards, panels, containers */
@@ -233,13 +240,13 @@
   }
 
   .embossed-sm {
-    @apply shadow-[inset_4px_4px_9px_var(--muted),inset_-4px_-4px_9px_var(--background)]!;
+    @apply shadow-[inset_4px_4px_9px_var(--muted),inset_-4px_-4px_9px_var(--surface)]!;
   }
   .embossed {
-    @apply shadow-[inset_5px_5px_11px_var(--shadow),inset_-5px_-5px_11px_var(--background)]!;
+    @apply shadow-[inset_5px_5px_11px_var(--shadow),inset_-5px_-5px_11px_var(--surface)]!;
   }
   .embossed-lg {
-    @apply shadow-[inset_12px_12px_28px_var(--shadow),inset_-12px_-12px_28px_var(--background)]!;
+    @apply shadow-[inset_12px_12px_28px_var(--shadow),inset_-12px_-12px_28px_var(--surface)]!;
   }
 
   .debossed-sm {
@@ -253,13 +260,13 @@
   }
 
   .bossed-sm {
-    @apply shadow-[inset_4px_4px_9px_var(--shadow),inset_-4px_-4px_9px_var(--background),4px_4px_9px_var(--shadow),-4px_-4px_9px_var(--shadow-highlight)]!;
+    @apply shadow-[inset_4px_4px_9px_var(--shadow),inset_-4px_-4px_9px_var(--surface),4px_4px_9px_var(--shadow),-4px_-4px_9px_var(--shadow-highlight)]!;
   }
   .bossed {
-    @apply shadow-[inset_5px_5px_11px_var(--shadow),inset_-5px_-5px_11px_var(--background),5px_5px_12px_var(--shadow),-5px_-5px_12px_var(--shadow-highlight)]!;
+    @apply shadow-[inset_5px_5px_11px_var(--shadow),inset_-5px_-5px_11px_var(--surface),5px_5px_12px_var(--shadow),-5px_-5px_12px_var(--shadow-highlight)]!;
   }
   .bossed-lg {
-    @apply shadow-[inset_12px_12px_28px_var(--shadow),inset_-12px_-12px_28px_var(--background),12px_12px_28px_var(--shadow),-12px_-12px_28px_var(--shadow-highlight)]!;
+    @apply shadow-[inset_12px_12px_28px_var(--shadow),inset_-12px_-12px_28px_var(--surface),12px_12px_28px_var(--shadow),-12px_-12px_28px_var(--shadow-highlight)]!;
   }
   .dip-on-click {
     @apply transition-all active:translate-y-0.5;

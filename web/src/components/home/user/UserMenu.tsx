@@ -5,7 +5,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
-} from '~components/ui/dropdown-menu';
+} from '~components/primitives/dropdown-menu';
 import { useUserStore } from '~store/useUserStore';
 import { Plan } from '#types/shared/enum/plan';
 import { SettingsSection } from '~types/components/settings-modal';

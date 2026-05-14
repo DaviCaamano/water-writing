@@ -1,6 +1,7 @@
 import { SettingsColorMap } from '~types/components/settings-modal';
 import { cn } from '~utils/merge-css-classes';
-import { Tooltip, TooltipContent, TooltipTrigger } from '~components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger } from '~components/primitives/tooltip';
+import { Switch } from '~components/primitives/switch';
 import {
   NeuDivider,
   NeuPillButton,
@@ -61,28 +62,12 @@ export const SubscriptionSection = ({ colorMap }: { colorMap: SettingsColorMap }
       <div className='flex items-center justify-between mb-5'>
         <SectionHeading>Plans</SectionHeading>
 
-        {/* Billing cycle toggle - pill track */}
-        <div className={'flex p-1 rounded-full gap-1 embossed-sm'}>
-          {[
-            { v: false, label: 'Monthly' },
-            { v: true, label: 'Yearly' },
-          ].map(({ v, label }) => (
-            <button
-              key={label}
-              type='button'
-              onClick={() => setYearly(v)}
-              className={cn(
-                'px-4 py-1.5 rounded-full text-[12px] cursor-pointer transition-all',
-                yearly === v && 'embossed-sm bg-accent',
-                yearly === v
-                  ? 'text-foreground font-semibold'
-                  : 'bg-transparent text-muted font-medium',
-              )}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
+        <Switch
+          offLabel='Monthly'
+          onLabel='Yearly'
+          checked={yearly}
+          onCheckedChange={setYearly}
+        />
       </div>
 
       <div className='grid grid-cols-2 gap-4'>

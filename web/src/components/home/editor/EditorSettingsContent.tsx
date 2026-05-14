@@ -1,13 +1,13 @@
-import { PopoverContent } from '~components/ui/popover';
-import { Label } from '~components/ui/label';
-import { Button } from '~components/ui/button';
+import { PopoverContent } from '~components/primitives/popover';
+import { Label } from '~components/primitives/label';
+import { Button } from '~components/primitives/button';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '~components/ui/select';
+} from '~components/primitives/select';
 import { useEditorStore } from '~store/useEditorStore';
 import { useTheme } from '~providers/theme';
 import type { EditorTheme } from '~types/story';
@@ -61,7 +61,7 @@ export const EditorSettingsContent = ({ open }: { open: boolean }) => {
             {FONT_SIZES.map((size) => (
               <Button
                 key={size}
-                variant={fontSize === size ? 'default' : 'outline'}
+                variant={fontSize === size ? 'default' : 'muted'}
                 size='sm'
                 className='w-10 h-8 text-xs shadow-shadow shadow'
                 onClick={() => setFontSize(size)}
@@ -75,16 +75,10 @@ export const EditorSettingsContent = ({ open }: { open: boolean }) => {
         <div className='space-y-2'>
           <Label className='text-xs font-medium'>Font</Label>
           <Select value={fontFamily} onValueChange={(v) => v && setFontFamily(v)}>
-            <SelectTrigger
-              className={cn(
-                'h-8 text-xs',
-                'bg-primary text-primary-foreground hover:bg-primary/90',
-                'shadow-shadow shadow',
-              )}
-            >
+            <SelectTrigger variant='primary' className='h-8 text-xs'>
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className='bg-primary text-primary-foreground'>
+            <SelectContent variant='primary'>
               {FONT_OPTIONS.map((font) => (
                 <SelectItem key={font.value} value={font.value}>
                   <span style={{ fontFamily: font.value }}>{font.label}</span>
@@ -100,7 +94,7 @@ export const EditorSettingsContent = ({ open }: { open: boolean }) => {
             {THEME_OPTIONS.map((themeOption) => (
               <Button
                 key={themeOption.value}
-                variant={theme === themeOption.value ? 'default' : 'outline'}
+                variant={theme === themeOption.value ? 'default' : 'muted'}
                 size='sm'
                 className='flex-1 h-8 text-xs shadow-shadow shadow'
                 onClick={() => setTheme(themeOption.value)}
