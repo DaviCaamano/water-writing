@@ -10,6 +10,7 @@ import { assertFound } from '#utils/database/assert-found';
 import * as documentRepo from '#repositories/story/document.repository';
 import * as cannonRepo from '#repositories/story/cannon.repository';
 import * as storyRepo from '#repositories/story/story.repository';
+import * as userRepo from '#repositories/user/user.repository';
 import { toJsonCamelCase } from '#utils/database/to-json-camel-case';
 
 const toDocumentResponse = async (row: DocumentRowWithBody): Promise<DocumentResponse> =>
@@ -28,7 +29,9 @@ export const fetchUserDocument = async (
   documentId: string,
 ): Promise<DocumentResponse> => {
   const result = await documentRepo.findByIdWithBodyAndUser(pool, documentId, userId);
-  return toDocumentResponse(assertFound(result, DocumentNotFoundError));
+  const document = assertFound(result, DocumentNotFoundError);
+  void userRepo.setLastViewedDocument(pool, userId, document.document_id);
+  return toDocumentResponse(document);
 };
 
 export const deleteDocument = async (userId: string, documentId: string): Promise<void> => {

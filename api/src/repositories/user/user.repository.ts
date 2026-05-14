@@ -36,3 +36,6 @@ export const setStripeCustomerId = (q: Queryable, userId: string, stripeCustomer
     stripeCustomerId,
     userId,
   ]);
+
+export const setLastViewedDocument = (q: Queryable, userId: string, documentId: string | null) =>
+  q.query('UPDATE users SET last_viewed_document_id = $1 WHERE user_id = $2', [documentId, userId]);

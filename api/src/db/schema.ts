@@ -34,6 +34,7 @@ export const users = pgTable('users', {
   email: varchar('email', { length: 255 }).notNull().unique(),
   passwordHash: text('password_hash').notNull(),
   stripeCustomerId: varchar('stripe_customer_id', { length: 255 }).unique(),
+  lastViewedDocumentId: uuid('last_viewed_document_id'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 });

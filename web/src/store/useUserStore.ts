@@ -86,6 +86,8 @@ export const useUserStore = () => {
       firstName: session?.firstName ?? '',
       lastName: session?.lastName ?? '',
       plan: session?.plan ?? null,
+      legacy: session?.legacy ?? [],
+      lastViewedDocumentId: session?.lastViewedDocumentId ?? null,
       ...actions,
     }),
     [session, actions],

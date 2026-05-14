@@ -48,6 +48,7 @@ export interface LoginResponse {
   legacy: CannonResponse[];
   plan: Plan | null;
   userId: string;
+  lastViewedDocumentId: string | null;
   /** Present server-side only; stripped before sending to the client via httpOnly cookie */
   token?: string;
 }

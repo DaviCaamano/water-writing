@@ -47,6 +47,7 @@ export const  login = async (data: LoginBody): Promise<LoginResponse> => {
     firstName: user.first_name,
     lastName: user.last_name,
     legacy,
+    lastViewedDocumentId: user.last_viewed_document_id,
     token,
   };
 };
@@ -79,6 +80,7 @@ export const getSession = async (userId: string, token: string): Promise<LoginRe
     firstName: user.first_name,
     lastName: user.last_name,
     legacy,
+    lastViewedDocumentId: user.last_viewed_document_id,
     token,
   };
 };

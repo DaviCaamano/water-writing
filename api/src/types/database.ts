@@ -14,6 +14,7 @@ export interface UserRow {
   email: string;
   password_hash: string;
   stripe_customer_id: string | null;
+  last_viewed_document_id: string | null;
   created_at: Date;
   updated_at: Date;
 }

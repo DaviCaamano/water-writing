@@ -33,6 +33,7 @@ export const MOCK_USER: UserRow = {
   last_name: MOCK_LOGIN_LAST_NAME,
   password_hash: MOCK_HASHED_PASSWORD,
   stripe_customer_id: mockStripeCustomerId,
+  last_viewed_document_id: null,
   created_at: MOCK_DATE,
   updated_at: MOCK_DATE,
 };
@@ -57,6 +58,7 @@ export const MOCK_LOGIN_RESPONSE: LoginResponse = {
   firstName: MOCK_LOGIN_FIRST_NAME,
   lastName: MOCK_LOGIN_LAST_NAME,
   legacy: mockLegacyResponse(),
+  lastViewedDocumentId: null,
   token: MOCK_LOGIN_TOKEN,
 };
 
