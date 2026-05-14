@@ -95,12 +95,13 @@ export const TextEditor = ({
     stickyEditor.current = { title, body };
   }, [title, body, editor]);
 
-  const isAtBottom = useEditorFadeEffect(editor);
+  const isAtBottom = useEditorFadeEffect(editor, title, body);
 
   return (
     <div
       className={cn(
-        '-rich-editor- relative flex-1 flex flex-col min-h-0 bg-background',
+        '-text-editor- relative flex-1 flex flex-col',
+        'min-h-0 rounded-lg overflow-hidden',
         'tiptap-host',
       )}
       style={{ fontSize, fontFamily, lineHeight: 'var(--lh)' }}

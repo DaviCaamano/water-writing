@@ -6,7 +6,6 @@ import {
   NeuIconBtn,
   NeuInput,
   SectionHeading,
-  settingsInsetStyle,
 } from '~components/home/user/user-settings/index';
 import { Check, Pencil, X } from 'lucide-react';
 
@@ -67,9 +66,7 @@ export const GeneralSection = () => {
             </div>
           ) : (
             <div className='flex items-center gap-3'>
-              <div
-                className={cn('flex-1 rounded-full px-5 py-2.5 text-[14px]', settingsInsetStyle)}
-              >
+              <div className={'flex-1 rounded-full px-5 py-2.5 text-[14px] embossed'}>
                 {firstName} {lastName}
               </div>
               <NeuIconBtn onClick={startNameEdit} aria-label='Edit name'>
@@ -81,9 +78,7 @@ export const GeneralSection = () => {
 
         <div>
           <FieldLabel>Email</FieldLabel>
-          <div
-            className={cn('rounded-full px-5 py-2.5 text-[14px] text-muted', settingsInsetStyle)}
-          >
+          <div className={'rounded-full px-5 py-2.5 text-[14px] text-muted embossed'}>
             {email || '-'}
           </div>
         </div>

@@ -133,16 +133,19 @@
   height: 0;
 }
 
-/* Scroll Bar */
-.tiptap-body::-webkit-scrollbar {
+/* Scroll Bar — shared between editor body and sidebar */
+.tiptap-body::-webkit-scrollbar,
+.editor-scroll::-webkit-scrollbar {
   width: 12px;
 }
 
-.tiptap-body::-webkit-scrollbar-track {
+.tiptap-body::-webkit-scrollbar-track,
+.editor-scroll::-webkit-scrollbar-track {
   background: transparent;
 }
 
-.tiptap-body::-webkit-scrollbar-thumb {
+.tiptap-body::-webkit-scrollbar-thumb,
+.editor-scroll::-webkit-scrollbar-thumb {
   background-color: color-mix(in srgb, var(--muted) 40%, transparent);
   border-radius: 999px;
   border: 3px solid transparent;
@@ -150,12 +153,14 @@
   cursor: pointer;
 }
 
-.tiptap-body::-webkit-scrollbar-thumb:hover {
+.tiptap-body::-webkit-scrollbar-thumb:hover,
+.editor-scroll::-webkit-scrollbar-thumb:hover {
   background: var(--muted);
   background-clip: content-box;
 }
 
-.tiptap-body::-webkit-scrollbar-button {
+.tiptap-body::-webkit-scrollbar-button,
+.editor-scroll::-webkit-scrollbar-button {
   display: none;
   height: 0;
   width: 0;

@@ -5,9 +5,6 @@ import {
   NeuDivider,
   NeuPillButton,
   SectionHeading,
-  settingsPillActiveStyle,
-  settingsRaisedStyle,
-  settingsTrackStyle,
 } from '~components/home/user/user-settings/index';
 import { useUserStore } from '~store/useUserStore';
 import { useState } from 'react';
@@ -65,7 +62,7 @@ export const SubscriptionSection = ({ colorMap }: { colorMap: SettingsColorMap }
         <SectionHeading>Plans</SectionHeading>
 
         {/* Billing cycle toggle - pill track */}
-        <div className={cn('flex p-1 rounded-full gap-1', settingsTrackStyle)}>
+        <div className={'flex p-1 rounded-full gap-1 embossed-sm'}>
           {[
             { v: false, label: 'Monthly' },
             { v: true, label: 'Yearly' },
@@ -76,7 +73,7 @@ export const SubscriptionSection = ({ colorMap }: { colorMap: SettingsColorMap }
               onClick={() => setYearly(v)}
               className={cn(
                 'px-4 py-1.5 rounded-full text-[12px] cursor-pointer transition-all',
-                yearly === v && settingsPillActiveStyle,
+                yearly === v && 'embossed-sm bg-accent',
                 yearly === v
                   ? 'text-foreground font-semibold'
                   : 'bg-transparent text-muted font-medium',
@@ -174,14 +171,13 @@ const PlanCard = ({
   const subtext = yearly ? yearlySubtext : monthlySubtext;
 
   return (
-    <div className={cn('relative rounded-3xl p-5 space-y-4', settingsRaisedStyle)}>
+    <div className={'relative rounded-3xl p-5 space-y-4 embossed-lg'}>
       {isCurrent && (
         <div
           className={cn(
             'absolute -top-3 left-4 px-3 py-1',
-            'rounded-full tracking-wide ',
+            'rounded-full tracking-wide embossed-lg',
             'text-[10px] font-semibold uppercase text-accent',
-            settingsRaisedStyle,
           )}
         >
           Current Plan

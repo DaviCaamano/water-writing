@@ -143,13 +143,12 @@ export const EditorToolbar = ({ editor }: EditorToolbarProps) => {
         '-editor-toolbar-',
         'flex items-center gap-0.5 flex-wrap',
         'px-12 pt-1.5 pb-4 -mb-2.5',
-        'sticky top-0 z-10',
-        '[background:linear-gradient(to_bottom,var(--background)_calc(100%-10px),transparent_100%)]',
+        'sticky top-0 z-10 rounded-lg',
       )}
     >
       <Tooltip>
         <TooltipTrigger asChild>
-          <div className='relative flex items-center gap-0.5 flex-wrap flex-1'>
+          <div className='relative flex items-center gap-0.5 flex-wrap flex-1 rounded-lg'>
             <ToolButton
               icon={<Undo2 size={13} strokeWidth={2.2} />}
               label='Undo'

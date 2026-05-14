@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Editor } from '@tiptap/core';
 
-export const useEditorFadeEffect = (editor: Editor | null) => {
+export const useEditorFadeEffect = (editor: Editor | null, title: string, body: string) => {
   // Hide fade out effect on text when document is scrolled to the bottom.
   const [isAtBottom, setIsAtBottom] = useState(false);
 
@@ -15,7 +15,7 @@ export const useEditorFadeEffect = (editor: Editor | null) => {
     check();
     el.addEventListener('scroll', check);
     return () => el.removeEventListener('scroll', check);
-  }, [editor]);
+  }, [editor, title, body]);
 
   return isAtBottom;
 };

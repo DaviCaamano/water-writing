@@ -10,7 +10,6 @@ import { useColors } from '~hooks/useColors';
 import { GeneralSection } from '~components/home/user/user-settings/GeneralSection';
 import { BillingSection } from '~components/home/user/user-settings/BillingSection';
 import { SubscriptionSection } from '~components/home/user/user-settings/SubscriptionSection';
-import { settingsRaisedStyle, settingsTrackStyle } from '~components/home/user/user-settings/index';
 
 interface SettingsModalProps {
   open: boolean;
@@ -86,8 +85,7 @@ const SettingsModalContent = ({
               'absolute top-5 right-5 size-9 rounded-full',
               'flex items-center justify-center',
               'cursor-pointer transition-transform active:translate-y-px',
-              'text-muted',
-              settingsRaisedStyle,
+              'text-muted embossed-lg',
             )}
             aria-label='Close'
           >
@@ -102,7 +100,7 @@ const SettingsModalContent = ({
               </h2>
             </DialogPrimitive.Title>
 
-            <div className={cn('flex flex-col gap-2 p-1.5 rounded-4xl', settingsTrackStyle)}>
+            <div className={'flex flex-col gap-2 p-1.5 rounded-4xl embossed-sm'}>
               {sections.map((s) => {
                 const isActive = activeSection === s.key;
                 return (

@@ -97,7 +97,7 @@
   /* success-foreground: readable content on success surfaces */
   --success-foreground: oklch(0.905 0.093 156.784);
   /* border: default border colo r */
-  --border: #ffffff;
+  --border: oklch(0.362 0.042 246.575);
   /* input: input border/background-related tone */
   --input: oklch(0.754 0.033 213.962);
   /* ring: focus ring color */
@@ -161,6 +161,8 @@
   --neu-highlight: rgba(255, 255, 255, 0.08);
   --neu-text: oklch(0.92 0.01 240);
   --neu-text-muted: oklch(0.65 0.01 240);
+
+  --boobs: rgb(102 144 179);
 }
 
 .sepia {
@@ -218,23 +220,47 @@
     @apply border-border outline-ring/50;
   }
   body {
-    background-image: linear-gradient(to bottom right, var(--background), var(--background), var(--background));
+    background-image: linear-gradient(
+      to bottom right,
+      var(--background),
+      var(--background),
+      var(--background)
+    );
     color: var(--foreground);
   }
   html {
     @apply font-sans;
   }
 
-  .embossed {
-    @apply shadow-[inset_5px_5px_11px_var(--shadow),inset_-5px_-5px_11px_var(--shadow)]!;
+  .embossed-sm {
+    @apply shadow-[inset_4px_4px_9px_var(--muted),inset_-4px_-4px_9px_var(--background)]!;
   }
-  .debossed {
-    box-shadow:
-      12px 12px 28px var(--shadow),
-      -12px -12px 28px var(--shadow-highlight);
-    @apply border-2 border-transparent;
+  .embossed {
+    @apply shadow-[inset_5px_5px_11px_var(--shadow),inset_-5px_-5px_11px_var(--background)]!;
+  }
+  .embossed-lg {
+    @apply shadow-[inset_12px_12px_28px_var(--shadow),inset_-12px_-12px_28px_var(--background)]!;
   }
 
+  .debossed-sm {
+    @apply shadow-[4px_4px_9px_var(--shadow),-4px_-4px_9px_var(--shadow-highlight)];
+  }
+  .debossed {
+    @apply shadow-[5px_5px_12px_var(--shadow),-5px_-5px_12px_var(--shadow-highlight)];
+  }
+  .debossed-lg {
+    @apply shadow-[12px_12px_28px_var(--shadow),-12px_-12px_28px_var(--shadow-highlight)];
+  }
+
+  .bossed-sm {
+    @apply shadow-[inset_4px_4px_9px_var(--shadow),inset_-4px_-4px_9px_var(--background),4px_4px_9px_var(--shadow),-4px_-4px_9px_var(--shadow-highlight)]!;
+  }
+  .bossed {
+    @apply shadow-[inset_5px_5px_11px_var(--shadow),inset_-5px_-5px_11px_var(--background),5px_5px_12px_var(--shadow),-5px_-5px_12px_var(--shadow-highlight)]!;
+  }
+  .bossed-lg {
+    @apply shadow-[inset_12px_12px_28px_var(--shadow),inset_-12px_-12px_28px_var(--background),12px_12px_28px_var(--shadow),-12px_-12px_28px_var(--shadow-highlight)]!;
+  }
   .dip-on-click {
     @apply transition-all active:translate-y-0.5;
   }

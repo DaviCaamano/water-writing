@@ -24,7 +24,7 @@ export const WaterRipple = ({
   className,
   contentClassName,
   disabled = false,
-  effectColor = '74, 144, 226',
+  effectColor = '102, 144, 179',
 }: WaterRippleProps) => {
   const reactId = useId();
   const instanceId = useMemo(() => reactId.replace(/:/g, ''), [reactId]);
@@ -64,11 +64,7 @@ export const WaterRipple = ({
     <>
       <div
         ref={wrapperRef}
-        className={cn(
-          'relative isolate inline-flex',
-          'overflow-hidden rounded-[inherit]',
-          className,
-        )}
+        className={cn('relative isolate inline-flex', 'overflow-hidden rounded-full', className)}
         onPointerEnter={handlePointerEnter}
         onPointerLeave={handlePointerLeave}
       >
@@ -76,12 +72,12 @@ export const WaterRipple = ({
           aria-hidden='true'
           className={cn(
             'absolute w-full',
-            'pointer-events-none inset-0 rounded-[inherit]',
+            'pointer-events-none inset-0 rounded-full',
             'opacity-0 transition-all duration-300 ease-out',
             displayIsActive && 'opacity-100',
           )}
           style={{
-            background: `radial-gradient(circle, rgba(${effectColor}, 0.12) 0%, rgba(${effectColor}, 0) 70%)`,
+            background: `radial-gradient(circle, rgba(${effectColor}, 1) 100%, rgba(${effectColor}, 1) 100%)`,
             transform: displayIsActive ? 'scale(1)' : 'scale(0)',
           }}
         />
@@ -94,7 +90,7 @@ export const WaterRipple = ({
               className='pointer-events-none absolute rounded-full'
               style={{
                 animation: `water-ripple-${instanceId} 700ms ease-out forwards`,
-                background: `rgba(${effectColor}, 0.2)`,
+                background: `rgba(${effectColor}, 1)`,
                 height: ripple.size,
                 left: ripple.left,
                 top: ripple.top,
@@ -103,11 +99,7 @@ export const WaterRipple = ({
             />
           ))}
 
-        <div
-          className={cn('w-full relative z-3', contentClassName)}
-        >
-          {children}
-        </div>
+        <div className={cn('w-full relative z-3', contentClassName)}>{children}</div>
       </div>
 
       <style jsx>{`

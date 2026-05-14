@@ -1,7 +1,19 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  Plus,
+  EllipsisVertical,
+  PencilLine,
+  Trash2,
+  ChevronLeft,
+  X,
+  FileText,
+  BookOpen,
+  Library,
+} from 'lucide-react';
 import { useUserStore } from '~store/useUserStore';
 import { useDocumentQuery } from '~lib/queries/story';
 import {
@@ -15,156 +27,123 @@ import {
 import { promptForTitle, generateUntitledName } from '~utils/catalog-helpers';
 import { cn } from '~utils/merge-css-classes';
 import {
-  settingsRaisedStyle,
-  settingsTrackStyle,
-  settingsInsetStyle,
-} from '~components/home/user/user-settings/index';
-import { Plus, EllipsisVertical, PencilLine, Trash2 } from 'lucide-react';
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '~components/ui/dropdown-menu';
-import { CannonResponse, StoryResponse, DocumentResponse } from '#types/shared/response';
-import { RiverPath } from '~components/home/sidebar/RiverPath';
+import { CannonResponse, StoryResponse } from '#types/shared/response';
 
-const SIDEBAR_WIDTH = 320;
+const DRAWER_WIDTH = 340;
 
-type SidebarMode = 'documents' | 'cannons';
-
-export const EditorSidebar = () => {
-  const [mode, setMode] = useState<SidebarMode>('documents');
+export const EditorSidebar = ({
+  open,
+  onOpenChange,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) => {
   const params = useParams<{ documentId?: string }>();
   const documentId = params.documentId ?? null;
 
-  return (
-    <aside
-      className={cn(
-        '-editor-sidebar-',
-        'h-full flex flex-col gap-4 p-4',
-        'bg-background',
-      )}
-      style={{ width: SIDEBAR_WIDTH }}
-    >
-      <ModeToggle mode={mode} onChange={setMode} />
-      <div className='flex-1 overflow-y-auto overflow-x-hidden relative'>
-        {mode === 'documents' ? (
-          <DocumentsView documentId={documentId} />
-        ) : (
-          <CannonsView documentId={documentId} />
-        )}
-      </div>
-    </aside>
-  );
-};
+  // Close on Escape
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onOpenChange(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [open, onOpenChange]);
 
-const ModeToggle = ({
-  mode,
-  onChange,
-}: {
-  mode: SidebarMode;
-  onChange: (mode: SidebarMode) => void;
-}) => {
   return (
-    <div className={cn('flex p-1.5 rounded-full', settingsTrackStyle)}>
-      {(['documents', 'cannons'] as SidebarMode[]).map((m) => {
-        const isActive = mode === m;
-        return (
-          <button
-            key={m}
-            type='button'
-            onClick={() => onChange(m)}
+    <AnimatePresence>
+      {open && (
+        <>
+          <motion.div
+            key='backdrop'
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={() => onOpenChange(false)}
+            className='fixed inset-0 bg-foreground/10 backdrop-blur-[2px] z-40'
+          />
+          <motion.aside
+            key='drawer'
+            initial={{ x: -DRAWER_WIDTH - 20 }}
+            animate={{ x: 0 }}
+            exit={{ x: -DRAWER_WIDTH - 20 }}
+            transition={{ type: 'spring', stiffness: 380, damping: 36 }}
             className={cn(
-              'flex-1 rounded-full px-3 py-1.5 text-[12px] cursor-pointer',
-              'transition-all duration-200 capitalize',
-              isActive
-                ? cn('text-foreground font-bold', settingsRaisedStyle)
-                : 'bg-transparent text-muted-foreground font-medium',
+              '-editor-sidebar-',
+              'fixed left-0 top-0 bottom-0 z-50',
+              'h-full flex flex-col gap-3 p-4',
+              'bg-background border-r border-border',
+              'shadow-2xl shadow-shadow/20',
             )}
+            style={{ width: DRAWER_WIDTH }}
           >
-            {m}
-          </button>
-        );
-      })}
-    </div>
+            <div className='flex items-center justify-end'>
+              <button
+                type='button'
+                onClick={() => onOpenChange(false)}
+                aria-label='Close sidebar'
+                className={cn(
+                  'size-8 flex items-center justify-center',
+                  'cursor-pointer transition-transform active:translate-y-px text-foreground',
+                  'embossed-lg rounded-full mr-0.5',
+                )}
+              >
+                <X className='size-4' />
+              </button>
+            </div>
+            <div className='flex-1 min-h-0 overflow-hidden'>
+              <CannonsView documentId={documentId} onPickDocument={() => onOpenChange(false)} />
+            </div>
+          </motion.aside>
+        </>
+      )}
+    </AnimatePresence>
   );
 };
 
-const DocumentsView = ({ documentId }: { documentId: string | null }) => {
-  const { data: currentDocument } = useDocumentQuery(documentId);
+type DrillLevel = 'cannons' | 'stories' | 'documents';
+
+interface DrillState {
+  level: DrillLevel;
+  cannon?: CannonResponse;
+  story?: StoryResponse;
+}
+
+const CannonsView = ({
+  documentId,
+  onPickDocument,
+}: {
+  documentId: string | null;
+  onPickDocument: () => void;
+}) => {
   const { legacy } = useUserStore();
-  const upsertDocument = useUpsertDocumentMutation();
-  const deleteDocument = useDeleteDocumentMutation();
+  const { data: currentDocument } = useDocumentQuery(documentId);
   const router = useRouter();
 
-  const story = useMemo(() => {
-    if (!currentDocument) return null;
+  const computeInitial = (): DrillState => {
+    if (!currentDocument) return { level: 'cannons' };
     for (const cannon of legacy) {
-      const found = cannon.stories.find((s) => s.storyId === currentDocument.storyId);
-      if (found) return found;
+      const story = cannon.stories.find((s) => s.storyId === currentDocument.storyId);
+      if (story) return { level: 'documents', cannon, story };
     }
-    return null;
-  }, [legacy, currentDocument]);
-
-  const handleAdd = () => {
-    if (!story) return;
-    upsertDocument.mutate({
-      storyId: story.storyId,
-      title: generateUntitledName(
-        'Untitled',
-        story.documents.map((d) => d.title),
-      ),
-      body: '',
-    });
+    return { level: 'cannons' };
   };
 
-  const handleRename = (doc: DocumentResponse) => {
-    const next = promptForTitle('document', doc.title);
-    if (!next) return;
-    upsertDocument.mutate({ documentId: doc.documentId, title: next });
-  };
+  const initial = computeInitial();
+  const [drill, setDrill] = useState<DrillState>(initial);
+  const [lastDocumentId, setLastDocumentId] = useState(documentId);
 
-  const handleDelete = (doc: DocumentResponse) => {
-    if (!window.confirm(`Delete "${doc.title}"?`)) return;
-    deleteDocument.mutate(doc.documentId);
-  };
-
-  if (!story) {
-    return (
-      <SidebarEmptyState message='Select a document to see related documents.' />
-    );
+  if (lastDocumentId !== documentId) {
+    setLastDocumentId(documentId);
+    setDrill(initial);
   }
-
-  return (
-    <SidebarList
-      header={story.title}
-      headerSubtitle='documents in this story'
-      onAdd={handleAdd}
-      addLabel='New document'
-    >
-      <RiverColumn
-        nodes={story.documents.map((doc) => ({
-          id: doc.documentId,
-          label: doc.title,
-          isActive: doc.documentId === documentId,
-          onClick: () => router.push(`/d/${doc.documentId}`),
-          menu: [
-            { label: 'Rename', icon: PencilLine, onClick: () => handleRename(doc) },
-            { label: 'Delete', icon: Trash2, onClick: () => handleDelete(doc), variant: 'destructive' },
-          ],
-        }))}
-      />
-    </SidebarList>
-  );
-};
-
-const CannonsView = ({ documentId }: { documentId: string | null }) => {
-  const { legacy } = useUserStore();
-  const { data: currentDocument } = useDocumentQuery(documentId);
-  const router = useRouter();
-  const [expandedCannons, setExpandedCannons] = useState<Set<string>>(() => new Set());
-  const [expandedStories, setExpandedStories] = useState<Set<string>>(() => new Set());
 
   const upsertCannon = useUpsertCannonMutation();
   const deleteCannon = useDeleteCannonMutation();
@@ -173,213 +152,321 @@ const CannonsView = ({ documentId }: { documentId: string | null }) => {
   const upsertDocument = useUpsertDocumentMutation();
   const deleteDocument = useDeleteDocumentMutation();
 
-  // Auto-expand the cannon/story containing the current document
-  const activeStoryId = currentDocument?.storyId ?? null;
-  const activeCannonId = useMemo(() => {
-    if (!activeStoryId) return null;
-    for (const cannon of legacy) {
-      if (cannon.stories.some((s) => s.storyId === activeStoryId)) return cannon.cannonId;
-    }
-    return null;
-  }, [legacy, activeStoryId]);
+  const currentCannon = drill.cannon
+    ? (legacy.find((c) => c.cannonId === drill.cannon!.cannonId) ?? null)
+    : null;
+  const currentStory =
+    currentCannon && drill.story
+      ? (currentCannon.stories.find((s) => s.storyId === drill.story!.storyId) ?? null)
+      : null;
 
-  const isCannonOpen = (id: string) => expandedCannons.has(id) || id === activeCannonId;
-  const isStoryOpen = (id: string) => expandedStories.has(id) || id === activeStoryId;
-
-  const toggleCannon = (id: string) => {
-    setExpandedCannons((prev) => {
-      const next = new Set(prev);
-      if (next.has(id) || id === activeCannonId) next.delete(id);
-      else next.add(id);
-      return next;
+  const goBack = () => {
+    setDrill((prev) => {
+      if (prev.level === 'documents' && prev.cannon) {
+        return { level: 'stories', cannon: prev.cannon };
+      }
+      if (prev.level === 'stories') return { level: 'cannons' };
+      return prev;
     });
   };
 
-  const toggleStory = (id: string) => {
-    setExpandedStories((prev) => {
-      const next = new Set(prev);
-      if (next.has(id) || id === activeStoryId) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  };
+  if (drill.level === 'cannons') {
+    const cards = legacy.map((cannon) => ({
+      id: cannon.cannonId,
+      title: cannon.title,
+      icon: Library,
+      isActive: cannon.cannonId === initial.cannon?.cannonId,
+      onClick: () => setDrill({ level: 'stories', cannon }),
+      menu: [
+        {
+          label: 'Rename',
+          icon: PencilLine,
+          onClick: () => {
+            const next = promptForTitle('cannon', cannon.title);
+            if (!next) return;
+            upsertCannon.mutate({ cannonId: cannon.cannonId, title: next });
+          },
+        },
+        {
+          label: 'Delete',
+          icon: Trash2,
+          variant: 'destructive' as const,
+          onClick: () => {
+            if (!window.confirm(`Delete "${cannon.title}" and all its content?`)) return;
+            deleteCannon.mutate(cannon.cannonId);
+          },
+        },
+      ],
+    }));
 
-  const handleAddCannon = () => {
-    upsertCannon.mutate({
-      title: generateUntitledName(
-        'Untitled Cannon',
-        legacy.map((c) => c.title),
-      ),
-    });
-  };
+    return (
+      <SidebarPanel
+        header='All cannons'
+        subtitle={`${legacy.length} cannon${legacy.length === 1 ? '' : 's'}`}
+        onAdd={() =>
+          upsertCannon.mutate({
+            title: generateUntitledName(
+              'Untitled Cannon',
+              legacy.map((c) => c.title),
+            ),
+          })
+        }
+        addLabel='New cannon'
+      >
+        <CardStack cards={cards} keyId='cannons' />
+      </SidebarPanel>
+    );
+  }
 
-  const handleRenameCannon = (cannon: CannonResponse) => {
-    const next = promptForTitle('cannon', cannon.title);
-    if (!next) return;
-    upsertCannon.mutate({ cannonId: cannon.cannonId, title: next });
-  };
+  if (drill.level === 'stories' && currentCannon) {
+    const cards = currentCannon.stories.map((story) => ({
+      id: story.storyId,
+      title: story.title,
+      icon: BookOpen,
+      isActive: story.storyId === initial.story?.storyId,
+      onClick: () => setDrill({ level: 'documents', cannon: currentCannon, story }),
+      menu: [
+        {
+          label: 'Rename',
+          icon: PencilLine,
+          onClick: () => {
+            const next = promptForTitle('story', story.title);
+            if (!next) return;
+            upsertStory.mutate({ storyId: story.storyId, title: next });
+          },
+        },
+        {
+          label: 'Delete',
+          icon: Trash2,
+          variant: 'destructive' as const,
+          onClick: () => {
+            if (!window.confirm(`Delete "${story.title}" and all its documents?`)) return;
+            deleteStory.mutate(story.storyId);
+          },
+        },
+      ],
+    }));
 
-  const handleDeleteCannon = (cannon: CannonResponse) => {
-    if (!window.confirm(`Delete "${cannon.title}" and all its stories and documents?`)) return;
-    deleteCannon.mutate(cannon.cannonId);
-  };
+    return (
+      <SidebarPanel
+        header={currentCannon.title}
+        subtitle='stories'
+        onBack={goBack}
+        onAdd={() =>
+          upsertStory.mutate({
+            cannonId: currentCannon.cannonId,
+            title: generateUntitledName(
+              'Untitled Story',
+              currentCannon.stories.map((s) => s.title),
+            ),
+          })
+        }
+        addLabel='New story'
+      >
+        <CardStack cards={cards} keyId={`stories-${currentCannon.cannonId}`} />
+      </SidebarPanel>
+    );
+  }
 
-  const handleAddStory = (cannon: CannonResponse) => {
-    upsertStory.mutate({
-      cannonId: cannon.cannonId,
-      title: generateUntitledName(
-        'Untitled Story',
-        cannon.stories.map((s) => s.title),
-      ),
-    });
-  };
+  if (drill.level === 'documents' && currentCannon && currentStory) {
+    const cards = currentStory.documents.map((doc) => ({
+      id: doc.documentId,
+      title: doc.title,
+      icon: FileText,
+      isActive: doc.documentId === documentId,
+      onClick: () => {
+        router.push(`/d/${doc.documentId}`);
+        onPickDocument();
+      },
+      menu: [
+        {
+          label: 'Rename',
+          icon: PencilLine,
+          onClick: () => {
+            const next = promptForTitle('document', doc.title);
+            if (!next) return;
+            upsertDocument.mutate({ documentId: doc.documentId, title: next });
+          },
+        },
+        {
+          label: 'Delete',
+          icon: Trash2,
+          variant: 'destructive' as const,
+          onClick: () => {
+            if (!window.confirm(`Delete "${doc.title}"?`)) return;
+            deleteDocument.mutate(doc.documentId);
+          },
+        },
+      ],
+    }));
 
-  const handleRenameStory = (story: StoryResponse) => {
-    const next = promptForTitle('story', story.title);
-    if (!next) return;
-    upsertStory.mutate({ storyId: story.storyId, title: next });
-  };
+    return (
+      <SidebarPanel
+        header={currentStory.title}
+        subtitle='documents'
+        onBack={goBack}
+        onAdd={() =>
+          upsertDocument.mutate({
+            storyId: currentStory.storyId,
+            title: generateUntitledName(
+              'Untitled',
+              currentStory.documents.map((d) => d.title),
+            ),
+            body: '',
+          })
+        }
+        addLabel='New document'
+      >
+        <CardStack cards={cards} keyId={`docs-${currentStory.storyId}`} />
+      </SidebarPanel>
+    );
+  }
 
-  const handleDeleteStory = (story: StoryResponse) => {
-    if (!window.confirm(`Delete "${story.title}" and all its documents?`)) return;
-    deleteStory.mutate(story.storyId);
-  };
+  return <SidebarEmptyState message='No content yet — add a cannon to begin.' />;
+};
 
-  const handleAddDocument = (story: StoryResponse) => {
-    upsertDocument.mutate({
-      storyId: story.storyId,
-      title: generateUntitledName(
-        'Untitled',
-        story.documents.map((d) => d.title),
-      ),
-      body: '',
-    });
-  };
+interface CardData {
+  id: string;
+  title: string;
+  icon: React.ComponentType<{ className?: string }>;
+  isActive: boolean;
+  onClick: () => void;
+  menu: {
+    label: string;
+    icon: React.ComponentType<{ className?: string }>;
+    onClick: () => void;
+    variant?: 'default' | 'destructive';
+  }[];
+}
 
-  const handleRenameDocument = (doc: DocumentResponse) => {
-    const next = promptForTitle('document', doc.title);
-    if (!next) return;
-    upsertDocument.mutate({ documentId: doc.documentId, title: next });
-  };
-
-  const handleDeleteDocument = (doc: DocumentResponse) => {
-    if (!window.confirm(`Delete "${doc.title}"?`)) return;
-    deleteDocument.mutate(doc.documentId);
-  };
-
+const CardStack = ({ cards, keyId }: { cards: CardData[]; keyId?: string }) => {
+  if (cards.length === 0) {
+    return <SidebarEmptyState message='Nothing here yet.' />;
+  }
   return (
-    <SidebarList header='All cannons' onAdd={handleAddCannon} addLabel='New cannon'>
-      <div className='relative'>
-        <RiverPath />
-        <div className='relative flex flex-col gap-1.5 pl-7'>
-          {legacy.map((cannon) => {
-            const open = isCannonOpen(cannon.cannonId);
-            return (
-              <div key={cannon.cannonId} className='flex flex-col gap-1'>
-                <SidebarRow
-                  label={cannon.title}
-                  level={0}
-                  isActive={cannon.cannonId === activeCannonId}
-                  expanded={open}
-                  onClick={() => toggleCannon(cannon.cannonId)}
-                  menu={[
-                    { label: 'New story', icon: Plus, onClick: () => handleAddStory(cannon) },
-                    { label: 'Rename', icon: PencilLine, onClick: () => handleRenameCannon(cannon) },
-                    {
-                      label: 'Delete',
-                      icon: Trash2,
-                      onClick: () => handleDeleteCannon(cannon),
-                      variant: 'destructive',
-                    },
-                  ]}
-                />
-                {open &&
-                  cannon.stories.map((story) => {
-                    const sOpen = isStoryOpen(story.storyId);
-                    return (
-                      <div key={story.storyId} className='flex flex-col gap-1 pl-3'>
-                        <SidebarRow
-                          label={story.title}
-                          level={1}
-                          isActive={story.storyId === activeStoryId}
-                          expanded={sOpen}
-                          onClick={() => toggleStory(story.storyId)}
-                          menu={[
-                            {
-                              label: 'New document',
-                              icon: Plus,
-                              onClick: () => handleAddDocument(story),
-                            },
-                            {
-                              label: 'Rename',
-                              icon: PencilLine,
-                              onClick: () => handleRenameStory(story),
-                            },
-                            {
-                              label: 'Delete',
-                              icon: Trash2,
-                              onClick: () => handleDeleteStory(story),
-                              variant: 'destructive',
-                            },
-                          ]}
-                        />
-                        {sOpen &&
-                          story.documents.map((doc) => (
-                            <div key={doc.documentId} className='pl-3'>
-                              <SidebarRow
-                                label={doc.title}
-                                level={2}
-                                isActive={doc.documentId === documentId}
-                                onClick={() => router.push(`/d/${doc.documentId}`)}
-                                menu={[
-                                  {
-                                    label: 'Rename',
-                                    icon: PencilLine,
-                                    onClick: () => handleRenameDocument(doc),
-                                  },
-                                  {
-                                    label: 'Delete',
-                                    icon: Trash2,
-                                    onClick: () => handleDeleteDocument(doc),
-                                    variant: 'destructive',
-                                  },
-                                ]}
-                              />
-                            </div>
-                          ))}
-                      </div>
-                    );
-                  })}
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    </SidebarList>
+    <div className='editor-scroll h-full overflow-y-auto overflow-x-hidden pr-2 pb-4'>
+      <AnimatePresence mode='wait'>
+        <motion.div
+          key={keyId ?? 'stack'}
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -20 }}
+          transition={{ duration: 0.2 }}
+          className='flex flex-col gap-2.5'
+        >
+          {cards.map((card) => (
+            <StackedCard key={card.id} card={card} />
+          ))}
+        </motion.div>
+      </AnimatePresence>
+    </div>
   );
 };
 
-const SidebarList = ({
+const StackedCard = ({ card }: { card: CardData }) => {
+  const Icon = card.icon;
+  return (
+    <motion.div
+      whileHover={{ y: -2, scale: 1.01 }}
+      whileTap={{ y: 0, scale: 0.99 }}
+      transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+      className={cn('group relative rounded-2xl', card.isActive ? 'embossed' : 'embossed-lg')}
+    >
+      <button
+        type='button'
+        onClick={card.onClick}
+        className={cn(
+          'w-full flex items-center gap-3 px-4 py-3 rounded-2xl',
+          'cursor-pointer text-left',
+          card.isActive ? 'text-foreground' : 'text-muted-foreground hover:text-foreground',
+        )}
+      >
+        <span
+          className={cn(
+            'shrink-0 size-7 rounded-full flex items-center justify-center',
+            card.isActive ? 'embossed-lg' : 'embossed-sm',
+          )}
+        >
+          <Icon className='size-3.5' />
+        </span>
+        <span
+          className={cn('flex-1 truncate text-[13px]', card.isActive ? 'font-bold' : 'font-medium')}
+        >
+          {card.title}
+        </span>
+      </button>
+      <div className='absolute right-2 top-1/2 -translate-y-1/2'>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              type='button'
+              aria-label={`Actions for ${card.title}`}
+              onClick={(e) => e.stopPropagation()}
+              className={cn(
+                'size-7 rounded-full flex items-center justify-center',
+                'opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer',
+                'text-muted-foreground hover:text-foreground bg-background/60',
+              )}
+            >
+              <EllipsisVertical className='size-3.5' />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align='end'>
+            {card.menu.map((item) => (
+              <DropdownMenuItem
+                key={item.label}
+                variant={item.variant ?? 'default'}
+                onClick={item.onClick}
+              >
+                <item.icon className='size-4' />
+                {item.label}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    </motion.div>
+  );
+};
+
+const SidebarPanel = ({
   header,
-  headerSubtitle,
+  subtitle,
   onAdd,
   addLabel,
+  onBack,
   children,
 }: {
   header: string;
-  headerSubtitle?: string;
+  subtitle?: string;
   onAdd: () => void;
   addLabel: string;
+  onBack?: () => void;
   children: React.ReactNode;
 }) => {
   return (
-    <div className='flex flex-col gap-3'>
-      <div className='flex items-center justify-between gap-2 px-2'>
-        <div className='flex flex-col min-w-0'>
+    <div className='flex flex-col gap-3 h-full min-h-0'>
+      <div className='flex items-center gap-2 px-1'>
+        {onBack && (
+          <button
+            type='button'
+            onClick={onBack}
+            aria-label='Back'
+            className={cn(
+              'size-8 flex items-center justify-center',
+              'cursor-pointer active:translate-y-px text-foreground',
+              'embossed rounded-lg transition-transformrounded-full shrink-0',
+              'hover:bg-accent/25',
+            )}
+          >
+            <ChevronLeft className='size-4' />
+          </button>
+        )}
+        <div className='flex-1 min-w-0'>
           <h3 className='text-[14px] font-bold text-foreground truncate'>{header}</h3>
-          {headerSubtitle && (
+          {subtitle && (
             <span className='text-[10px] text-muted-foreground uppercase tracking-wide'>
-              {headerSubtitle}
+              {subtitle}
             </span>
           )}
         </div>
@@ -389,121 +476,15 @@ const SidebarList = ({
           aria-label={addLabel}
           title={addLabel}
           className={cn(
-            'size-8 rounded-full shrink-0 flex items-center justify-center',
-            'cursor-pointer transition-transform active:translate-y-px text-foreground',
-            settingsRaisedStyle,
+            'size-8 flex items-center justify-center',
+            'cursor-pointer active:translate-y-px text-foreground',
+            'rounded-full shrink-0 transition-transform embossed-lg hover:bg-accent/25',
           )}
         >
           <Plus className='size-4' />
         </button>
       </div>
-      {children}
-    </div>
-  );
-};
-
-const RiverColumn = ({
-  nodes,
-}: {
-  nodes: {
-    id: string;
-    label: string;
-    isActive: boolean;
-    onClick: () => void;
-    menu: MenuItem[];
-  }[];
-}) => {
-  return (
-    <div className='relative'>
-      <RiverPath />
-      <div className='relative flex flex-col gap-1.5 pl-7'>
-        {nodes.map((node) => (
-          <SidebarRow
-            key={node.id}
-            label={node.label}
-            level={0}
-            isActive={node.isActive}
-            onClick={node.onClick}
-            menu={node.menu}
-          />
-        ))}
-      </div>
-    </div>
-  );
-};
-
-interface MenuItem {
-  label: string;
-  icon: React.ComponentType<{ className?: string }>;
-  onClick: () => void;
-  variant?: 'default' | 'destructive';
-}
-
-const SidebarRow = ({
-  label,
-  level,
-  isActive,
-  expanded,
-  onClick,
-  menu,
-}: {
-  label: string;
-  level: 0 | 1 | 2;
-  isActive: boolean;
-  expanded?: boolean;
-  onClick: () => void;
-  menu: MenuItem[];
-}) => {
-  void expanded;
-  return (
-    <div
-      className={cn(
-        'group relative flex items-center gap-1 rounded-full pr-1',
-        isActive ? settingsInsetStyle : '',
-        !isActive && 'hover:bg-muted/30',
-      )}
-    >
-      <button
-        type='button'
-        onClick={onClick}
-        className={cn(
-          'flex-1 text-left rounded-full px-3 py-2 text-[13px] truncate cursor-pointer',
-          isActive ? 'text-foreground font-semibold' : 'text-muted-foreground',
-          level === 0 && 'font-medium',
-          level === 1 && 'text-[12px]',
-          level === 2 && 'text-[12px]',
-        )}
-      >
-        {label}
-      </button>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <button
-            type='button'
-            aria-label={`Actions for ${label}`}
-            onClick={(e) => e.stopPropagation()}
-            className={cn(
-              'size-7 rounded-full flex items-center justify-center shrink-0',
-              'opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer',
-              'text-muted-foreground hover:text-foreground',
-            )}
-          >
-            <EllipsisVertical className='size-3.5' />
-          </button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align='end'>
-          {menu.map((item) => (
-            <DropdownMenuItem
-              key={item.label}
-              variant={item.variant ?? 'default'}
-              onClick={item.onClick}
-            >
-              <item.icon className='size-4' />
-              {item.label}
-            </DropdownMenuItem>
-          ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <div className='flex-1 min-h-0'>{children}</div>
     </div>
   );
 };

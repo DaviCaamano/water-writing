@@ -21,12 +21,7 @@ export const Providers = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider
-        attribute='class'
-        defaultTheme='light'
-        themes={['light', 'dark', 'sepia']}
-        enableSystem={false}
-      >
+      <ThemeProvider defaultTheme='light' themes={['light', 'dark', 'sepia']}>
         <TooltipProvider delayDuration={200}>{children}</TooltipProvider>
       </ThemeProvider>
     </QueryClientProvider>

@@ -5,8 +5,6 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 const STORAGE_KEY = 'theme';
 const THEMES = ['light', 'dark', 'sepia'] as const;
 
-type Theme = (typeof THEMES)[number];
-
 interface ThemeContextValue {
   theme: string;
   setTheme: (theme: string) => void;
@@ -37,13 +35,10 @@ export function ThemeProvider({
   children,
   defaultTheme = 'light',
   themes = [...THEMES],
-  attribute = 'class',
 }: {
   children: React.ReactNode;
   defaultTheme?: string;
   themes?: string[];
-  attribute?: string;
-  enableSystem?: boolean;
 }) {
   const [theme, setThemeState] = useState(() => getStoredTheme(defaultTheme));
 

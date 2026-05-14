@@ -97,7 +97,7 @@ export const Editor = () => {
 
   if (!effectiveDocumentId) {
     return (
-      <div className='-editor- h-100vh w-full max-w-[calc(65ch+6rem)] mx-auto bg-transparent flex items-center justify-center'>
+      <div className='-editor- h-100vh w-full max-w-[calc(65ch+6rem)] mx-auto flex items-center justify-center'>
         <p className='text-muted-foreground text-sm'>
           Create a document from the sidebar to begin writing.
         </p>
@@ -106,14 +106,14 @@ export const Editor = () => {
   }
 
   return (
-    <div className='-editor- h-100vh w-full max-w-[calc(65ch+6rem)] mx-auto bg-transparent'>
+    <div className='-editor- h-100vh w-full max-w-[calc(65ch+6rem)] mx-auto'>
       <div
         className={cn(
           'flex-1 flex flex-col',
           'w-full h-[calc(100vh-2rem)]',
-          'mt-2.5 border-2 border-border rounded-lg',
-          'shadow-background shadow-2xl bg-background',
-          'text-foreground overflow-hidden',
+          'mt-2.5 mx-8 border-2 border-border rounded-lg',
+          'bg-background border-border',
+          'text-foreground bossed',
         )}
       >
         <EditorToolbar editor={editor} />
