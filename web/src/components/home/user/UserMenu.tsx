@@ -162,16 +162,9 @@ export const UserMenu = ({ onOpenAuth, onOpenSettings }: UserMenuProps) => {
               )}
               {menuItems.map((item) => (
                 <WaterRipple key={item.label} className='w-full'>
-                  <div
-                    role='button'
-                    tabIndex={0}
+                  <button
+                    type='button'
                     onClick={() => handleMenuItemSelect(item.action)}
-                    onKeyDown={(event) => {
-                      if (event.key === 'Enter' || event.key === ' ') {
-                        event.preventDefault();
-                        handleMenuItemSelect(item.action);
-                      }
-                    }}
                     onMouseEnter={() => setActiveItem(item.label)}
                     onMouseLeave={() =>
                       setActiveItem((current) => (current === item.label ? null : current))
@@ -182,16 +175,16 @@ export const UserMenu = ({ onOpenAuth, onOpenSettings }: UserMenuProps) => {
                     }
                     className={cn(
                       '-home-user-menu-item-',
-                      'w-full px-4 py-2.5',
+                      'w-full px-4 py-2.5 bg-transparent border-none',
                       'text-left text-[13px] font-medium',
                       'transition-all duration-200',
-                      'cursor-pointer outline-none',
+                      'cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-ring/50',
                       activeItem === item.label &&
                         'bg-accent/10 shadow-[inset_5px_5px_11px_var(--shadow),inset_-5px_-5px_11px_var(--shadow)]!',
                     )}
                   >
                     {item.label}
-                  </div>
+                  </button>
                 </WaterRipple>
               ))}
             </div>

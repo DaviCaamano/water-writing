@@ -62,10 +62,7 @@ const SettingsModalContent = ({
       bare
       showCloseButton={false}
       aria-describedby={undefined}
-      className={cn(
-        '-settings-modal-',
-        'bg-background rounded-kg shadow-2xl border-border border',
-      )}
+      className={cn('-settings-modal-', 'bg-background rounded-kg shadow-2xl border-border border')}
     >
       <div
         className={cn(
@@ -92,17 +89,25 @@ const SettingsModalContent = ({
             </h2>
           </DialogTitle>
 
-          <div className={'flex flex-col gap-2 p-1.5 rounded-4xl embossed-sm'}>
+          <div
+            role='tablist'
+            aria-label='Settings sections'
+            className="flex flex-col gap-2 p-1.5 rounded-4xl embossed-sm"
+          >
             {sections.map((s) => {
               const isActive = activeSection === s.key;
               return (
                 <button
                   key={s.key}
                   type='button'
+                  role='tab'
+                  aria-selected={isActive}
+                  aria-current={isActive ? 'page' : undefined}
                   onClick={() => setActiveSection(s.key)}
                   className={cn(
                     'text-left rounded-full px-4 py-2.5 text-[13px]',
                     'cursor-pointer transition-all duration-200 weight-600',
+                    'outline-none focus-visible:ring-2 focus-visible:ring-ring/50',
                     isActive
                       ? 'text-foreground font-bold'
                       : 'bg-transparent text-muted-foreground font-medium',

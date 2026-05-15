@@ -39,6 +39,7 @@ import { Label } from '~components/primitives/label';
 import { Skeleton } from '~components/primitives/skeleton';
 import { Switch } from '~components/primitives/switch';
 import { Input } from '~components/primitives/input';
+import { ColorSwap } from '~components/color-swap';
 
 const INPUT_VARIANTS = [
   'default',
@@ -78,7 +79,8 @@ type Size = (typeof SIZES)[number];
 
 const isIconSize = (size: Size) => size.startsWith('icon');
 const isPillSize = (size: Size) => size.startsWith('pill');
-const buttonLabel = (size: Size) => (isIconSize(size) ? null : isPillSize(size) ? 'Pill' : 'Button');
+const buttonLabel = (size: Size) =>
+  isIconSize(size) ? null : isPillSize(size) ? 'Pill' : 'Button';
 
 const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
   <section className='space-y-4'>
@@ -97,6 +99,7 @@ const Cell = ({ label, children }: { label: string; children: React.ReactNode })
 export default function UxPage() {
   return (
     <div className='bg-background min-h-screen p-8 space-y-12'>
+      <ColorSwap />
       <header className='space-y-2'>
         <h1 className='text-3xl font-bold text-foreground'>UX Primitives</h1>
         <p className='text-sm text-muted-foreground'>

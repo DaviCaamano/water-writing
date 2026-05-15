@@ -67,7 +67,13 @@ function PopoverTitle({ className, ...props }: React.ComponentProps<'h2'>) {
 }
 
 function PopoverDescription({ className, ...props }: React.ComponentProps<'p'>) {
-  return <p data-slot='popover-description' className={cn('text-muted-foreground', className)} {...props} />;
+  return (
+    <p
+      data-slot='popover-description'
+      className={cn('text-muted-foreground', className)}
+      {...props}
+    />
+  );
 }
 
 export { Popover, PopoverContent, PopoverDescription, PopoverHeader, PopoverTitle, PopoverTrigger };

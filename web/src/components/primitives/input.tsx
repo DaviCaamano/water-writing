@@ -7,20 +7,24 @@ const inputVariants = cva(
   cn(
     'flex w-full text-sm font-medium',
     'transition-colors outline-none',
-    'placeholder:text-muted-foreground/60',
     'focus-visible:ring-2 focus-visible:ring-ring/50',
     'disabled:pointer-events-none disabled:opacity-50',
   ),
   {
     variants: {
       variant: {
-        default: 'bg-surface text-foreground embossed-lg border-none',
-        debossed: 'bg-surface text-foreground debossed border-none',
-        bossed: 'bg-surface text-foreground bossed border-none',
-        primary: 'bg-primary text-primary-foreground border-none',
-        secondary: 'bg-secondary text-secondary-foreground border-none',
-        destructive: 'bg-destructive text-destructive-foreground border-none',
-        accent: 'bg-accent text-accent-foreground border-none',
+        default:
+          'bg-surface text-foreground embossed-lg border-none placeholder:text-foreground/45',
+        debossed: 'bg-surface text-foreground debossed border-none placeholder:text-foreground/45',
+        bossed: 'bg-surface text-foreground bossed border-none placeholder:text-foreground/45',
+        primary:
+          'bg-primary text-primary-foreground border-none placeholder:text-primary-foreground/60',
+        secondary:
+          'bg-secondary text-secondary-foreground border-none placeholder:text-secondary-foreground/60',
+        destructive:
+          'bg-destructive text-destructive-foreground border-none placeholder:text-destructive-foreground/60',
+        accent:
+          'bg-accent text-accent-foreground border-none placeholder:text-accent-foreground/60',
       },
       size: {
         default: 'h-9 px-4 rounded-lg',

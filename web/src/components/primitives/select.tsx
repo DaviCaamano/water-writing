@@ -95,9 +95,7 @@ function SelectContent({
   variant?: 'default' | 'primary';
 }) {
   const variantClasses =
-    variant === 'primary'
-      ? 'bg-primary text-primary-foreground'
-      : 'bg-card text-card-foreground';
+    variant === 'primary' ? 'bg-primary text-primary-foreground' : 'bg-card text-card-foreground';
 
   return (
     <SelectPrimitive.Portal>

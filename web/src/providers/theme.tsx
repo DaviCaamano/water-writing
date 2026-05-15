@@ -42,16 +42,13 @@ export function ThemeProvider({
 }) {
   const [theme, setThemeState] = useState(() => getStoredTheme(defaultTheme));
 
-  const setTheme = useCallback(
-    (value: string) => {
-      setThemeState(value);
-      try {
-        localStorage.setItem(STORAGE_KEY, value);
-      } catch {}
-      applyTheme(value);
-    },
-    [],
-  );
+  const setTheme = useCallback((value: string) => {
+    setThemeState(value);
+    try {
+      localStorage.setItem(STORAGE_KEY, value);
+    } catch {}
+    applyTheme(value);
+  }, []);
 
   useEffect(() => {
     applyTheme(theme);

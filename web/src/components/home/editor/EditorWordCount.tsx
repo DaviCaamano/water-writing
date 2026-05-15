@@ -5,7 +5,6 @@ export interface EditorWordCountProps {
   text: string;
 }
 export const EditorWordCount = ({ text }: EditorWordCountProps) => {
-
   const charCount = text.length;
 
   const wordCount = useMemo(() => {

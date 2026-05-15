@@ -33,13 +33,16 @@ export function PageTransitionProvider({ children }: { children: React.ReactNode
       pendingHref.current = href;
       router.prefetch(href);
       setPhase(TransitionPhase.covering);
-      setTimeout(() => {
-        if (pendingHref.current) {
-          router.push(pendingHref.current);
-          pendingHref.current = null;
-          setPhase(TransitionPhase.revealing);
-        }
-      }, (WATER_DROP_TRANSITION_DURATION + TRANSITION_HANG_DURATION) * 1000);
+      setTimeout(
+        () => {
+          if (pendingHref.current) {
+            router.push(pendingHref.current);
+            pendingHref.current = null;
+            setPhase(TransitionPhase.revealing);
+          }
+        },
+        (WATER_DROP_TRANSITION_DURATION + TRANSITION_HANG_DURATION) * 1000,
+      );
     },
     [phase, router],
   );

@@ -72,6 +72,9 @@ export const EditorSidebar = ({
           />
           <motion.aside
             key='drawer'
+            role='dialog'
+            aria-modal='true'
+            aria-label='Document navigation'
             initial={{ x: -DRAWER_WIDTH - 20 }}
             animate={{ x: 0 }}
             exit={{ x: -DRAWER_WIDTH - 20 }}
@@ -373,9 +376,11 @@ const StackedCard = ({ card }: { card: CardData }) => {
       <button
         type='button'
         onClick={card.onClick}
+        aria-current={card.isActive ? 'page' : undefined}
         className={cn(
           'w-full flex items-center gap-3 px-4 py-3 rounded-2xl',
           'cursor-pointer text-left',
+          'outline-none focus-visible:ring-2 focus-visible:ring-ring/50',
           card.isActive ? 'text-foreground' : 'text-muted-foreground hover:text-foreground',
         )}
       >

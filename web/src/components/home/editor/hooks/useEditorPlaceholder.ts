@@ -7,7 +7,7 @@ type PlaceHolderProps = {
   node: Node;
   pos: number;
   hasAnchor: boolean;
-}
+};
 type PlaceHolderCallback = (placeHolderProps: PlaceHolderProps) => string;
 export interface UseEditorPlaceholderProps {
   bodyPlaceholder?: string;

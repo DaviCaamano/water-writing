@@ -7,6 +7,7 @@ import { Input } from '~components/primitives/input';
 import { Switch } from '~components/primitives/switch';
 import { WaterRipple } from '~components/visual-effects/WaterRipple';
 import { useUserStore } from '~store/useUserStore';
+import { cn } from '~utils/merge-css-classes';
 import * as VisuallyHidden from '@radix-ui/react-visually-hidden';
 
 interface AuthDialogProps {
@@ -117,156 +118,193 @@ export const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
         <VisuallyHidden.Root>
           <DialogTitle>{mode === 'login' ? 'Log In' : 'Create Account'}</DialogTitle>
         </VisuallyHidden.Root>
-          <div className='w-85 rounded-[32px] px-9 py-11 flex flex-col gap-6' style={neuCard}>
-            {/* Wordmark */}
-            <div className='text-center -mb-2'>
-              <div className='text-[28px] font-bold tracking-tight' style={{ color: textColor }}>
-                Water Writing
-              </div>
-              <div className='text-[11px] mt-0.5 tracking-[0.04em]' style={{ color: mutedColor }}>
-                Your Story, in Full Flow
-              </div>
+        <div className='w-85 rounded-[32px] px-9 py-11 flex flex-col gap-6' style={neuCard}>
+          {/* Wordmark */}
+          <div className='text-center -mb-2'>
+            <div className='text-[28px] font-bold tracking-tight' style={{ color: textColor }}>
+              Water Writing
             </div>
+            <div className='text-[11px] mt-0.5 tracking-[0.04em]' style={{ color: mutedColor }}>
+              Your Story, in Full Flow
+            </div>
+          </div>
 
-            {/* Tab toggle */}
-            <Switch
-              offLabel='Log In'
-              onLabel='Sign Up'
-              checked={mode === 'signup'}
-              onCheckedChange={(v) => dispatch({ type: 'SET_MODE', mode: v ? 'signup' : 'login' })}
-              className='w-full'
-            />
+          {/* Tab toggle */}
+          <Switch
+            offLabel='Log In'
+            onLabel='Sign Up'
+            checked={mode === 'signup'}
+            onCheckedChange={(v) => dispatch({ type: 'SET_MODE', mode: v ? 'signup' : 'login' })}
+            className='w-full'
+          />
 
-            {/* Error */}
-            {error && (
-              <div className='text-destructive-foreground text-sm text-center -my-2'>{error}</div>
+          {/* Error */}
+          <div
+            id='auth-form-error'
+            role='alert'
+            aria-live='polite'
+            className={cn(
+              'text-destructive-foreground text-sm text-center -my-2',
+              !error && 'sr-only',
             )}
+          >
+            {error}
+          </div>
 
-            {/* Fields */}
-            <form onSubmit={handleSubmit} className='flex flex-col gap-4.5'>
-              {mode === 'signup' && (
-                <div className='grid grid-cols-2 gap-3'>
-                  <div className='flex flex-col gap-2'>
-                    <label className='text-[15px] font-semibold pl-1' style={{ color: textColor }}>
-                      First name
-                    </label>
-                    <Input
-                      size='pill-lg'
-                      value={firstName}
-                      onChange={(e) =>
-                        dispatch({ type: 'SET_FIELD', field: 'firstName', value: e.target.value })
-                      }
-                      placeholder='Jane'
-                      required
-                    />
-                  </div>
-                  <div className='flex flex-col gap-2'>
-                    <label className='text-[15px] font-semibold pl-1' style={{ color: textColor }}>
-                      Last name
-                    </label>
-                    <Input
-                      size='pill-lg'
-                      value={lastName}
-                      onChange={(e) =>
-                        dispatch({ type: 'SET_FIELD', field: 'lastName', value: e.target.value })
-                      }
-                      placeholder='Doe'
-                      required
-                    />
-                  </div>
-                </div>
-              )}
-
-              <div className='flex flex-col gap-2'>
-                <label className='text-[15px] font-semibold pl-1' style={{ color: textColor }}>
-                  Email
-                </label>
-                <Input
-                  type='email'
-                  size='pill-lg'
-                  value={email}
-                  onChange={(e) =>
-                    dispatch({ type: 'SET_FIELD', field: 'email', value: e.target.value })
-                  }
-                  placeholder='you@example.com'
-                  autoComplete='email'
-                  required
-                />
-              </div>
-
-              <div className='flex flex-col gap-2'>
-                <label className='text-[15px] font-semibold pl-1' style={{ color: textColor }}>
-                  Password
-                </label>
-                <Input
-                  type='password'
-                  size='pill-lg'
-                  value={password}
-                  onChange={(e) =>
-                    dispatch({ type: 'SET_FIELD', field: 'password', value: e.target.value })
-                  }
-                  placeholder='••••••••••'
-                  autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
-                  required
-                />
-              </div>
-
-              {mode === 'signup' && (
+          {/* Fields */}
+          <form
+            onSubmit={handleSubmit}
+            className='flex flex-col gap-4.5'
+            aria-describedby={error ? 'auth-form-error' : undefined}
+          >
+            {mode === 'signup' && (
+              <div className='grid grid-cols-2 gap-3'>
                 <div className='flex flex-col gap-2'>
-                  <label className='text-[15px] font-semibold pl-1' style={{ color: textColor }}>
-                    Confirm password
+                  <label
+                    htmlFor='auth-first-name'
+                    className='text-[15px] font-semibold pl-1'
+                    style={{ color: textColor }}
+                  >
+                    First name
                   </label>
                   <Input
-                    type='password'
+                    id='auth-first-name'
                     size='pill-lg'
-                    value={confirm}
+                    value={firstName}
                     onChange={(e) =>
-                      dispatch({ type: 'SET_FIELD', field: 'confirm', value: e.target.value })
+                      dispatch({ type: 'SET_FIELD', field: 'firstName', value: e.target.value })
                     }
-                    placeholder='••••••••••'
-                    autoComplete='new-password'
+                    placeholder='Jane'
                     required
                   />
                 </div>
-              )}
-
-              {/* Submit button */}
-              <div className='flex justify-center mt-1'>
-                <WaterRipple className='rounded-full'>
-                  <Button
-                    type='submit'
-                    variant='default'
-                    size='pill-lg'
-                    disabled={loading}
-                    className='px-12'
+                <div className='flex flex-col gap-2'>
+                  <label
+                    htmlFor='auth-last-name'
+                    className='text-[15px] font-semibold pl-1'
+                    style={{ color: textColor }}
                   >
-                    {loading
-                      ? mode === 'login'
-                        ? 'Logging in…'
-                        : 'Creating account…'
-                      : mode === 'login'
-                        ? 'Log In'
-                        : 'Create Account'}
-                  </Button>
-                </WaterRipple>
-              </div>
-            </form>
-
-            {/* Forgot password */}
-            {mode === 'login' && (
-              <div className='flex justify-end -mt-2'>
-                <button
-                  type='button'
-                  className='text-[13px] cursor-pointer bg-transparent border-none transition-colors duration-150'
-                  style={{ color: mutedColor }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--neu-text)')}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--neu-text-muted)')}
-                >
-                  Forgot password?
-                </button>
+                    Last name
+                  </label>
+                  <Input
+                    id='auth-last-name'
+                    size='pill-lg'
+                    value={lastName}
+                    onChange={(e) =>
+                      dispatch({ type: 'SET_FIELD', field: 'lastName', value: e.target.value })
+                    }
+                    placeholder='Doe'
+                    required
+                  />
+                </div>
               </div>
             )}
-          </div>
+
+            <div className='flex flex-col gap-2'>
+              <label
+                htmlFor='auth-email'
+                className='text-[15px] font-semibold pl-1'
+                style={{ color: textColor }}
+              >
+                Email
+              </label>
+              <Input
+                id='auth-email'
+                type='email'
+                size='pill-lg'
+                value={email}
+                onChange={(e) =>
+                  dispatch({ type: 'SET_FIELD', field: 'email', value: e.target.value })
+                }
+                placeholder='you@example.com'
+                autoComplete='email'
+                required
+              />
+            </div>
+
+            <div className='flex flex-col gap-2'>
+              <label
+                htmlFor='auth-password'
+                className='text-[15px] font-semibold pl-1'
+                style={{ color: textColor }}
+              >
+                Password
+              </label>
+              <Input
+                id='auth-password'
+                type='password'
+                size='pill-lg'
+                value={password}
+                onChange={(e) =>
+                  dispatch({ type: 'SET_FIELD', field: 'password', value: e.target.value })
+                }
+                placeholder='••••••••••'
+                autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+                required
+              />
+            </div>
+
+            {mode === 'signup' && (
+              <div className='flex flex-col gap-2'>
+                <label
+                  htmlFor='auth-confirm-password'
+                  className='text-[15px] font-semibold pl-1'
+                  style={{ color: textColor }}
+                >
+                  Confirm password
+                </label>
+                <Input
+                  id='auth-confirm-password'
+                  type='password'
+                  size='pill-lg'
+                  value={confirm}
+                  onChange={(e) =>
+                    dispatch({ type: 'SET_FIELD', field: 'confirm', value: e.target.value })
+                  }
+                  placeholder='••••••••••'
+                  autoComplete='new-password'
+                  required
+                />
+              </div>
+            )}
+
+            {/* Submit button */}
+            <div className='flex justify-center mt-1'>
+              <WaterRipple className='rounded-full'>
+                <Button
+                  type='submit'
+                  variant='default'
+                  size='pill-lg'
+                  disabled={loading}
+                  className='px-12'
+                >
+                  {loading
+                    ? mode === 'login'
+                      ? 'Logging in…'
+                      : 'Creating account…'
+                    : mode === 'login'
+                      ? 'Log In'
+                      : 'Create Account'}
+                </Button>
+              </WaterRipple>
+            </div>
+          </form>
+
+          {/* Forgot password */}
+          {mode === 'login' && (
+            <div className='flex justify-end -mt-2'>
+              <button
+                type='button'
+                className='text-[13px] cursor-pointer bg-transparent border-none transition-colors duration-150'
+                style={{ color: mutedColor }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--neu-text)')}
+                onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--neu-text-muted)')}
+              >
+                Forgot password?
+              </button>
+            </div>
+          )}
+        </div>
       </DialogContent>
     </Dialog>
   );

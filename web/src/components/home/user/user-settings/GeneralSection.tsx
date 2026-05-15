@@ -54,34 +54,19 @@ export const GeneralSection = () => {
                 placeholder='Last'
                 className='flex-1'
               />
-              <Button
-                variant='default'
-                size='icon'
-                onClick={saveName}
-                aria-label='Save'
-              >
+              <Button variant='default' size='icon' onClick={saveName} aria-label='Save'>
                 <Check className='size-4' />
               </Button>
-              <Button
-                variant='default'
-                size='icon'
-                onClick={cancelNameEdit}
-                aria-label='Cancel'
-              >
+              <Button variant='default' size='icon' onClick={cancelNameEdit} aria-label='Cancel'>
                 <X className='size-4' />
               </Button>
             </div>
           ) : (
             <div className='flex items-center gap-3'>
-              <div className={'flex-1 rounded-full px-5 py-2.5 text-[14px] embossed'}>
+              <div className="flex-1 rounded-full px-5 py-2.5 text-[14px] embossed">
                 {firstName} {lastName}
               </div>
-              <Button
-                variant='default'
-                size='icon'
-                onClick={startNameEdit}
-                aria-label='Edit name'
-              >
+              <Button variant='default' size='icon' onClick={startNameEdit} aria-label='Edit name'>
                 <Pencil className='size-3.5' />
               </Button>
             </div>
@@ -90,7 +75,7 @@ export const GeneralSection = () => {
 
         <div>
           <FieldLabel>Email</FieldLabel>
-          <div className={'rounded-full px-5 py-2.5 text-[14px] text-muted embossed'}>
+          <div className="rounded-full px-5 py-2.5 text-[14px] text-muted embossed">
             {email || '-'}
           </div>
         </div>

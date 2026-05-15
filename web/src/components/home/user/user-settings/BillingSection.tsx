@@ -12,7 +12,7 @@ export const BillingSection = () => {
     return (
       <div>
         <SectionHeading>Card on file</SectionHeading>
-        <div className={'rounded-full p-1 embossed'}>
+        <div className="rounded-full p-1 embossed">
           <Skeleton className='h-8 w-72 rounded-full' />
         </div>
         <NeuDivider />
@@ -29,7 +29,7 @@ export const BillingSection = () => {
   return (
     <div>
       <SectionHeading>Card on file</SectionHeading>
-      <div className={'rounded-full px-5 py-2.5 text-[13px] text-muted embossed'}>
+      <div className="rounded-full px-5 py-2.5 text-[13px] text-muted embossed">
         No card on file
       </div>
 
@@ -67,7 +67,7 @@ export const BillingSection = () => {
           ))}
         </div>
       ) : (
-        <div className={'rounded-full px-5 py-2.5 text-[13px] text-muted embossed'}>
+        <div className="rounded-full px-5 py-2.5 text-[13px] text-muted embossed">
           No payment history
         </div>
       )}

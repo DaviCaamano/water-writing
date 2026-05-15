@@ -25,10 +25,7 @@ const buttonVariants = cva(
           'bg-surface text-foreground debossed',
           'hover:bg-accent/15 active:bg-accent/25',
         ),
-        bossed: cn(
-          'bg-surface text-foreground bossed',
-          'hover:bg-accent/15 active:bg-accent/25',
-        ),
+        bossed: cn('bg-surface text-foreground bossed', 'hover:bg-accent/15 active:bg-accent/25'),
         primary: cn(
           'bg-primary text-primary-foreground',
           'hover:bg-primary/85 active:bg-primary/70',
@@ -37,18 +34,12 @@ const buttonVariants = cva(
           'bg-secondary text-secondary-foreground',
           'hover:bg-secondary/85 active:bg-secondary/70',
         ),
-        accented: cn(
-          'bg-accent text-accent-foreground',
-          'hover:bg-accent/85 active:bg-accent/70',
-        ),
+        accented: cn('bg-accent text-accent-foreground', 'hover:bg-accent/85 active:bg-accent/70'),
         destructive: cn(
           'bg-destructive text-destructive-foreground',
           'hover:bg-destructive/85 active:bg-destructive/70',
         ),
-        muted: cn(
-          'bg-muted text-muted-foreground',
-          'hover:bg-muted/85 active:bg-muted/70',
-        ),
+        muted: cn('bg-muted text-muted-foreground', 'hover:bg-muted/85 active:bg-muted/70'),
         success: cn(
           'bg-success text-success-foreground',
           'hover:bg-success/85 active:bg-success/70',

@@ -65,6 +65,7 @@ export const SubscriptionSection = ({ colorMap }: { colorMap: SettingsColorMap }
         <Switch
           offLabel='Monthly'
           onLabel='Yearly'
+          aria-label={`Billing cycle: ${yearly ? 'yearly' : 'monthly'}`}
           checked={yearly}
           onCheckedChange={setYearly}
         />
@@ -156,7 +157,7 @@ const PlanCard = ({
   const subtext = yearly ? yearlySubtext : monthlySubtext;
 
   return (
-    <div className={'relative rounded-3xl p-5 space-y-4 embossed-lg'}>
+    <div className="relative rounded-3xl p-5 space-y-4 embossed-lg">
       {isCurrent && (
         <div
           className={cn(
