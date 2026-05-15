@@ -103,7 +103,7 @@ const StackedCard = ({ card }: { card: CardData }) => {
             {card.menu.map((item) => (
               <DropdownMenuItem
                 key={item.label}
-                variant={item.variant ?? 'default'}
+                variant={(item.variant as Variant) ?? Variant.default}
                 onClick={item.onClick}
               >
                 <item.icon className='size-4' />

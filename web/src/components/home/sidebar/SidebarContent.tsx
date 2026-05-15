@@ -40,44 +40,43 @@ export const SidebarContent = ({
   const upsertDocument = useUpsertDocumentMutation();
   const deleteDocument = useDeleteDocumentMutation();
 
-  if (!documentId || !currentCannon || !currentStory || !currentDocument)
-    return <SidebarEmptyState message='No content yet — add a cannon to begin.' />;
+  if (legacy.length && drill.level === DrillLevel.cannons)
+    return (
+      <SideBarCannonView
+        currentCannon={currentCannon}
+        deleteCannon={deleteCannon}
+        legacy={legacy}
+        setDrill={setDrill}
+        upsertCannon={upsertCannon}
+      />
+    );
 
-  switch (drill.level) {
-    case DrillLevel.cannons:
-      return (
-        <SideBarCannonView
-          currentCannon={currentCannon}
-          deleteCannon={deleteCannon}
-          legacy={legacy}
-          setDrill={setDrill}
-          upsertCannon={upsertCannon}
-        />
-      );
-    case DrillLevel.stories:
-      return (
-        <SideBarStoryView
-          currentCannon={currentCannon}
-          deleteStory={deleteStory}
-          drill={drill}
-          setDrill={setDrill}
-          upsertStory={upsertStory}
-        />
-      );
-    case DrillLevel.documents:
-      return (
-        <SideBarDocumentView
-          currentStory={currentStory}
-          deleteDocument={deleteDocument}
-          documentId={documentId}
-          onPickDocument={onPickDocument}
-          setDrill={setDrill}
-          upsertDocument={upsertDocument}
-        />
-      );
-    default:
-      return <SidebarEmptyState message='No content yet — add a cannon to begin.' />;
+  if (drill.level === DrillLevel.stories && currentCannon && drill.cannon) {
+    return (
+      <SideBarStoryView
+        currentCannon={currentCannon}
+        deleteStory={deleteStory}
+        drill={drill}
+        setDrill={setDrill}
+        upsertStory={upsertStory}
+      />
+    );
   }
+
+  if (drill.level === DrillLevel.documents && currentStory && documentId) {
+    return (
+      <SideBarDocumentView
+        currentStory={currentStory}
+        deleteDocument={deleteDocument}
+        documentId={documentId}
+        onPickDocument={onPickDocument}
+        setDrill={setDrill}
+        upsertDocument={upsertDocument}
+      />
+    );
+  }
+
+  return <SidebarEmptyState message='No content yet — add a cannon to begin.' />;
 };
 
 const computeInitialDrillState = (

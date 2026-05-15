@@ -7,7 +7,7 @@ import { Library, PencilLine, Trash2 } from 'lucide-react';
 import { UseDeleteCannonMutation, UseUpsertCannonMutation } from '~lib/mutations/story';
 
 export interface SideBarCannonViewProps {
-  currentCannon: CannonResponse;
+  currentCannon: CannonResponse | null;
   deleteCannon: UseDeleteCannonMutation;
   legacy: CannonResponse[];
   setDrill: Setter<DrillState>;
@@ -24,7 +24,7 @@ export const SideBarCannonView = ({
     id: cannon.cannonId,
     title: cannon.title,
     icon: Library,
-    isActive: cannon.cannonId === currentCannon.cannonId,
+    isActive: currentCannon !== null && cannon.cannonId === currentCannon.cannonId,
     onClick: () => setDrill({ level: 'stories', cannon }),
     menu: [
       {

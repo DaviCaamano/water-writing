@@ -88,7 +88,7 @@ function DropdownMenuItem({
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.Item> & {
   inset?: boolean;
-  variant?: 'default' | 'destructive';
+  variant?: Variant;
 }) {
   return (
     <DropdownMenuPrimitive.Item
