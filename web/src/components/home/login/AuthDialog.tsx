@@ -8,6 +8,7 @@ import { Switch } from '~components/primitives/switch';
 import { WaterRipple } from '~components/visual-effects/WaterRipple';
 import { useUserStore } from '~store/useUserStore';
 import { cn } from '~utils/merge-css-classes';
+import { Variant } from '~types';
 import * as VisuallyHidden from '@radix-ui/react-visually-hidden';
 
 interface AuthDialogProps {
@@ -273,7 +274,7 @@ export const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
               <WaterRipple className='rounded-full'>
                 <Button
                   type='submit'
-                  variant='default'
+                  variant={Variant.default}
                   size='pill-lg'
                   disabled={loading}
                   className='px-12'

@@ -41,12 +41,15 @@ const deepEqual = (a: unknown, b: unknown, seen = new WeakSet()): boolean => {
   );
 };
 
-export const useSticky = <T>(value: T, callback: (stickyValue?: T) => void | Promise<void>) => {
+export const useSticky = <T>(
+  value: T,
+  callback: (prev?: T, current?: T) => void | Promise<void>,
+) => {
   const previousValue = useRef<T>(value);
 
   useEffect(() => {
     if (!deepEqual(previousValue.current, value)) {
-      void callback(previousValue.current);
+      void callback(previousValue.current, value);
       previousValue.current = value;
     }
   }, [value, callback]);

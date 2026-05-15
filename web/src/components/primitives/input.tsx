@@ -2,6 +2,7 @@ import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 
 import { cn } from '~utils/merge-css-classes';
+import { Variant } from '~types';
 
 const inputVariants = cva(
   cn(
@@ -36,7 +37,7 @@ const inputVariants = cva(
       },
     },
     defaultVariants: {
-      variant: 'default',
+      variant: Variant.default,
       size: 'default',
     },
   },

@@ -7,6 +7,7 @@ import { X } from 'lucide-react';
 import { SettingsSection } from '~types/components/settings-modal';
 import { cn } from '~utils/merge-css-classes';
 import { useColors } from '~hooks/useColors';
+import { Variant } from '~types';
 import { GeneralSection } from '~components/home/user/user-settings/GeneralSection';
 import { BillingSection } from '~components/home/user/user-settings/BillingSection';
 import { SubscriptionSection } from '~components/home/user/user-settings/SubscriptionSection';
@@ -72,7 +73,7 @@ const SettingsModalContent = ({
       >
         {/* Close */}
         <Button
-          variant='default'
+          variant={Variant.default}
           size='icon-lg'
           onClick={onClose}
           className='absolute top-5 right-5 text-muted'

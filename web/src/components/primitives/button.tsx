@@ -3,6 +3,7 @@ import { Slot } from '@radix-ui/react-slot';
 import { cva, type VariantProps } from 'class-variance-authority';
 
 import { cn } from '~utils/merge-css-classes';
+import { Variant } from '~types';
 
 const buttonVariants = cva(
   cn(
@@ -58,7 +59,7 @@ const buttonVariants = cva(
       },
     },
     defaultVariants: {
-      variant: 'default',
+      variant: Variant.default,
       size: 'default',
     },
   },
@@ -66,7 +67,7 @@ const buttonVariants = cva(
 
 function Button({
   className,
-  variant = 'default',
+  variant = Variant.default,
   size = 'default',
   asChild = false,
   ...props

@@ -5,6 +5,7 @@ import { FieldLabel, SectionHeading } from '~components/home/user/user-settings/
 import { Button } from '~components/primitives/button';
 import { Input } from '~components/primitives/input';
 import { Check, Pencil, X } from 'lucide-react';
+import { Variant } from '~types';
 
 export const GeneralSection = () => {
   const { firstName, lastName, email, updateName } = useUserStore();
@@ -54,10 +55,10 @@ export const GeneralSection = () => {
                 placeholder='Last'
                 className='flex-1'
               />
-              <Button variant='default' size='icon' onClick={saveName} aria-label='Save'>
+              <Button variant={Variant.default} size='icon' onClick={saveName} aria-label='Save'>
                 <Check className='size-4' />
               </Button>
-              <Button variant='default' size='icon' onClick={cancelNameEdit} aria-label='Cancel'>
+              <Button variant={Variant.default} size='icon' onClick={cancelNameEdit} aria-label='Cancel'>
                 <X className='size-4' />
               </Button>
             </div>
@@ -66,7 +67,7 @@ export const GeneralSection = () => {
               <div className="flex-1 rounded-full px-5 py-2.5 text-[14px] embossed">
                 {firstName} {lastName}
               </div>
-              <Button variant='default' size='icon' onClick={startNameEdit} aria-label='Edit name'>
+              <Button variant={Variant.default} size='icon' onClick={startNameEdit} aria-label='Edit name'>
                 <Pencil className='size-3.5' />
               </Button>
             </div>

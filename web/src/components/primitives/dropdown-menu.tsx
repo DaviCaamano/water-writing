@@ -5,6 +5,7 @@ import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu';
 
 import { cn } from '~utils/merge-css-classes';
 import { ChevronRightIcon, CheckIcon } from 'lucide-react';
+import { Variant } from '~types';
 
 function DropdownMenu({ ...props }: React.ComponentProps<typeof DropdownMenuPrimitive.Root>) {
   return <DropdownMenuPrimitive.Root data-slot='dropdown-menu' {...props} />;
@@ -83,7 +84,7 @@ function DropdownMenuLabel({
 function DropdownMenuItem({
   className,
   inset,
-  variant = 'default',
+  variant = Variant.default,
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.Item> & {
   inset?: boolean;

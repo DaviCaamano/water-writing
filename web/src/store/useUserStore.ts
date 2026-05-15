@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { Store, useStore } from '@tanstack/react-store';
 import { useQueryClient } from '@tanstack/react-query';
 import { queryApi } from '~lib/api';
-import { LoginResponse, UserResponse } from '#types/shared/response';
+import { CannonResponse, LoginResponse, UserResponse } from '#types/shared/response';
 import { apiRoutes } from '#types/shared/api-route';
 import { queryKeys } from '~types/lib/tanstack-query/query-keys';
 import { useSessionQuery } from '~lib/queries/user';
@@ -29,7 +29,29 @@ export interface UserActions {
   reset: () => void;
 }
 
-export const useUserStore = () => {
+export interface UserStore extends UserActions {
+  isLoggedIn: boolean;
+  userId: string | null;
+  email: string;
+  firstName: string;
+  lastName: string;
+  plan: 'none' | 'pro-plan' | 'max-plan' | null;
+  legacy: CannonResponse[];
+  lastViewedDocumentId: string | null;
+  login: (email: string, password: string) => Promise<void>;
+  signup: (data: {
+    email: string;
+    password: string;
+    firstName: string;
+    lastName: string;
+  }) => Promise<void>;
+  logout: () => Promise<void>;
+  updateName: (firstName: string, lastName: string) => Promise<void>;
+  deleteAccount: () => Promise<void>;
+  reset: () => void;
+}
+
+export const useUserStore = (): UserStore => {
   const { loggedOut } = useStore(authStore);
   const queryClient = useQueryClient();
   const { data: session } = useSessionQuery(!loggedOut);

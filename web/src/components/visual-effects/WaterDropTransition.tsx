@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { Dimensions, useViewport } from '~hooks/useViewport';
 import { motion, useAnimationControls } from 'framer-motion';
-import { ZIndex } from '~constants/z-index';
+import { ZIndex } from '~types';
 import { indexArray } from '~utils/indexArray';
 import {
   TransitionPhase,

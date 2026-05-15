@@ -5,6 +5,7 @@ import * as SelectPrimitive from '@radix-ui/react-select';
 
 import { ChevronDownIcon, CheckIcon, ChevronUpIcon } from 'lucide-react';
 import { cn } from '~utils/merge-css-classes';
+import { Variant } from '~types';
 
 function Select({ ...props }: React.ComponentProps<typeof SelectPrimitive.Root>) {
   return <SelectPrimitive.Root data-slot='select' {...props} />;
@@ -33,7 +34,7 @@ function SelectValue({ className, ...props }: React.ComponentProps<typeof Select
 function SelectTrigger({
   className,
   size = 'default',
-  variant = 'default',
+  variant = Variant.default,
   children,
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.Trigger> & {
@@ -89,7 +90,7 @@ function SelectContent({
   sideOffset = 4,
   align = 'center',
   alignOffset = 0,
-  variant = 'default',
+  variant = Variant.default,
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.Content> & {
   variant?: 'default' | 'primary';

@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient, UseMutationResult } from '@tanstack/react-query';
 import { apiRoutes } from '#types/shared/api-route';
 import { StoryResponse, CannonResponse } from '#types/shared/response';
 import { queryApi } from '~lib/api';
@@ -27,7 +27,12 @@ const invalidateAll = (queryClient: ReturnType<typeof useQueryClient>) => {
   void queryClient.invalidateQueries({ queryKey: queryKeys.documents.all });
 };
 
-export const useUpsertCannonMutation = () => {
+export type UseUpsertCannonMutation = UseMutationResult<
+  CannonResponse | null,
+  Error,
+  UpsertCannonVariables
+>;
+export const useUpsertCannonMutation = (): UseUpsertCannonMutation => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (vars: UpsertCannonVariables) =>
@@ -36,7 +41,8 @@ export const useUpsertCannonMutation = () => {
   });
 };
 
-export const useDeleteCannonMutation = () => {
+export type UseDeleteCannonMutation = UseMutationResult<{ status: 'ok' }, Error, string>;
+export const useDeleteCannonMutation = (): UseDeleteCannonMutation => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (cannonId: string) =>
@@ -45,7 +51,8 @@ export const useDeleteCannonMutation = () => {
   });
 };
 
-export const useUpsertStoryMutation = () => {
+export type UseUpsertStoryMutation = UseMutationResult<StoryResponse, Error, UpsertStoryVariables>;
+export const useUpsertStoryMutation = (): UseUpsertStoryMutation => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (vars: UpsertStoryVariables) =>
@@ -54,7 +61,8 @@ export const useUpsertStoryMutation = () => {
   });
 };
 
-export const useDeleteStoryMutation = () => {
+export type UseDeleteStoryMutation = UseMutationResult<{ status: 'ok' }, Error, string>;
+export const useDeleteStoryMutation = (): UseDeleteStoryMutation => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (storyId: string) =>
@@ -63,7 +71,12 @@ export const useDeleteStoryMutation = () => {
   });
 };
 
-export const useUpsertDocumentMutation = () => {
+export type UseUpsertDocumentMutation = UseMutationResult<
+  CannonResponse | null,
+  Error,
+  UpsertDocumentVariables
+>;
+export const useUpsertDocumentMutation = (): UseUpsertDocumentMutation => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (vars: UpsertDocumentVariables) =>
@@ -72,7 +85,8 @@ export const useUpsertDocumentMutation = () => {
   });
 };
 
-export const useDeleteDocumentMutation = () => {
+export type UseDeleteDocumentMutation = UseMutationResult<{ status: 'ok' }, Error, string>;
+export const useDeleteDocumentMutation = (): UseDeleteDocumentMutation => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (documentId: string) =>

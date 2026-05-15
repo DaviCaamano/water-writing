@@ -11,6 +11,7 @@ import {
 import { useEditorStore } from '~store/useEditorStore';
 import { useTheme } from '~providers/theme';
 import type { EditorTheme } from '~types/story';
+import { Variant } from '~types';
 import { WaterRippleFade } from '~components/visual-effects/WaterRippleFade';
 import { cn } from '~utils/merge-css-classes';
 
@@ -61,7 +62,7 @@ export const EditorSettingsContent = ({ open }: { open: boolean }) => {
             {FONT_SIZES.map((size) => (
               <Button
                 key={size}
-                variant={fontSize === size ? 'default' : 'muted'}
+                variant={fontSize === size ? Variant.default : Variant.muted}
                 size='sm'
                 className='w-10 h-8 text-xs shadow-shadow shadow'
                 onClick={() => setFontSize(size)}
@@ -75,10 +76,10 @@ export const EditorSettingsContent = ({ open }: { open: boolean }) => {
         <div className='space-y-2'>
           <Label className='text-xs font-medium'>Font</Label>
           <Select value={fontFamily} onValueChange={(v) => v && setFontFamily(v)}>
-            <SelectTrigger variant='primary' className='h-8 text-xs'>
+            <SelectTrigger variant={Variant.primary} className='h-8 text-xs'>
               <SelectValue />
             </SelectTrigger>
-            <SelectContent variant='primary'>
+            <SelectContent variant={Variant.primary}>
               {FONT_OPTIONS.map((font) => (
                 <SelectItem key={font.value} value={font.value}>
                   <span style={{ fontFamily: font.value }}>{font.label}</span>
@@ -94,7 +95,7 @@ export const EditorSettingsContent = ({ open }: { open: boolean }) => {
             {THEME_OPTIONS.map((themeOption) => (
               <Button
                 key={themeOption.value}
-                variant={theme === themeOption.value ? 'default' : 'muted'}
+                variant={theme === themeOption.value ? Variant.default : Variant.muted}
                 size='sm'
                 className='flex-1 h-8 text-xs shadow-shadow shadow'
                 onClick={() => setTheme(themeOption.value)}

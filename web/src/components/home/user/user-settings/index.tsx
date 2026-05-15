@@ -1,6 +1,7 @@
 import { SettingsColorMap } from '~types/components/settings-modal';
 import { WaterRipple } from '~components/visual-effects/WaterRipple';
 import { Button } from '~components/primitives/button';
+import { Variant } from '~types';
 
 export const SectionHeading = ({ children }: { children: React.ReactNode }) => {
   return (
@@ -22,7 +23,7 @@ export const NeuPillButton = ({
   disabled,
   onClick,
   type = 'button',
-  variant = 'default',
+  variant = Variant.default,
   colorMap,
 }: {
   children: React.ReactNode;
@@ -36,7 +37,7 @@ export const NeuPillButton = ({
   return (
     <WaterRipple className={`rounded-full ${className ?? ''}`}>
       <Button
-        variant='default'
+        variant={Variant.default}
         size='pill-lg'
         type={type}
         onClick={onClick}

@@ -9,6 +9,7 @@ import {
 } from '~components/home/user/user-settings/index';
 import { useUserStore } from '~store/useUserStore';
 import { useState } from 'react';
+import { Variant } from '~types';
 import { apiRoutes } from '#types/shared/api-route';
 import { queryApi } from '~lib/api';
 import { Plan } from '#types/shared/enum/plan';
@@ -48,7 +49,7 @@ export const SubscriptionSection = ({ colorMap }: { colorMap: SettingsColorMap }
           <NeuPillButton
             colorMap={colorMap}
             onClick={() => setShowDeleteConfirm(false)}
-            variant='ghost'
+            variant={Variant.default}
           >
             Dismiss
           </NeuPillButton>
@@ -102,7 +103,7 @@ export const SubscriptionSection = ({ colorMap }: { colorMap: SettingsColorMap }
           <NeuPillButton
             colorMap={colorMap}
             onClick={handleCancelSubscription}
-            variant='destructive'
+            variant={Variant.destructive}
           >
             Cancel subscription
           </NeuPillButton>
@@ -112,7 +113,7 @@ export const SubscriptionSection = ({ colorMap }: { colorMap: SettingsColorMap }
           <Tooltip>
             <TooltipTrigger asChild>
               <span className='inline-block w-full'>
-                <NeuPillButton colorMap={colorMap} disabled variant='ghost'>
+                <NeuPillButton colorMap={colorMap} disabled variant={Variant.default}>
                   Delete account
                 </NeuPillButton>
               </span>
@@ -122,7 +123,11 @@ export const SubscriptionSection = ({ colorMap }: { colorMap: SettingsColorMap }
             </TooltipContent>
           </Tooltip>
         ) : (
-          <NeuPillButton colorMap={colorMap} onClick={handleDeleteAccount} variant='destructive'>
+          <NeuPillButton
+            colorMap={colorMap}
+            onClick={handleDeleteAccount}
+            variant={Variant.destructive}
+          >
             Delete account
           </NeuPillButton>
         )}
@@ -157,7 +162,7 @@ const PlanCard = ({
   const subtext = yearly ? yearlySubtext : monthlySubtext;
 
   return (
-    <div className="relative rounded-3xl p-5 space-y-4 embossed-lg">
+    <div className='relative rounded-3xl p-5 space-y-4 embossed-lg'>
       {isCurrent && (
         <div
           className={cn(

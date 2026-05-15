@@ -1,6 +1,7 @@
 'use client';
 
 import { Plus, Settings, Search, ChevronDown, Heart, Trash2 } from 'lucide-react';
+import { Variant } from '~types';
 import { Button } from '~components/primitives/button';
 import {
   Dialog,
@@ -252,7 +253,7 @@ export default function UxPage() {
                   Search
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem variant='destructive'>
+                <DropdownMenuItem variant={Variant.destructive}>
                   <Trash2 />
                   Delete
                 </DropdownMenuItem>
